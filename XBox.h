@@ -7,6 +7,7 @@
 
 #include <FL/Fl_Group.H>
 #include <Fl_Anim_GIF_Image.h>
+#include <FL/Fl_Menu_Item.H>
 
 #include <string> // stoi
 #include <climits> // INT_MAX, INT_MIN
@@ -91,8 +92,8 @@ public:
         box(FL_BORDER_BOX);
         color(fl_rgb_color(252,243,207));
         end();
-        _img = NULL;
-        _anim = NULL;
+        _img = nullptr;
+        _anim = nullptr;
 
         draw_check = true;
         draw_scale = ScaleMode::None;
@@ -306,7 +307,7 @@ public:
         }
 
 
-        draw_label:
+draw_label:
         {
             char hack[1000];
             char hack2[1]={'\0'};
@@ -334,6 +335,12 @@ public:
         if (m && m->callback())
             m->do_callback(this, m->user_data());
     }
+
+private:
+    void next_scale();
+    void nextTkScale();
+    void updateLabel();
+    void updateImage();
 };
 
 #endif //CLION_TEST2_XBOX_H

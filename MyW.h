@@ -5,6 +5,10 @@
 #ifndef CLION_TEST2_MYW_H
 #define CLION_TEST2_MYW_H
 
+#include <FL/Fl_Double_Window.H>
+#include <FL/Fl_Group.H>
+#include <FL/filename.H>
+
 class MyW : public Fl_Double_Window
 {
 private:
