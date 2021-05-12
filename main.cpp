@@ -22,7 +22,6 @@ int arg(int, char **argv, int &i) {
 }
 
 int main(int argc, char **argv) {
-    int i = 1;
 
     Fl::scheme("gtk+"); // TODO ability to change - see unittests
     setlocale(LC_ALL, "");    // enable multilanguage errors in file chooser
@@ -30,6 +29,8 @@ int main(int argc, char **argv) {
 
     Fl_Image::RGB_scaling(FL_RGB_SCALING_BILINEAR);
 
+    // TODO rework to add options, filename, etc
+    int i = 1;
     Fl::args(argc,argv,i,arg);
     if (!dvisual) Fl::visual(FL_RGB);
 

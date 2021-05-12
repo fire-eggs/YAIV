@@ -42,7 +42,9 @@ private:
     }
 
     Fl_Image *_img;
+    Fl_Image *_showImg;
     Fl_Anim_GIF_Image *_anim;
+    bool requiresDiscard; // true if _showImg needs discard_user_rgb_image
 
     bool draw_check;
     ScaleMode draw_scale;
@@ -108,35 +110,20 @@ public:
     int handle(int);
     char * getLabel(char *n, char *buff, int buffsize);
 
-    void image(Fl_Image *img, Fl_Anim_GIF_Image *animimg)
-    {
-        if (_anim)
-        {
-            //Fl_Anim_GIF_Image* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(_img);
-            _anim->stop();
-            _anim->canvas(NULL);
-//        Fl_Anim_GIF_Image::animate = false;
-            delete _anim;
-        }
-
-        else if (_img)
-            _img->release();
-
-        _img = img;
-        _anim = animimg;
-    }
-
+    void resize(int,int,int,int);
 
     void draw()
     {
         Fl_Group::draw();
-        if (!_img) return;
-        if (!_img->w() || !_img->h()) return; // zero dimension
+        if (!_showImg || !_showImg->w() || !_showImg->h())
+            return;
+//        if (!_img) return;
+//        if (!_img->w() || !_img->h()) return; // zero dimension
 
 //    int new_anim_w = 0; // hack TODO fix scale logic in Fl_Anim_GIF_Image
 //    int new_anim_h = 0;
 
-        //double oldzoom = _zoom;
+#if false
         _zoom = 1.0;
 
         // TODO: needs to be initialized on change, allowing zoom to be changed
@@ -200,6 +187,7 @@ public:
                 _zoom = (double)_img->h() / _img->data_h();
             }
         }
+#endif
 
         //::_w->updateLabel(); // TODO super hack
 /*
@@ -215,6 +203,7 @@ public:
         int drawx = x()+1;
         int drawy = y()+1;
 
+#if false
         if (draw_center) {
             int iw;
             int ih;
@@ -225,7 +214,9 @@ public:
             deltay = std::max(1, (h() - ih) / 2);
             //drawy = y() +
         }
+#endif
 
+#if false
         if (draw_check)
         {
             int outw = 0;
@@ -241,8 +232,26 @@ public:
 
             drawChecker(x() + deltax + 1, y() + deltay + 1, outw-2, outh-2);
         }
+#endif
 
-        if (rotation)
+        if (_anim) {
+            auto tmp = _anim->image();
+            //printf("Draw Anim %d,%d | %d,%d \n", tmp->w(),tmp->h(), tmp->data_w(), tmp->data_h());
+            // TODO for some reason the frame scale() isn't "sticking"???
+            tmp->scale(_anim->w(), _anim->h(), 1, 1);
+            _anim->draw(drawx, drawy, w() - 2, h() - 2, -deltax, -deltay);
+        }
+        else {
+            _showImg->draw(drawx, drawy, w() - 2, h() - 2, -deltax, -deltay);
+        }
+        goto draw_label;
+
+// rotation and scale
+//        if (rotation) {
+            _showImg->draw(drawx, drawy, w() - 2, h() - 2, -deltax, -deltay);
+            goto draw_label;
+//        }
+#if false
         {
             // TODO rotation of scaled image is garbage - need to rotate, then scale?
             Fl_RGB_Image *rimg = nullptr;
@@ -269,6 +278,7 @@ public:
                 return;
             }
         }
+#endif
 
         // Testing imgtk scaling
 
@@ -336,11 +346,15 @@ draw_label:
             m->do_callback(this, m->user_data());
     }
 
+    void image(Fl_Image *img, Fl_Anim_GIF_Image *animimg);
+
 private:
     void next_scale();
     void nextTkScale();
+    void nextRotation();
     void updateLabel();
     void updateImage();
+    void wipeShowImage();
 };
 
 #endif //CLION_TEST2_XBOX_H

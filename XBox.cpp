@@ -153,8 +153,10 @@ void load_current() {
 
         // this is a hack to force the box to resize which forces the animated image to center in the box & clear background
         // TODO how to make this happen cleanly
-        if (anim)
-            _w->size(_w->w()+1, _w->h()+1);
+
+//        if (anim)
+//            _w->size(_w->w()+1, _w->h()+1);
+
     }
     dolabel:
     char lbl[1000];
@@ -353,8 +355,7 @@ int XBox::handle(int msg) {
                 break;
 
             case 't':
-                rotation++;
-                redraw();
+                nextRotation();
                 return 1;
                 break;
 
@@ -492,14 +493,177 @@ void XBox::nextTkScale() {
     redraw();
 }
 
+void XBox::nextRotation() {
+    rotation++;
+    updateLabel();
+    updateImage();
+    redraw();
+}
+
 void XBox::updateLabel() {
     ::_w->updateLabel(); // TODO super hack
 }
 
+void XBox::image(Fl_Image *img, Fl_Anim_GIF_Image *animimg)
+{
+    wipeShowImage();
+
+    if (_anim)
+    {
+        //Fl_Anim_GIF_Image* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(_img);
+        _anim->stop();
+        _anim->canvas(NULL);
+//        Fl_Anim_GIF_Image::animate = false;
+        delete _anim;
+    }
+
+    else if (_img)
+        _img->release();
+
+    _img = img;
+    //_showImg = img->copy();
+    _anim = animimg;
+
+    rotation = 0; // TODO better place
+    updateImage();
+}
+
+void XBox::wipeShowImage() {
+    if (_showImg && _showImg != _img)
+        if (requiresDiscard) {
+            auto *tmp = (Fl_RGB_Image *)_showImg;
+            discard_user_rgb_image(tmp);
+        }
+        else {
+            _showImg->release();
+        }
+    _showImg = nullptr;
+}
+
 void XBox::updateImage() {
 
-    // 1. dispose of any existing showImg
-    // 2. rotate showimage
-    // 3. scale  showimage
+    // 1. dispose of any existing showImg because we're building a new one
+    wipeShowImage();
 
+    requiresDiscard = false;
+    if (!_img) {
+        _showImg = nullptr;
+        return;
+    }
+
+    // 2. rotate the original
+    // TODO rotation of _anim
+    auto *rimg = (Fl_RGB_Image *)_img;
+    if (rotation && !_anim)
+    {
+        switch (rotation)
+        {
+            case 1:
+                rimg = rotate90((Fl_RGB_Image*)_img);
+                break;
+            case 2:
+                rimg = rotate180((Fl_RGB_Image*)_img);
+                break;
+            case 3:
+                rimg = rotate270((Fl_RGB_Image*)_img);
+                break;
+            default:
+                rotation = 0;
+                break;
+        }
+
+        if (rotation != 0) {
+            requiresDiscard = true;
+        }
+        _showImg = rimg;
+    }
+    else _showImg = _img->copy();
+
+    // 3. scale showimage
+
+    // TODO need to keep _zoom if no scaling [user zoom]
+    _zoom = 1.0;
+
+    switch (draw_scale) {
+        case ScaleMode::None:
+            {
+                if (_anim)
+                    _anim->scale(_anim->data_w(), _anim->data_h());
+                else
+                    _showImg->scale(_showImg->data_w(),_showImg->data_h());
+            }
+            break;
+
+        case ScaleMode::Wide:
+            {
+                int new_w = w();
+                int new_h = (int)((double)_showImg->h() * w() / (double)_showImg->w());
+                if (_anim) {
+                    _anim->scale(new_w, new_h, 1, 1);
+                    _zoom = (double)_anim->w() / _anim->data_w();
+                }
+                else {
+                    _showImg->scale(new_w, new_h, 1, 1);
+                    _zoom = (double)_showImg->w() / _showImg->data_w();
+                }
+            }
+            break;
+
+        case ScaleMode::High:
+            {
+                int new_h = h();
+                int new_w = (int)((double)_showImg->w() * h() / (double)_showImg->h());
+                if (_anim) {
+                    _anim->scale(new_w, new_h, 1, 1);
+                    _zoom = (double)_anim->h() / _anim->data_h();
+                }
+                else {
+                    _showImg->scale(new_w, new_h, 1, 1);
+                    _zoom = (double)_showImg->h() / _showImg->data_h();
+                }
+            }
+            break;
+
+        case ScaleMode::Fit:
+            {
+                if (_anim) {
+                    _anim->scale(w(), h(), 1, 1);
+                    _zoom = std::max( (double)_anim->w() / _anim->data_w(),
+                                      (double)_anim->h() / _anim->data_h());
+                }
+                else {
+                    _showImg->scale(w(),h(), 1, 1);
+                    _zoom = std::max( (double)_showImg->w() / _showImg->data_w(),
+                                      (double)_showImg->h() / _showImg->data_h());
+                }
+            }
+            break;
+
+        case ScaleMode::Auto:
+            {
+                if (_anim) {
+                    _anim->scale(w(), h());
+                    _zoom = std::max( (double)_anim->w() / _anim->data_w(),
+                                      (double)_anim->h() / _anim->data_h());
+                }
+                else {
+                    _showImg->scale(w(),h());
+                    _zoom = std::max( (double)_showImg->w() / _showImg->data_w(),
+                                      (double)_showImg->h() / _showImg->data_h());
+                }
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    // A. draw showImage in draw()
+    // B. TODO merge checkerboard via Image_Surface?
 }
+
+void XBox::resize(int x,int y,int w,int h) {
+    Fl_Group::resize(x,y,w,h);
+    updateImage(); // e.g. resize to fit/wide/high
+}
+
