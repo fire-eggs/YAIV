@@ -81,49 +81,9 @@ void load_current() {
 
         Fl_Anim_GIF_Image::min_delay = 0.01;
         Fl_Anim_GIF_Image::animate = true;
-/*
-        Fl_Image *img2 = nullptr;
-        bool anim = false;
 
-        // 1. try to open as (animated) webp
-        Fl_Image *img00 = LoadWebp(n, _b2);
-        Fl_Anim_GIF_Image* animgif = nullptr;
-
-        if (img00)
-        {
-            animgif = dynamic_cast<Fl_Anim_GIF_Image*>(img00);
-            if (animgif)
-            {
-                anim = animgif->is_animated();
-                //size *= animgif->frames() * 4; // TODO HACK the gif was d=1 but has been promoted to 32
-            }
-        }
-
-        if (!img00)
-        {
-            // 2. try to open as (animated) gif
-            animgif = new Fl_Anim_GIF_Image(n, nullptr, Fl_Anim_GIF_Image::Start);
-            if (animgif && animgif->valid() && animgif->is_animated()) // TODO can use fail() ?
-            {
-                animgif->canvas(_b2, Fl_Anim_GIF_Image::Flags::DontResizeCanvas |
-                                     Fl_Anim_GIF_Image::Flags::DontSetAsImage);
-                img00 = animgif;
-            }
-            else
-            {
-                // 2a. try to open as (regular) gif
-                delete animgif;
-                animgif = nullptr;
-
-                // 3. try to open as Fl_Shared_Image
-                img2 = loadFile(n);
-                //img2 = Fl_Shared_Image::get(n);
-            }
-        }
-*/
         img = loadFile(n, _b2);
 
-//        if (!img00 && !img2)
         if (!img)
         {
             // failed to load
@@ -135,20 +95,13 @@ void load_current() {
             _b2->redraw();
             goto dolabel;
         }
-/*
-        if (!img2) // && !animgif)
-        {
-            //img2 = Fl_Shared_Image::get((Fl_RGB_Image *) img00, true);
-            img2 = (Fl_RGB_Image *)img00;
-        }
 
-        img = img2;
-*/
         _b2->label(nullptr);
-        Fl_Anim_GIF_Image* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(img);
+        auto* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(img);
         _b2->image(img, animgif);
         _b2->redraw();
 
+#if false
         bool anim = animgif != nullptr;
 
         // this is a hack to force the box to resize which forces the animated image to center in the box & clear background
@@ -156,9 +109,9 @@ void load_current() {
 
 //        if (anim)
 //            _w->size(_w->w()+1, _w->h()+1);
-
+#endif
     }
-    dolabel:
+dolabel:
     char lbl[1000];
     lbl[0] = 0;
     _w->label(_b2->getLabel(n, lbl, sizeof(lbl)));
@@ -203,7 +156,7 @@ void next_image() {
 }
 
 void prev_image() {
-    current_index = std::max(current_index-1, 0); // 2);
+    current_index = std::max(current_index-1, 0);
     load_current();
 }
 
@@ -248,16 +201,15 @@ int XBox::handle(int msg) {
         {
             case 'q':
                 exit(0);
-                break;
 
             case 'c':
-                draw_check = !draw_check; redraw(); return 1;
-                break;
+                draw_check = !draw_check;
+                redraw();
+                return 1;
 
             case 's':
                 next_scale();
                 return 1;
-                break;
 
             case 'n':
                 draw_center = !draw_center;
@@ -265,7 +217,6 @@ int XBox::handle(int msg) {
                     deltax = deltay = 0;
                 redraw();
                 return 1;
-                break;
 
             case 'r':
             {
@@ -280,7 +231,7 @@ int XBox::handle(int msg) {
                 free(newlist);
                 load_current();
             }
-                break;
+            return 1;
 
             case FL_Right:
                 //printf("Box: Right arrow, state:%d\n", Fl::event_state());
@@ -295,7 +246,6 @@ int XBox::handle(int msg) {
                 }
                 redraw();
                 return 1;
-                break;
 
             case FL_Left: // TODO consider for pan
                 if (Fl::event_state() & FL_CTRL)
@@ -309,7 +259,6 @@ int XBox::handle(int msg) {
                 }
                 redraw();
                 return 1;
-                break;
 
             case FL_Up:
                 //printf("Box: Up arrow, state:%d\n", Fl::event_state());
@@ -319,7 +268,6 @@ int XBox::handle(int msg) {
                 }
                 redraw();
                 return 1;
-                break;
 
             case FL_Down:
                 if (Fl::event_state() & FL_CTRL)
@@ -328,49 +276,41 @@ int XBox::handle(int msg) {
                 }
                 redraw();
                 return 1;
-                break;
 
             case FL_Page_Down:
             case ' ':
                 next_image();
                 return 1;
-                break;
 
             case FL_Page_Up:
             case FL_BackSpace:
                 prev_image();
                 return 1;
-                break;
 
             case FL_Home:
                 current_index = INT_MIN + 1;
                 prev_image();
                 return 1;
-                break;
 
             case FL_End:
                 current_index = INT_MAX - 1;
                 next_image();
                 return 1;
-                break;
 
             case 't':
                 nextRotation();
                 return 1;
-                break;
 
             case 'z':
                 nextTkScale();
                 return 1;
-                break;
 
             case FL_Escape: // escape to NOT close app
                 return 1;
-                break;
 
             case 'b':
                 ::_w->toggle_border();
-                break;
+                return 1;
 
             case FL_PUSH:
 //                printf("Box:push\n");
@@ -397,7 +337,7 @@ int XBox::handle(int msg) {
         }
     }
 
-    return 0;
+    return ret;
 }
 
 
@@ -455,7 +395,7 @@ char * XBox::getLabel(char *n, char *buff, int buffsize)
     char scaletxt[10];
     char * res = humanScale(draw_scale, scaletxt, sizeof(scaletxt)-1);
 
-    if (res == NULL || img == NULL)
+    if (res == nullptr || img == nullptr)
         strcpy(buff, "huh?");
     else
     {
@@ -504,7 +444,7 @@ void XBox::updateLabel() {
     ::_w->updateLabel(); // TODO super hack
 }
 
-void XBox::image(Fl_Image *img, Fl_Anim_GIF_Image *animimg)
+void XBox::image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg)
 {
     wipeShowImage();
 
@@ -512,7 +452,7 @@ void XBox::image(Fl_Image *img, Fl_Anim_GIF_Image *animimg)
     {
         //Fl_Anim_GIF_Image* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(_img);
         _anim->stop();
-        _anim->canvas(NULL);
+        _anim->canvas(nullptr);
 //        Fl_Anim_GIF_Image::animate = false;
         delete _anim;
     }
@@ -520,8 +460,7 @@ void XBox::image(Fl_Image *img, Fl_Anim_GIF_Image *animimg)
     else if (_img)
         _img->release();
 
-    _img = img;
-    //_showImg = img->copy();
+    _img = newImg;
     _anim = animimg;
 
     rotation = 0; // TODO better place
@@ -529,14 +468,14 @@ void XBox::image(Fl_Image *img, Fl_Anim_GIF_Image *animimg)
 }
 
 void XBox::wipeShowImage() {
-    if (_showImg && _showImg != _img)
+    if (_showImg && _showImg != _img) {
         if (requiresDiscard) {
-            auto *tmp = (Fl_RGB_Image *)_showImg;
+            auto *tmp = (Fl_RGB_Image *) _showImg;
             discard_user_rgb_image(tmp);
-        }
-        else {
+        } else {
             _showImg->release();
         }
+    }
     _showImg = nullptr;
 }
 
@@ -552,7 +491,7 @@ void XBox::updateImage() {
     }
 
     // 2. rotate the original
-    // TODO rotation of _anim
+    // TODO rotation of _anim : problematic as frames change via draw(), not here
     auto *rimg = (Fl_RGB_Image *)_img;
     if (rotation && !_anim)
     {
@@ -655,6 +594,7 @@ void XBox::updateImage() {
             break;
 
         default:
+        case MAX:
             break;
     }
 
