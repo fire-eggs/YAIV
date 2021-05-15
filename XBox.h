@@ -196,6 +196,7 @@ draw_label:
             labelsize(20);
             labelcolor(FL_DARK_GREEN);    // TODO options
             labeltype(FL_EMBOSSED_LABEL); // TODO options
+            align(FL_ALIGN_BOTTOM_RIGHT); // TODO options
 
             if (label())
             {
