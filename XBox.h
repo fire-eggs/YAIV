@@ -77,13 +77,15 @@ private:
         MI_FAV9,
     };
 
-    Fl_Menu_Item right_click_menu[5] =
+    Fl_Menu_Item right_click_menu[7] =
             {
                     {"Load",            0, MenuCB, (void *)MI_LOAD},
                     {"Copy image path", 0, MenuCB, (void *)MI_COPYPATH},
                     {"Goto Image",      0, MenuCB, (void *)MI_GOTO, FL_MENU_DIVIDER},
                     {"Options",         0, MenuCB, (void *)MI_OPTIONS, FL_MENU_DIVIDER},
 
+                    {"Last Used",       0,      0, 0, FL_SUBMENU},
+                        {nullptr}, // end of sub menu
                     {nullptr} // end of menu
             };
 
@@ -211,12 +213,7 @@ draw_label:
         }
     }
 
-    void do_menu() {
-        const Fl_Menu_Item *m = right_click_menu->popup(Fl::event_x(), Fl::event_y(), "YAIV", nullptr, nullptr);
-        if (m && m->callback())
-            m->do_callback(this, m->user_data());
-    }
-
+    void do_menu();
     void image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg);
 
 private:

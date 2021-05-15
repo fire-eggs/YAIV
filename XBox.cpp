@@ -9,11 +9,16 @@
 #include "XBox.h"
 #include "MyW.h"
 #include "list_rand.h"
+#include "prefs.h"
+#include "MostRecentPaths.h"
 
 #define snprintf_nowarn(...) (snprintf(__VA_ARGS__) < 0 ? abort() : (void)0)
 
 extern XBox *_b2;
 extern MyW *_w;
+extern Prefs *_prefs;
+MostRecentPaths *_mru;
+
 Fl_Image *img;  // Original image
 Fl_Image *showImg; // rotated/scaled image
 
@@ -82,7 +87,6 @@ void load_current() {
     {
         // TODO done in end of file chooser
         //_b2->take_focus();
-
 
         Fl_Anim_GIF_Image::min_delay = 0.01;
         Fl_Anim_GIF_Image::animate = true;
@@ -153,6 +157,10 @@ void load_file(const char *n) {
     if (!fl_filename_isdir(n))
         current_index = find_file(n);
     load_current();
+
+    // Update the MRU list
+    _mru->Add(n);
+    _mru->Save();
 }
 
 void next_image() {
@@ -167,7 +175,7 @@ void prev_image() {
 
 void file_cb(const char *n) {
     if (!strcmp(name,n)) return;
-    load_file(n);
+    load_file(n); // TODO intermediate folders are being displayed/remembered; only want selected via OK?
     strcpy(name,n);
 }
 
@@ -387,6 +395,17 @@ void XBox::MenuCB(Fl_Widget *window_p, void *userdata) { // TODO make dynamic
 
         case MI_OPTIONS:		    // TODO nyi
             break;
+
+        case MI_FAV0: case MI_FAV1: case MI_FAV2:
+        case MI_FAV3: case MI_FAV4: case MI_FAV5:
+        case MI_FAV6: case MI_FAV7: case MI_FAV8: case MI_FAV9:
+            {
+            int path = (long)userdata - MI_FAV0;
+            char** mru = _mru->getAll(); // TODO return a single path
+            printf("MRU: %s\n", mru[path]);
+            load_file(mru[path]);
+            }
+            break;
     }
 }
 
@@ -483,8 +502,6 @@ void XBox::wipeShowImage() {
     }
     _showImg = nullptr;
 }
-
-#include <FL/Fl_Image_Surface.H>
 
 void XBox::updateImage() {
 
@@ -626,3 +643,50 @@ void XBox::resize(int x,int y,int w,int h) {
     updateImage(); // e.g. resize to fit/wide/high
 }
 
+void XBox::do_menu() {
+
+    if (!_mru)
+        _mru = new MostRecentPaths(_prefs);
+
+    // 1. find the submenu in the "master" menu
+    int i;
+    for (i = 0; i < right_click_menu->size(); i++)
+    {
+        if (strcmp(right_click_menu[i].text,"Last Used"))
+            continue;
+        break;
+    }
+
+    size_t numfavs = _mru->getCount();
+
+    // create a new menu
+    int newCount = right_click_menu->size() + numfavs;
+    Fl_Menu_Item* dyn_menu = new Fl_Menu_Item[newCount];
+
+    // make sure the rest of the allocated menu is clear
+    for (int j = 0; j < newCount; j++)
+        memset(&(dyn_menu[j]), 0, sizeof(Fl_Menu_Item));
+
+    // initialize it with the static menu contents
+    for (int j = 0; j <= i; j++)
+    {
+        dyn_menu[j] = right_click_menu[j];
+        dyn_menu[j].callback(MenuCB, (void *)(MI_LOAD + j)); // TODO just 'j'?
+    }
+
+    // TODO if numfavs == 0 disable the "last used"
+
+    char** favs = _mru->getAll();
+    for (long unsigned int j = 0; j < numfavs; j++)
+    {
+        dyn_menu[i + 1 + j].label(favs[j]);
+        dyn_menu[i + 1 + j].callback(MenuCB);
+        dyn_menu[i + 1 + j].argument(MI_FAV0 + j);
+    }
+
+    // show the menu
+
+    const Fl_Menu_Item *m = dyn_menu->popup(Fl::event_x(), Fl::event_y(), "YAIV", nullptr, nullptr);
+    if (m && m->callback())
+        m->do_callback(this, m->user_data());
+}

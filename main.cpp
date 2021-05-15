@@ -5,14 +5,21 @@ void load_file(const char *n); // hack
 
 #include "MyW.h"
 #include "XBox.h"
+#include "prefs.h"
 
 MyW *_w;
 XBox *_b2;
+Prefs *_prefs;
 
 void MyW::updateLabel() {
     char lbl[1000];
     lbl[0] = 0;
     label(::_b2->getLabel(filename, lbl, sizeof(lbl)));
+}
+
+void MyW::resize(int x, int y, int w, int h) {
+    Fl_Double_Window::resize(x,y,w,h);
+    _prefs->setWinRect(MAIN_PREFIX, x, y, w, h);
 }
 
 int dvisual = 0;
@@ -34,8 +41,12 @@ int main(int argc, char **argv) {
     Fl::args(argc,argv,i,arg);
     if (!dvisual) Fl::visual(FL_RGB);
 
-    _w = new MyW(400,450);
-    _b2 = new XBox(5,5,390,440);
+    int x, y, w, h;
+    _prefs = new Prefs();
+    _prefs->getWinRect(MAIN_PREFIX, x, y, w, h);
+
+    _w = new MyW(x,y,w,h);
+    _b2 = new XBox(5,5,w-10,h-10);
     _w->child(_b2);
     _w->resizable(_b2);
     _w->end();

@@ -18,7 +18,8 @@ private:
     Fl_Widget *_child;
 
 public:
-    MyW(int a, int b) : Fl_Double_Window(a, b), _border(1), _xoff(0), _yoff(0) {}
+    MyW(int x, int y, int w, int h) : Fl_Double_Window(x,y,w,h),
+    _border(1), _xoff(0), _yoff(0) {}
 
     void child(Fl_Widget *c) { _child =c; }
 
@@ -42,6 +43,8 @@ public:
     {
         // show();
     }
+
+    void resize(int x, int y, int w, int h) override;
 
     int handle(int e)
     {
