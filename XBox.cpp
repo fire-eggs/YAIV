@@ -481,6 +481,8 @@ void XBox::wipeShowImage() {
     _showImg = nullptr;
 }
 
+#include <FL/Fl_Image_Surface.H>
+
 void XBox::updateImage() {
 
     // 1. dispose of any existing showImg because we're building a new one
@@ -600,8 +602,20 @@ void XBox::updateImage() {
             break;
     }
 
-    // A. draw showImage in draw()
-    // B. TODO merge checkerboard via Image_Surface?
+    // Draw the checker and image in a surface and use the surface to draw later
+    // TODO animated image frames update in draw(), not here, so skip for now
+    if (!_anim) {
+        Fl_Image_Surface *imgSurf = new Fl_Image_Surface(_showImg->w(), _showImg->h());
+        Fl_Surface_Device::push_current(imgSurf);
+        if (draw_check) {
+            drawChecker(0, 0, _showImg->w(), _showImg->h());
+        _showImg->draw(0,0);
+        _showImg->release();
+        _showImg = imgSurf->image();
+        Fl_Surface_Device::pop_current();
+        delete imgSurf;
+        }
+    }
 }
 
 void XBox::resize(int x,int y,int w,int h) {

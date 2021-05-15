@@ -132,7 +132,7 @@ public:
             deltay = std::max(1, (h() - ih) / 2);
         }
 
-        if (draw_check)
+        if (_anim && draw_check)
         {
             // TODO can checker be established in updateImage() instead?
             int outw;
@@ -145,8 +145,7 @@ public:
                 outw = std::min(w(), _showImg->w());
                 outh = std::min(h(), _showImg->h());
             }
-
-            drawChecker(x() + deltax + 1, y() + deltay + 1, outw-2, outh-2);
+            drawChecker(drawx + deltax, drawy + deltay, outw-2, outh-2);
         }
 
         if (_anim) {
@@ -155,7 +154,7 @@ public:
             // TODO for some reason the frame scale() isn't "sticking"???
             // TODO 4009.webp gets this far then crashes because image() returns null
             if (tmp)
-            tmp->scale(_anim->w(), _anim->h(), 1, 1);
+                tmp->scale(_anim->w(), _anim->h(), 1, 1);
             _anim->draw(drawx, drawy, w() - 2, h() - 2, -deltax, -deltay);
         }
         else {
