@@ -645,8 +645,6 @@ void XBox::resize(int x,int y,int w,int h) {
 
 void XBox::do_menu() {
 
-    if (!_mru)
-        _mru = new MostRecentPaths(_prefs);
 
     // 1. find the submenu in the "master" menu
     int i;
@@ -689,4 +687,25 @@ void XBox::do_menu() {
     const Fl_Menu_Item *m = dyn_menu->popup(Fl::event_x(), Fl::event_y(), "YAIV", nullptr, nullptr);
     if (m && m->callback())
         m->do_callback(this, m->user_data());
+}
+
+XBox::XBox(int x, int y, int w, int h) : Fl_Group(x,y,w,h)
+{
+    align(FL_ALIGN_INSIDE|FL_ALIGN_TOP|FL_ALIGN_LEFT|FL_ALIGN_CLIP);
+    box(FL_BORDER_BOX);
+    color(fl_rgb_color(252,243,207));
+    end();
+    _img = nullptr;
+    _anim = nullptr;
+
+    draw_check = true;
+    draw_scale = ScaleMode::None;
+    draw_center = false;
+
+    deltax = 0;
+    deltay = 0;
+    rotation = 0;
+    imgtkScale = 0;
+
+    _mru = new MostRecentPaths(_prefs); // TODO consider singleton
 }

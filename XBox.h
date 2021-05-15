@@ -90,24 +90,7 @@ private:
             };
 
 public:
-    XBox(int x, int y, int w, int h) : Fl_Group(x,y,w,h)
-    {
-        align(FL_ALIGN_INSIDE|FL_ALIGN_TOP|FL_ALIGN_LEFT|FL_ALIGN_CLIP);
-        box(FL_BORDER_BOX);
-        color(fl_rgb_color(252,243,207));
-        end();
-        _img = nullptr;
-        _anim = nullptr;
-
-        draw_check = true;
-        draw_scale = ScaleMode::None;
-        draw_center = false;
-
-        deltax = 0;
-        deltay = 0;
-        rotation = 0;
-        imgtkScale = 0;
-    }
+    XBox(int x, int y, int w, int h);
 
     int handle(int) override;
     char * getLabel(char *n, char *buff, int buffsize);
