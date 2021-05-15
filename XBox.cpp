@@ -1,6 +1,8 @@
 //
 // Created by kevin on 5/12/21.
 //
+#include <string.h>
+
 #include <FL/filename.H>
 #include <FL/Fl_File_Chooser.H>
 #include <FL/Fl_Menu_Item.H>
@@ -17,12 +19,12 @@
 extern XBox *_b2;
 extern MyW *_w;
 extern Prefs *_prefs;
-MostRecentPaths *_mru;
+MostRecentPaths *_mru; // TODO consider member variable
 
-Fl_Image *img;  // Original image
-Fl_Image *showImg; // rotated/scaled image
+Fl_Image *img;  // Original image TODO consider member variable
+Fl_Image *showImg; // rotated/scaled image TODO consider member variable
 
-static char name[1024]; // filename load
+static char name[1024]; // filename load TODO consider member variable
 
 // TODO these go to some file list container
 int current_index;
@@ -158,6 +160,7 @@ void load_file(const char *n) {
         current_index = find_file(n);
     load_current();
 
+    // TODO don't add to MRU if unsuccessful load
     // Update the MRU list
     _mru->Add(n);
     _mru->Save();
@@ -198,13 +201,49 @@ void button_cb(Fl_Widget *,void *) {
 
 int XBox::handle(int msg) {
 
-    if (msg == FL_FOCUS || msg == FL_UNFOCUS)
+    if (msg == FL_FOCUS || msg == FL_UNFOCUS) // TODO must this go before Fl_Group::handle?
     {
         //printf("box:focus %d\n", msg);
         return 1;
     }
 
     int ret = Fl_Group::handle(msg);
+
+    switch (msg) {
+        case FL_DND_ENTER:
+        case FL_DND_DRAG:
+        case FL_DND_LEAVE:
+        case FL_DND_RELEASE:
+            return 1; // accept drag-and-drop
+            break;
+
+        case FL_PASTE: {
+            // input will be a URL of form "file://<path>\n" OR "file://<path>\r\n"
+            // THERE MAY BE MORE THAN ONE URL! taking only the first
+            // TODO confirm that windows DND includes the "file://" prefix!
+            const char *urls = Fl::event_text();
+            if (strncmp(urls, "file://", 7) != 0)
+                return 1; // not a local file, do nothing
+
+            int len = strlen(urls);
+            int i = 0;
+            while (urls[i] != '\r' && urls[i] != '\n' && i < len) i++;
+            char *fpath = new char[i + 1 - 7];
+            strncpy(fpath, urls + 7, i + 1 - 7);
+            fpath[i - 7] = '\0';
+            load_file(fpath);
+            delete[] fpath;
+            return 1;
+        }
+            break;
+
+        case FL_PUSH:
+            if (Fl::event_button() == FL_RIGHT_MOUSE) {
+                do_menu();
+                return 1;
+            }
+            break;
+    }
 
     if (msg == FL_KEYDOWN) {
 
@@ -324,31 +363,9 @@ int XBox::handle(int msg) {
             case 'b':
                 ::_w->toggle_border();
                 return 1;
-
-            case FL_PUSH:
-//                printf("Box:push\n");
-//                ::w->push();
-//                return 1;
-                break;
-            case FL_DRAG:
-//                printf("Box:drag\n");
-//                ::w->drag();
-//                return 1;
-                break;
-            case FL_RELEASE:
-//                printf("Box:release\n");
-//                ::w->rel();
-//                return 1;
-                break;
         }
     }
 
-    if (msg == FL_PUSH) {
-        if (Fl::event_button() == FL_RIGHT_MOUSE) {
-            do_menu();
-            return 1;
-        }
-    }
 
     return ret;
 }
@@ -644,7 +661,6 @@ void XBox::resize(int x,int y,int w,int h) {
 }
 
 void XBox::do_menu() {
-
 
     // 1. find the submenu in the "master" menu
     int i;

@@ -74,7 +74,7 @@ public:
                 ret = 0;
                 break;
 
-            default: ret=0; break;
+            default: break;
         }
         return ret;
     }
