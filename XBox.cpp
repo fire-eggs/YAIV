@@ -55,6 +55,8 @@ void load_current() {
     current_index = std::min(std::max(current_index,0), file_count-1);
 
     char n[FL_PATH_MAX<<2];
+    if (fold[strlen(fold)-1] == '/')
+        fold[strlen(fold)-1] = 0x0;
     sprintf(n, "%s/%s", fold, file_list[current_index]->d_name);
     //puts(n);
 
