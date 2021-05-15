@@ -398,7 +398,7 @@ char * XBox::getLabel(char *n, char *buff, int buffsize)
     char * res = humanScale(draw_scale, scaletxt, sizeof(scaletxt)-1);
 
     if (res == nullptr || img == nullptr)
-        strcpy(buff, "huh?");
+        sprintf(buff, "%d/%d - huh? - %s", current_index+1,file_count,n);
     else
     {
         char nicesize[10];
