@@ -3,6 +3,8 @@
 //
 #include <FL/filename.H>
 #include <FL/Fl_File_Chooser.H>
+#include <FL/Fl_Menu_Item.H>
+#include <FL/Fl_Image_Surface.H>
 
 #include "XBox.h"
 #include "MyW.h"
@@ -29,6 +31,7 @@ int filename_path(const char* buf, char *to) { // TODO hack pending adding to FL
         ;
     if (p == buf) return 0;
     strncpy(to, buf, (p-buf)+1);
+    to[(p-buf)] = '\0';
     return 1;
 }
 
