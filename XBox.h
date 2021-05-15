@@ -153,6 +153,8 @@ public:
             auto tmp = _anim->image();
             //printf("Draw Anim %d,%d | %d,%d \n", tmp->w(),tmp->h(), tmp->data_w(), tmp->data_h());
             // TODO for some reason the frame scale() isn't "sticking"???
+            // TODO 4009.webp gets this far then crashes because image() returns null
+            if (tmp)
             tmp->scale(_anim->w(), _anim->h(), 1, 1);
             _anim->draw(drawx, drawy, w() - 2, h() - 2, -deltax, -deltay);
         }
