@@ -233,6 +233,7 @@ int XBox::handle(int msg) {
             fpath[i - 7] = '\0';
             load_file(fpath);
             delete[] fpath;
+
             take_focus();
             return 1;
         }
@@ -532,21 +533,37 @@ void XBox::updateImage() {
         return;
     }
 
+    // Covert any Fl_Pixmap into a Fl_RGB_Image so imgTk can rotate/scale
+    Fl_RGB_Image *vImg;
+    auto *pimg = dynamic_cast<Fl_Pixmap *>(_img);
+    if (!pimg) {
+        vImg = (Fl_RGB_Image *)_img->copy();
+    } else {
+        // draw pixmap to a 32-bit image surface
+
+        auto *imgSurf = new Fl_Image_Surface(_img->w(), _img->h());
+        Fl_Surface_Device::push_current(imgSurf);
+        _img->draw(0, 0);
+        vImg = imgSurf->image();
+        Fl_Surface_Device::pop_current();
+        delete imgSurf;
+    }
+
     // 2. rotate the original
     // TODO rotation of _anim : problematic as frames change via draw(), not here
-    auto *rimg = (Fl_RGB_Image *)_img;
+    Fl_RGB_Image *rimg = vImg;
     if (rotation && !_anim)
     {
         switch (rotation)
         {
             case 1:
-                rimg = rotate90((Fl_RGB_Image*)_img);
+                rimg = rotate90(vImg);
                 break;
             case 2:
-                rimg = rotate180((Fl_RGB_Image*)_img);
+                rimg = rotate180(vImg);
                 break;
             case 3:
-                rimg = rotate270((Fl_RGB_Image*)_img);
+                rimg = rotate270(vImg);
                 break;
             default:
                 rotation = 0;
@@ -556,9 +573,8 @@ void XBox::updateImage() {
         if (rotation != 0) {
             requiresDiscard = true;
         }
-        _showImg = rimg;
     }
-    else _showImg = _img->copy();
+    _showImg = rimg;
 
     // 3. scale showimage
 
