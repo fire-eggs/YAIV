@@ -233,6 +233,7 @@ int XBox::handle(int msg) {
             fpath[i - 7] = '\0';
             load_file(fpath);
             delete[] fpath;
+            take_focus();
             return 1;
         }
             break;
