@@ -13,6 +13,8 @@
 #include "list_rand.h"
 #include "prefs.h"
 #include "MostRecentPaths.h"
+#include "rescaler.h"
+#include "rotate.h"
 
 #define snprintf_nowarn(...) (snprintf(__VA_ARGS__) < 0 ? abort() : (void)0)
 
@@ -515,12 +517,7 @@ void XBox::image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg)
 
 void XBox::wipeShowImage() {
     if (_showImg && _showImg != _img) {
-        if (requiresDiscard) {
-            auto *tmp = (Fl_RGB_Image *) _showImg;
-            discard_user_rgb_image(tmp);
-        } else {
             _showImg->release();
-        }
     }
     _showImg = nullptr;
 }
@@ -530,7 +527,6 @@ void XBox::updateImage() {
     // 1. dispose of any existing showImg because we're building a new one
     wipeShowImage();
 
-    requiresDiscard = false;
     if (!_img) {
         _showImg = nullptr;
         return;
@@ -572,10 +568,6 @@ void XBox::updateImage() {
                 rotation = 0;
                 break;
         }
-
-        if (rotation != 0) {
-            requiresDiscard = true;
-        }
     }
     _showImg = rimg;
 
@@ -583,6 +575,7 @@ void XBox::updateImage() {
 
     // TODO need to keep _zoom if no scaling [user zoom]
     _zoom = 1.0;
+    bool noscale = false;
 
     switch (draw_scale) {
         case ScaleMode::None:
@@ -591,6 +584,7 @@ void XBox::updateImage() {
                     _anim->scale(_anim->data_w(), _anim->data_h());
                 else
                     _showImg->scale(_showImg->data_w(),_showImg->data_h());
+                noscale = true;
             }
             break;
 
@@ -657,6 +651,20 @@ void XBox::updateImage() {
         default:
         case MAX:
             break;
+    }
+
+    // TODO imgTK scaling currently limited to 3 and 4 bit depth
+    // TODO anim is updated in draw so skip those here
+    if (!_anim && (int) imgtkScale && !noscale && _img->d() > 2)
+    {
+        //auto *icopy = (Fl_Image*)_showImg->copy();
+        //Fl_RGB_Image *itksimg = itk_rescale((Fl_RGB_Image *)icopy,
+        Fl_RGB_Image *itksimg = itk_rescale(_showImg,
+                                            _showImg->w(), _showImg->h(),
+                                            imgtkScale-1);
+        //icopy->release();
+        _showImg->release();
+        _showImg = itksimg;
     }
 
     // Draw the checker and image in a surface and use the surface to draw later

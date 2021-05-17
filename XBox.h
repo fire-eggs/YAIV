@@ -43,9 +43,8 @@ private:
     }
 
     Fl_Image *_img{};
-    Fl_Image *_showImg{};
+    Fl_RGB_Image *_showImg{};
     Fl_Anim_GIF_Image *_anim{};
-    bool requiresDiscard{}; // true if _showImg needs discard_user_rgb_image
 
     bool draw_check;
     ScaleMode draw_scale;
@@ -100,7 +99,7 @@ public:
     void draw() override
     {
         Fl_Group::draw();
-        if (!_showImg || !_showImg->w() || !_showImg->h())
+        if ((!_showImg || !_showImg->w() || !_showImg->h()) && !_anim)
             return;
 
         // Note: offset to not overwrite the box outline
@@ -145,36 +144,7 @@ public:
         else {
             _showImg->draw(drawx, drawy, w() - 2, h() - 2, -deltax, -deltay);
         }
-        goto draw_label;
 
-#if false
-        // TODO Testing imgtk scaling : move to updateImage()
-
-        // scale crashed on discard of 100% image [discard of copy] when using FL_Shared_Image.
-
-        // TODO scale crashes/doesn't work on animated image (see 86000.webp; 6003.webp)
-        // TODO don't need to scale if zoom is 100% ?
-        if (!_anim && (int)imgtkScale)
-        {
-            int outw = _anim ? _anim->w() : _img->w();
-            int outh = _anim ? _anim->h() : _img->h();
-            if (_anim) _anim->scale(_anim->data_w(), _anim->data_h());
-            _img->scale(_img->data_w(), _img->data_h());
-
-            auto *icopy = (Fl_Image*)_img->copy();
-            Fl_RGB_Image *itksimg = itk_rescale((Fl_RGB_Image *)icopy, outw, outh, imgtkScale-1);
-            icopy->release();
-
-            if (itksimg)
-            {
-                itksimg->draw(drawx, drawy, w()-2, h()-2, -deltax, -deltay);
-                discard_user_rgb_image(itksimg);
-                goto draw_label;
-            }
-        }
-#endif
-
-draw_label:
         {
             char hack[1000];
             char hack2[1]={'\0'};
