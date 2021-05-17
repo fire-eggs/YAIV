@@ -18,8 +18,7 @@ private:
     Fl_Widget *_child;
 
 public:
-    MyW(int x, int y, int w, int h) : Fl_Double_Window(x,y,w,h),
-    _border(1), _xoff(0), _yoff(0) {}
+    MyW(int, int, int, int);
 
     void child(Fl_Widget *c) { _child =c; }
 
@@ -27,7 +26,7 @@ public:
 
     void updateLabel();
 
-    void toggle_border() { _border = !_border; border(_border); }
+    void toggle_border();
 
     void push()
     {

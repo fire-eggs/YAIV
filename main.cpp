@@ -11,6 +11,14 @@ MyW *_w;
 XBox *_b2;
 Prefs *_prefs;
 
+MyW::MyW(int x, int y, int w, int h) : Fl_Double_Window(x,y,w,h),
+_xoff(0), _yoff(0) {
+    int val;
+    _prefs->get("BORDER", val, true);
+    _border = !val;
+    toggle_border();
+}
+
 void MyW::updateLabel() {
     char lbl[1000];
     lbl[0] = 0;
@@ -20,6 +28,12 @@ void MyW::updateLabel() {
 void MyW::resize(int x, int y, int w, int h) {
     Fl_Double_Window::resize(x,y,w,h);
     _prefs->setWinRect(MAIN_PREFIX, x, y, w, h);
+}
+
+void MyW::toggle_border() {
+    _border = !_border;
+    border(_border);
+    _prefs->set("BORDER", _border);
 }
 
 int dvisual = 0;

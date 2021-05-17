@@ -39,6 +39,12 @@ public:
         flush();
     }
 
+    void set(const char* n, int val)
+    {
+        Fl_Preferences::set(n, val);
+        flush();
+    }
+
 
 };
 #endif //CLION_TEST2_PREFS_H
