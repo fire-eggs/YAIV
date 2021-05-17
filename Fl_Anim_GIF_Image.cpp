@@ -546,7 +546,7 @@ static char *readin(const char *name_, long &sz_) {
     char *buf = 0;
     struct stat s = {};
     if (fl_stat(name_, &s)) return buf;
-    if (s.st_mode & 0x4000/*_SIFDIR*/) { errno = EISDIR; return buf; };
+    if (s.st_mode & 0x4000/*_SIFDIR*/) { errno = EISDIR; return buf; }
     sz_ = s.st_size;
     FILE *gif = fl_fopen(name_, "rb"); // KBR needed to add binary flag
     if (!gif)

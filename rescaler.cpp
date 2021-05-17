@@ -377,7 +377,7 @@ private:
     void verticalFilter( const uchar* src, const unsigned width, const unsigned src_height,
                          const unsigned src_bpp,
                          const unsigned src_offset_x, const unsigned src_offset_y,
-                         uchar* dst, const unsigned dst_width, const unsigned dst_height);
+                         uchar* dst, const unsigned dst_height);
 
 protected:
     bool useSCh;
@@ -444,7 +444,7 @@ Fl_RGB_Image* ResizeEngine::scale( Fl_RGB_Image* src, int dst_width, int dst_hei
         if ( src->h() != dst_height )
         {
             verticalFilter( tmp_buff, dst_width, src->h(), src->d(), 0, 0,
-                            dst_buff, dst_width, dst_height );
+                            dst_buff, dst_height );
         }
 
         if ( ( tmp_buff != src_buff ) && ( tmp_buff != dst_buff ) )
@@ -473,7 +473,7 @@ Fl_RGB_Image* ResizeEngine::scale( Fl_RGB_Image* src, int dst_width, int dst_hei
             }
 
             verticalFilter( src_buff, src->w(), src->h(), src->d(),
-                            0, 0, tmp_buff, dst_width, dst_height );
+                            0, 0, tmp_buff, dst_height );
 
         }
         else
@@ -550,7 +550,7 @@ void ResizeEngine::horizontalFilter( const uchar* src, const unsigned height, co
                         // accumulate weighted effect of each neighboring pixel
                         const double weight = weightsTable.getWeight(x, i);
 
-                        if ( useSCh == true )
+                        if (useSCh)
                         {
                             double c = (weight * (double)pixel[refSCh]);
                             r += c;
@@ -569,7 +569,7 @@ void ResizeEngine::horizontalFilter( const uchar* src, const unsigned height, co
                     }
 
                     // clamp and place result in destination pixel
-                    if ( useSCh == true )
+                    if (useSCh)
                     {
                         uchar cmpv = (uchar)CLAMP((int)(r + 0.5), 0, 0xFF);
                         dst_bits[FI_RGBA_RED]   = cmpv;
@@ -617,7 +617,7 @@ void ResizeEngine::horizontalFilter( const uchar* src, const unsigned height, co
                         // accumulate weighted effect of each neighboring pixel
                         const double weight = weightsTable.getWeight(x, i);
 
-                        if ( useSCh == true )
+                        if (useSCh)
                         {
                             double c = (weight * (double)pixel[refSCh]);
                             r += c;
@@ -636,7 +636,7 @@ void ResizeEngine::horizontalFilter( const uchar* src, const unsigned height, co
                     }
 
                     // clamp and place result in destination pixel
-                    if ( useSCh == true )
+                    if (useSCh)
                     {
                         uchar cmpv = (uchar)CLAMP((int)(r + 0.5), 0, 0xFF);
 
@@ -657,12 +657,13 @@ void ResizeEngine::horizontalFilter( const uchar* src, const unsigned height, co
             }
         }
             break;
-
+        default:
+            break;
     } /// of switch()
 }
 
 /// Performs vertical image filtering
-void ResizeEngine::verticalFilter( const uchar* src, unsigned width, unsigned src_height, const unsigned src_bpp, unsigned src_offset_x, unsigned src_offset_y, uchar* dst, const unsigned dst_width, unsigned dst_height)
+void ResizeEngine::verticalFilter( const uchar* src, unsigned width, unsigned src_height, const unsigned src_bpp, unsigned src_offset_x, unsigned src_offset_y, uchar* dst, unsigned dst_height)
 {
     // allocate and calculate the contributions
     WeightsTable weightsTable( m_pFilter, dst_height, src_height );
@@ -704,7 +705,7 @@ void ResizeEngine::verticalFilter( const uchar* src, unsigned width, unsigned sr
                         // accumulate weighted effect of each neighboring pixel
                         const double weight = weightsTable.getWeight(y, i);
 
-                        if ( useSCh == true )
+                        if (useSCh)
                         {
                             double c = (weight * (double)src_bits[refSCh]);
                             r += c;
@@ -721,7 +722,7 @@ void ResizeEngine::verticalFilter( const uchar* src, unsigned width, unsigned sr
                     }
 
                     // clamp and place result in destination pixel
-                    if ( useSCh == true )
+                    if (useSCh)
                     {
                         uchar cmpv = (uchar)CLAMP((int) (r + 0.5), 0, 0xFF);
                         dst_bits[FI_RGBA_RED]   = cmpv;
@@ -770,7 +771,7 @@ void ResizeEngine::verticalFilter( const uchar* src, unsigned width, unsigned sr
                         // accumulate weighted effect of each neighboring pixel
                         const double weight = weightsTable.getWeight(y, i);
 
-                        if ( useSCh == true )
+                        if (useSCh)
                         {
                             double c = (weight * (double)src_bits[refSCh]);
                             r += c;
@@ -789,7 +790,7 @@ void ResizeEngine::verticalFilter( const uchar* src, unsigned width, unsigned sr
                     }
 
                     // clamp and place result in destination pixel
-                    if ( useSCh == true )
+                    if (useSCh)
                     {
                         uchar cmpv = (uchar)CLAMP((int) (r + 0.5), 0, 0xFF);
                         dst_bits[FI_RGBA_RED]   = cmpv;
@@ -809,6 +810,8 @@ void ResizeEngine::verticalFilter( const uchar* src, unsigned width, unsigned sr
             }
         }
             break;
+        default:
+            break;
     }
 }
 
@@ -826,6 +829,7 @@ Fl_RGB_Image* itk_rescale( Fl_RGB_Image* img, unsigned w, unsigned h, int _rst )
     switch( (int)rst )
     {
         case (int)NONE:
+        default:
             afilter = new BoxFilter();
             break;
 
