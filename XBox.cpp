@@ -32,6 +32,14 @@ char fold[FL_PATH_MAX];
 struct dirent **file_list;
 int file_count;
 
+void logit(const char *format, char *arg) // TODO varargs
+{
+    FILE *f = fopen("yaiv.log", "a+");
+    fprintf(f, format, arg);
+    fputs("\n", f);
+    fclose(f);
+}
+
 int filename_path(const char* buf, char *to) { // TODO hack pending adding to FLTK
     const char *p = buf + strlen(buf) - 1;
     for (; *p != '/' && p != buf; --p) // TODO slash is possible '\' under windows
@@ -47,14 +55,6 @@ int removeFolders(struct dirent *entry) {
     const char * out = fl_filename_ext(entry->d_name);
     bool val = out != nullptr && *out != 0 && (out[1] != 0);
     return val;
-}
-
-void logit(const char *format, char *arg) // TODO varargs
-{
-    FILE *f = fopen("yaiv.log", "a+");
-    fprintf(f, format, arg);
-    fputs("\n", f);
-    fclose(f);
 }
 
 void load_current() {
@@ -133,6 +133,7 @@ dolabel:
 int find_file(const char *n) {
     // determine the index in the file_list of the given filename
     const char *outfn = fl_filename_name(n);
+    logit("file_file:|%s|", (char *)outfn);
     for (int i=0; i < file_count; i++)
         if (strcmp(file_list[i]->d_name, outfn) == 0)
             return i;
@@ -231,6 +232,8 @@ int XBox::handle(int msg) {
             char *fpath = new char[i + 1 - 7];
             strncpy(fpath, urls + 7, i + 1 - 7);
             fpath[i - 7] = '\0';
+            logit("Drop path |%s|", fpath);
+            fl_decode_uri(fpath);
             load_file(fpath);
             delete[] fpath;
 
