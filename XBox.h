@@ -50,6 +50,8 @@ private:
     ScaleMode draw_scale;
     bool draw_center;
     double _zoom{};
+    int _zoom_step = 0;
+    int _scroll_speed = 20;
 
     int deltax;
     int deltay;
@@ -95,6 +97,8 @@ public:
     char * getLabel(char *n, char *buff, int buffsize);
 
     void resize(int,int,int,int) override;
+
+    void change_zoom(int delta) {_zoom_step += delta; updateImage();}
 
     void draw() override
     {

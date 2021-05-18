@@ -63,20 +63,16 @@ void load_current() {
     if (!file_list || file_count < 1)
         return;
 
-    //current_index = std::min(std::max(current_index,2), file_count-1);
     current_index = std::min(std::max(current_index,0), file_count-1);
 
     char n[FL_PATH_MAX<<2];
     if (fold[strlen(fold)-1] == '/')
         fold[strlen(fold)-1] = 0x0;
     sprintf(n, "%s/%s", fold, file_list[current_index]->d_name);
-    //puts(n);
 
-    logit("LC-file:%s", n);
+    //logit("LC-file:%s", n);
 
     strcpy(::_w->filename, n);
-
-// TODO consider re-enabling or doing something rather than pass folder name to image processing
 
     if (fl_filename_isdir(n)) {
         _b2->align(FL_ALIGN_CENTER);
@@ -87,11 +83,8 @@ void load_current() {
         _b2->redraw();
         goto dolabel;
     }
-
+    else
     {
-        // TODO done in end of file chooser
-        //_b2->take_focus();
-
         Fl_Anim_GIF_Image::min_delay = 0.01;
         Fl_Anim_GIF_Image::animate = true;
 
@@ -204,7 +197,7 @@ void button_cb(Fl_Widget *,void *) {
 
 int XBox::handle(int msg) {
 
-    if (msg == FL_FOCUS || msg == FL_UNFOCUS) // TODO must this go before Fl_Group::handle?
+    if (msg == FL_FOCUS || msg == FL_UNFOCUS) // TODO _must_ this go before Fl_Group::handle?
     {
         //printf("box:focus %d\n", msg);
         return 1;
@@ -253,8 +246,6 @@ int XBox::handle(int msg) {
     }
 
     if (msg == FL_KEYDOWN) {
-
-        //printf("keyboard '%s'\n", Fl::event_text());
 
         switch (Fl::event_key())
         {
@@ -309,12 +300,12 @@ int XBox::handle(int msg) {
             case FL_Left: // TODO consider for pan
                 if (Fl::event_state() & FL_CTRL)
                 {
-                    deltax += 10; // direction matches FEH
+                    deltax += _scroll_speed; // direction matches FEH
                 }
                 else
                 {
                     prev_image();
-                    deltax = deltay = 0; // TODO allow unchanged?
+                    deltax = deltay = 0; // TODO allow unchanged? [lock position]
                 }
                 redraw();
                 return 1;
@@ -323,7 +314,11 @@ int XBox::handle(int msg) {
                 //printf("Box: Up arrow, state:%d\n", Fl::event_state());
                 if (Fl::event_state() & FL_CTRL)
                 {
-                    deltay += 10; // direction matches FEH
+                    deltay += _scroll_speed; // direction matches FEH
+                }
+                else
+                {
+                    change_zoom(+1);
                 }
                 redraw();
                 return 1;
@@ -332,6 +327,10 @@ int XBox::handle(int msg) {
                 if (Fl::event_state() & FL_CTRL)
                 {
                     deltay -= 10; // direction matches FEH
+                }
+                else
+                {
+                    change_zoom(-1);
                 }
                 redraw();
                 return 1;
@@ -466,6 +465,7 @@ void XBox::next_scale() {
     draw_scale = (ScaleMode)((int)draw_scale + 1);
     if (draw_scale == ScaleMode::MAX)
         draw_scale = ScaleMode::None;
+    _zoom_step = 0;
 
     updateLabel();
     updateImage();
@@ -573,9 +573,17 @@ void XBox::updateImage() {
 
     // 3. scale showimage
 
-    // TODO need to keep _zoom if no scaling [user zoom]
     _zoom = 1.0;
     bool noscale = false;
+
+    // TODO need to keep _zoom if no scaling [user zoom]
+    if (_zoom_step && !_anim)
+    {
+        // TODO change to be a lookup into a list of zoom levels
+        _zoom = 1.0 + .1 * _zoom_step;
+        _showImg->scale(_showImg->w()*_zoom, _showImg->h()*_zoom,1, 1);
+        goto tk_scale;
+    }
 
     switch (draw_scale) {
         case ScaleMode::None:
@@ -653,6 +661,7 @@ void XBox::updateImage() {
             break;
     }
 
+tk_scale:
     // TODO imgTK scaling currently limited to 3 and 4 bit depth
     // TODO anim is updated in draw so skip those here
     if (!_anim && (int) imgtkScale && !noscale && _img->d() > 2)
