@@ -8,6 +8,9 @@
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Group.H>
 #include <FL/filename.H>
+#include <prefs.h>
+
+extern Prefs *_prefs;
 
 class MyW : public Fl_Double_Window
 {
@@ -58,20 +61,25 @@ public:
             case FL_RELEASE: rel(); ret=1; break;
 
             case FL_FOCUS:
-                //printf("win:focus\n");
-                //ret = 0;
                 _child->take_focus();
                 break;
             case FL_UNFOCUS:
-                //printf("win:unfocus\n");
                 ret = 1;
-//          _child->take_focus();
                 break;
 
             case FL_KEYDOWN:
                 //printf("Win: keydown, state:%d\n", Fl::event_state());
                 ret = 0;
                 break;
+
+            case FL_SHOW: {
+                // cannot initialize border state until window has actually been shown
+                int val;
+                ::_prefs->get("BORDER", val, true);
+                _border = !val;
+                toggle_border();
+            }
+            break;
 
             default: break;
         }

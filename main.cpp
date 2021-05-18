@@ -12,11 +12,8 @@ XBox *_b2;
 Prefs *_prefs;
 
 MyW::MyW(int x, int y, int w, int h) : Fl_Double_Window(x,y,w,h),
-_xoff(0), _yoff(0) {
-    int val;
-    _prefs->get("BORDER", val, true);
-    _border = !val;
-    toggle_border();
+_xoff(0), _yoff(0), _border(1) {
+    // NOTE do _not_ toggle the border in here. Prevents minimize/restore.
 }
 
 void MyW::updateLabel() {
