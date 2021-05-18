@@ -1,7 +1,7 @@
 //
 // Created by kevin on 5/12/21.
 //
-#include <string.h>
+#include <cstring>
 
 #include <FL/filename.H>
 #include <FL/Fl_File_Chooser.H>
@@ -228,7 +228,7 @@ int XBox::handle(int msg) {
             if (strncmp(urls, "file://", 7) != 0)
                 return 1; // not a local file, do nothing
 
-            int len = strlen(urls);
+            size_t len = strlen(urls);
             int i = 0;
             while (urls[i] != '\r' && urls[i] != '\n' && i < len) i++;
             char *fpath = new char[i + 1 - 7];
@@ -670,16 +670,16 @@ void XBox::updateImage() {
     // Draw the checker and image in a surface and use the surface to draw later
     // TODO animated image frames update in draw(), not here, so skip for now
     if (!_anim) {
-        Fl_Image_Surface *imgSurf = new Fl_Image_Surface(_showImg->w(), _showImg->h());
+        auto *imgSurf = new Fl_Image_Surface(_showImg->w(), _showImg->h());
         Fl_Surface_Device::push_current(imgSurf);
         if (draw_check) {
             drawChecker(0, 0, _showImg->w(), _showImg->h());
+        }
         _showImg->draw(0,0);
         _showImg->release();
         _showImg = imgSurf->image();
         Fl_Surface_Device::pop_current();
         delete imgSurf;
-        }
     }
 }
 
@@ -694,7 +694,7 @@ void XBox::do_menu() {
     int i;
     for (i = 0; i < right_click_menu->size(); i++)
     {
-        if (strcmp(right_click_menu[i].text,"Last Used"))
+        if (strcmp(right_click_menu[i].text,"Last Used") != 0)
             continue;
         break;
     }
@@ -702,8 +702,8 @@ void XBox::do_menu() {
     size_t numfavs = _mru->getCount();
 
     // create a new menu
-    int newCount = right_click_menu->size() + numfavs;
-    Fl_Menu_Item* dyn_menu = new Fl_Menu_Item[newCount];
+    unsigned long newCount = right_click_menu->size() + numfavs;
+    auto* dyn_menu = new Fl_Menu_Item[newCount];
 
     // make sure the rest of the allocated menu is clear
     for (int j = 0; j < newCount; j++)
@@ -713,13 +713,13 @@ void XBox::do_menu() {
     for (int j = 0; j <= i; j++)
     {
         dyn_menu[j] = right_click_menu[j];
-        dyn_menu[j].callback(MenuCB, (void *)(MI_LOAD + j)); // TODO just 'j'?
+        dyn_menu[j].callback(MenuCB, (void *)(unsigned long)(MI_LOAD + j)); // TODO just 'j'?
     }
 
     // TODO if numfavs == 0 disable the "last used"
 
     char** favs = _mru->getAll();
-    for (long unsigned int j = 0; j < numfavs; j++)
+    for (long j = 0; j < numfavs; j++)
     {
         dyn_menu[i + 1 + j].label(favs[j]);
         dyn_menu[i + 1 + j].callback(MenuCB);
