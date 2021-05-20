@@ -517,6 +517,7 @@ void XBox::image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg)
     _zoom_step = 0;
     deltax = 0;
     deltay = 0;
+
     updateImage();
 }
 
@@ -578,26 +579,19 @@ void XBox::updateImage() {
 
     // 3. scale showimage
 
-    _zoom = 1.0;
+    auto basezoom = 1.0;
     bool noscale = false;
-
-    // TODO need to keep _zoom if no scaling [user zoom]
-    if (_zoom_step && !_anim)
-    {
-        // TODO change to be a lookup into a list of zoom levels
-        _zoom = 1.0 + .1 * _zoom_step;
-        _showImg->scale(_showImg->w()*_zoom, _showImg->h()*_zoom,1, 1);
-        goto tk_scale;
-    }
 
     switch (draw_scale) {
         case ScaleMode::None:
             {
+                // TODO is none of this necessary?
                 if (_anim)
                     _anim->scale(_anim->data_w(), _anim->data_h());
                 else
                     _showImg->scale(_showImg->data_w(),_showImg->data_h());
                 noscale = true;
+                basezoom = 1.0;
             }
             break;
 
@@ -607,11 +601,11 @@ void XBox::updateImage() {
                 int new_h = (int)((double)_showImg->h() * w() / (double)_showImg->w());
                 if (_anim) {
                     _anim->scale(new_w, new_h, 1, 1);
-                    _zoom = (double)_anim->w() / _anim->data_w();
+                    basezoom = (double)_anim->w() / _anim->data_w();
                 }
                 else {
                     _showImg->scale(new_w, new_h, 1, 1);
-                    _zoom = (double)_showImg->w() / _showImg->data_w();
+                    basezoom = (double)_showImg->w() / _showImg->data_w();
                 }
             }
             break;
@@ -622,11 +616,11 @@ void XBox::updateImage() {
                 int new_w = (int)((double)_showImg->w() * h() / (double)_showImg->h());
                 if (_anim) {
                     _anim->scale(new_w, new_h, 1, 1);
-                    _zoom = (double)_anim->h() / _anim->data_h();
+                    basezoom = (double)_anim->h() / _anim->data_h();
                 }
                 else {
                     _showImg->scale(new_w, new_h, 1, 1);
-                    _zoom = (double)_showImg->h() / _showImg->data_h();
+                    basezoom = (double)_showImg->h() / _showImg->data_h();
                 }
             }
             break;
@@ -635,12 +629,12 @@ void XBox::updateImage() {
             {
                 if (_anim) {
                     _anim->scale(w(), h(), 1, 1);
-                    _zoom = std::max( (double)_anim->w() / _anim->data_w(),
+                    basezoom = std::max( (double)_anim->w() / _anim->data_w(),
                                       (double)_anim->h() / _anim->data_h());
                 }
                 else {
                     _showImg->scale(w(),h(), 1, 1);
-                    _zoom = std::max( (double)_showImg->w() / _showImg->data_w(),
+                    basezoom = std::max( (double)_showImg->w() / _showImg->data_w(),
                                       (double)_showImg->h() / _showImg->data_h());
                 }
             }
@@ -650,12 +644,12 @@ void XBox::updateImage() {
             {
                 if (_anim) {
                     _anim->scale(w(), h());
-                    _zoom = std::max( (double)_anim->w() / _anim->data_w(),
+                    basezoom = std::max( (double)_anim->w() / _anim->data_w(),
                                       (double)_anim->h() / _anim->data_h());
                 }
                 else {
                     _showImg->scale(w(),h());
-                    _zoom = std::max( (double)_showImg->w() / _showImg->data_w(),
+                    basezoom = std::max( (double)_showImg->w() / _showImg->data_w(),
                                       (double)_showImg->h() / _showImg->data_h());
                 }
             }
@@ -666,23 +660,33 @@ void XBox::updateImage() {
             break;
     }
 
-tk_scale:
-    // TODO imgTK scaling currently limited to 3 and 4 bit depth
-    // TODO anim is updated in draw so skip those here
-    if (!_anim && (int) imgtkScale && !noscale && _img->d() > 2)
+    if (_zoom_step)
     {
-        //auto *icopy = (Fl_Image*)_showImg->copy();
-        //Fl_RGB_Image *itksimg = itk_rescale((Fl_RGB_Image *)icopy,
-        Fl_RGB_Image *itksimg = itk_rescale(_showImg,
-                                            _showImg->w(), _showImg->h(),
+        // TODO change to be a lookup into a list of zoom levels
+        _zoom =  basezoom + .1 * _zoom_step;
+        if (_anim)
+            _anim->scale(_anim->data_w()*_zoom, _anim->data_h()*_zoom,1, 1);
+        else {
+            _showImg->scale(_showImg->data_w() * _zoom, _showImg->data_h() * _zoom, 1, 1);
+        }
+    }
+    else _zoom = basezoom;
+
+    // TODO anim is updated in draw so skip those here
+    if (!_anim && (int) imgtkScale && !noscale)
+    {
+        // imgTK scaling is going to draw the image, so undo the pseudo-scaling from before
+        int target_w = _showImg->w();
+        int target_h = _showImg->h();
+        _showImg->scale(_showImg->data_w(),_showImg->data_h(),0,1);
+        Fl_RGB_Image *itksimg = itk_rescale(_showImg, target_w, target_h,
                                             imgtkScale-1);
-        //icopy->release();
         _showImg->release();
         _showImg = itksimg;
     }
 
     // Draw the checker and image in a surface and use the surface to draw later
-    // TODO animated image frames update in draw(), not here, so skip for now
+    // TODO animated image frames currently update in draw(), not here, so skip
     if (!_anim) {
         auto *imgSurf = new Fl_Image_Surface(_showImg->w(), _showImg->h());
         Fl_Surface_Device::push_current(imgSurf);
@@ -693,6 +697,7 @@ tk_scale:
             fl_color(fl_rgb_color(252,243,207)); // TODO hard-coded background color
             fl_rectf(0,0,_showImg->w(),_showImg->h());
         }
+
         _showImg->draw(0,0);
         _showImg->release();
         _showImg = imgSurf->image();
