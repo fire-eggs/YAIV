@@ -511,7 +511,12 @@ void XBox::image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg)
     _img = newImg;
     _anim = animimg;
 
-    rotation = 0; // TODO better place
+    // Reset all state for a new image [pending some sort of 'lock' feature]
+    rotation = 0;
+    _zoom = 1.0;
+    _zoom_step = 0;
+    deltax = 0;
+    deltay = 0;
     updateImage();
 }
 

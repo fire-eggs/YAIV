@@ -122,21 +122,14 @@ public:
 
         if (_anim && draw_check)
         {
-            // TODO can checker be established in updateImage() instead?
-            int outw;
-            int outh;
-            if (_anim) {
-                outw = std::min(w(), _anim->w());
-                outh = std::min(h(), _anim->h());
-            }
-            else {
-                outw = std::min(w(), _showImg->w());
-                outh = std::min(h(), _showImg->h());
-            }
+            // animation frames currently update here, not in updateImage()
+            int outw = std::min(w(), _anim->w());
+            int outh = std::min(h(), _anim->h());
             drawChecker(drawx + deltax, drawy + deltay, outw-2, outh-2);
         }
 
         if (_anim) {
+            // NOTE: this assumes the _anim scale has been set in updateImage()
             auto tmp = _anim->image();
             //printf("Draw Anim %d,%d | %d,%d \n", tmp->w(),tmp->h(), tmp->data_w(), tmp->data_h());
             // TODO for some reason the frame scale() isn't "sticking"???
