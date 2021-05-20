@@ -254,6 +254,7 @@ int XBox::handle(int msg) {
 
             case 'c':
                 draw_check = !draw_check;
+                updateImage();
                 redraw();
                 return 1;
 
