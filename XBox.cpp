@@ -689,6 +689,10 @@ tk_scale:
         if (draw_check) {
             drawChecker(0, 0, _showImg->w(), _showImg->h());
         }
+        else{
+            fl_color(fl_rgb_color(252,243,207)); // TODO hard-coded background color
+            fl_rectf(0,0,_showImg->w(),_showImg->h());
+        }
         _showImg->draw(0,0);
         _showImg->release();
         _showImg = imgSurf->image();
