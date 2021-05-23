@@ -16,6 +16,10 @@
 #include "rescaler.h"
 #include "rotate.h"
 
+#ifdef DANBOORU
+#include "danbooru.h"
+#endif
+
 #define snprintf_nowarn(...) (snprintf(__VA_ARGS__) < 0 ? abort() : (void)0)
 
 extern XBox *_b2;
@@ -101,6 +105,10 @@ void load_current() {
             _b2->redraw();
             goto dolabel;
         }
+
+#ifdef DANBOORU
+        update_danbooru(n);
+#endif
 
         _b2->label(nullptr);
         auto* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(img);
@@ -370,6 +378,19 @@ int XBox::handle(int msg) {
             case 'b':
                 ::_w->toggle_border();
                 return 1;
+
+#ifdef DANBOORU
+            case 'd':
+                if (!file_list || file_count<=1)
+                    break;
+
+                if (Fl::event_state() & FL_CTRL)
+                {
+                    view_danbooru();
+
+                }
+                break;
+#endif
         }
     }
 

@@ -10,6 +10,10 @@
 #include <FL/filename.H>
 #include <prefs.h>
 
+#ifdef DANBOORU
+#include "danbooru.h"
+#endif
+
 extern Prefs *_prefs;
 
 class MyW : public Fl_Double_Window
@@ -80,6 +84,15 @@ public:
                 toggle_border();
             }
             break;
+
+#ifdef DANBOORU
+            case FL_HIDE: {
+                // shutting down
+                shutdown_danbooru();
+            }
+            ret = 0;
+            break;
+#endif
 
             default: break;
         }
