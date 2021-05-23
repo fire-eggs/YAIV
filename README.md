@@ -27,9 +27,9 @@ Keyboard commands:
 
 Requirements
 
-  libwebp
-  FLTK 1.4
-  openmp
+  - libwebp
+  - FLTK 1.4
+  - openmp
 
 The project currently builds against fltk_png rather than use libpng. That is not a 'hard' requirement currently, pending
-the addition of animated-PNG support.
+the addition of animated-PNG support. I've also been using libturbo_jpeg instead of libjpeg.
