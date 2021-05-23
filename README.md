@@ -1,7 +1,7 @@
 # YAIV
 "Yet Another Image Viewer"
 
-A FLTK-based image viewer, intended to (eventually) replace feh but with additional capabilities.
+A FLTK-based image viewer, intended to (eventually) replace [feh](https://feh.finalrewind.org/) but with additional capabilities.
 
 Very much a work-in-progress, mostly a platform for experimentation.
 
