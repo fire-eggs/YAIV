@@ -24,3 +24,12 @@ Keyboard commands:
 - Left / right arrows : next/prev image
 - Pageup/page down : next/prev image
 - Space / backspace : next/prev image
+
+Requirements
+
+  libwebp
+  FLTK 1.4
+  openmp
+
+The project currently builds against fltk_png rather than use libpng. That is not a 'hard' requirement currently, pending
+the addition of animated-PNG support.
