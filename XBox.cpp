@@ -20,7 +20,8 @@
 #include "danbooru.h"
 #endif
 
-#define snprintf_nowarn(...) (snprintf(__VA_ARGS__) < 0 ? abort() : (void)0)
+#define snprintf_nowarn(...) \
+            (snprintf(__VA_ARGS__) < 0 ? abort() : (void)0)
 
 extern XBox *_b2;
 extern MyW *_w;
@@ -399,9 +400,18 @@ int XBox::handle(int msg) {
 }
 
 
-void XBox::MenuCB(Fl_Widget *window_p, void *userdata) { // TODO make dynamic
+void XBox::MenuCB(Fl_Widget *window_p, void *userdata) {
 
-    switch((long int)userdata) {
+    // MinGW-W64 cannot cast void* to data.
+    // But crashes in gcc if userdata is NULL.
+#if defined(__MINGW32__) || defined(__MINGW64__)
+    long int ndata = * (long int*)(userdata);
+#else
+    auto ndata = (long int)userdata;
+#endif
+
+    switch( ndata )
+    {        
         case MI_LOAD:
             button_cb(window_p, (void *)userdata);
             break;
@@ -445,11 +455,13 @@ void XBox::MenuCB(Fl_Widget *window_p, void *userdata) { // TODO make dynamic
         case MI_FAV3: case MI_FAV4: case MI_FAV5:
         case MI_FAV6: case MI_FAV7: case MI_FAV8: case MI_FAV9:
             {
-            int path = (long)userdata - MI_FAV0;
+            long int path = ndata - MI_FAV0;
             char** mru = _mru->getAll(); // TODO return a single path
             printf("MRU: %s\n", mru[path]);
             load_file(mru[path]);
             }
+            break;
+        default:
             break;
     }
 }

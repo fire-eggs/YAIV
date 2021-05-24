@@ -2,6 +2,7 @@
 // Created by kevin on 5/23/21.
 //
 
+#ifdef DANBOORU
 #include <FL/fl_ask.H>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Multiline_Output.H>
@@ -104,3 +105,4 @@ void update_danbooru(char *filename)
     txtout->value(taglist);
     free(taglist);
 }
+#endif

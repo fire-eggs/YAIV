@@ -5,8 +5,12 @@
 #include "humansize.h"
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <FL/Fl.H>
 #include <FL/fl_utf8.h> // fl_stat
-#include <sys/stat.h>   // stat
+// -- platform dependancy --
+// #include <sys/stat.h>   // stat in Fl/Fl.H
 
 static char *humanSize(size_t bytes, char *buf, int bufsize)
 {

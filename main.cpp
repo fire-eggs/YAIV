@@ -41,6 +41,7 @@ int arg(int, char **argv, int &i) {
 
 int main(int argc, char **argv) {
 
+   Fl::lock(); /// thread lock must be called in this time for init.
     Fl::scheme("gtk+"); // TODO ability to change - see unittests
     setlocale(LC_ALL, "");    // enable multilanguage errors in file chooser
     makeChecker();

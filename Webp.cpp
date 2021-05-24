@@ -5,8 +5,11 @@
 #include <fstream>
 #include <FL/fl_utf8.h>
 
+extern "C" {
 #include <webp/decode.h>
 #include <webp/demux.h>
+};
+
 #include "Fl_Anim_GIF_Image.h"
 #include "Webp.h"
 

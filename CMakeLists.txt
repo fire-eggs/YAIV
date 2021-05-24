@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.19)
-project(clion_test2)
+project(YAIV)
 
 # Warnings disabled pending cleanup
 # "-Wall" "-Wpedantic" "-Wextra"
@@ -14,7 +14,7 @@ set(LINK_FLAGS -fopenmp -lX11 -lXext -lm -ldl -lXinerama -lXcursor -lXi -lXrende
 include_directories(. /home/kevin/proj/fltk/fltk)
 
 
-add_executable(clion_test2 main.cpp Fl_Anim_GIF_Image.cpp Fl_Anim_GIF_Image.h humansize.cpp humansize.h list_rand.cpp list_rand.h rescaler.cpp rescaler.h rotate.cpp rotate.h MyW.h XBox.h Webp.cpp
+add_executable(yaiv main.cpp Fl_Anim_GIF_Image.cpp Fl_Anim_GIF_Image.h humansize.cpp humansize.h list_rand.cpp list_rand.h rescaler.cpp rescaler.h rotate.cpp rotate.h MyW.h XBox.h Webp.cpp
         Webp.h checker.cpp checker.h XBox.cpp prefs.h MostRecentPaths.h MostRecentPaths.cpp )
 #        sqlite-amalgamation-3350500/sqlite3.c danbooru.cpp danbooru.h)
 
@@ -23,4 +23,4 @@ find_library(FLTK_IMG fltk_images /home/kevin/proj/fltk/fltk/lib)
 # Using own PNG library to prevent output to console
 find_library(FLTK_PNG fltk_png /home/kevin/proj/fltk/fltk/lib)
 
-target_link_libraries(clion_test2 LINK_PUBLIC ${FLTK} ${FLTK_IMG} ${FLTK_PNG} ${LINK_FLAGS})
+target_link_libraries(yaiv LINK_PUBLIC ${FLTK} ${FLTK_IMG} ${FLTK_PNG} ${LINK_FLAGS})
