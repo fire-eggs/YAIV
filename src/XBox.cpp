@@ -176,6 +176,82 @@ void next_image() {
     load_current();
 }
 
+void XBox::load_current() {
+    if (!file_list || file_count < 1)
+        return;
+
+    current_index = std::min(std::max(current_index,0), file_count-1);
+
+    char n[FL_PATH_MAX<<2];
+    if (fold[strlen(fold)-1] == '/')
+        fold[strlen(fold)-1] = 0x0;
+    sprintf(n, "%s/%s", fold, file_list[current_index]->d_name);
+
+    //logit("LC-file:%s", n);
+
+    strcpy(::_w->filename, n);
+
+    if (fl_filename_isdir(n)) {
+        _b2->align(FL_ALIGN_CENTER);
+        _b2->label("@fileopen"); // show a generic folder
+        _b2->labelsize(64);
+        _b2->labelcolor(FL_LIGHT2);
+        _b2->image(nullptr,nullptr);
+        _b2->redraw();
+        goto dolabel;
+    }
+    else
+    {
+        Fl_Anim_GIF_Image::min_delay = 0.01;
+        Fl_Anim_GIF_Image::animate = true;
+
+        img = loadFile(n, _b2);
+
+        if (!img)
+        {
+            // failed to load
+            _b2->align(FL_ALIGN_CENTER);
+            _b2->label("@filenew");
+            _b2->labelsize(64);
+            _b2->labelcolor(FL_RED);
+            _b2->image(nullptr,nullptr);
+            _b2->redraw();
+            goto dolabel;
+        }
+
+#ifdef DANBOORU
+        update_danbooru(n);
+#endif
+
+        _b2->label(nullptr);
+        auto* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(img);
+        _b2->image(img, animgif);
+        _b2->redraw();
+
+#if false
+        bool anim = animgif != nullptr;
+
+        // this is a hack to force the box to resize which forces the animated image to center in the box & clear background
+        // TODO how to make this happen cleanly
+
+//        if (anim)
+//            _w->size(_w->w()+1, _w->h()+1);
+#endif
+    }
+    dolabel:
+    char lbl[1000];
+    lbl[0] = 0;
+    _w->label(_b2->getLabel(n, lbl, sizeof(lbl)));
+
+    _b2->rotation = 0; // TODO keep rotation?
+
+}
+
+void XBox::next_image() {
+    current_index = std::min(current_index+1, file_count-1);
+    load_current();
+}
+
 void prev_image() {
     current_index = std::max(current_index-1, 0);
     load_current();
@@ -380,6 +456,10 @@ int XBox::handle(int msg) {
                 ::_w->toggle_border();
                 return 1;
 
+            case 'w':
+                toggleSlideshow();
+                return 1;
+
 #ifdef DANBOORU
             case 'd':
                 if (!file_list || file_count<=1)
@@ -423,7 +503,7 @@ void XBox::MenuCB(Fl_Widget *window_p, void *userdata) {
 
             char n[FL_PATH_MAX<<2];
             sprintf(n, "%s/%s", fold, file_list[current_index]->d_name);
-            Fl::copy(n, strlen(n), 1);
+            Fl::copy(n, (int)strlen(n), 1);
         }
             break;
 
@@ -439,7 +519,7 @@ void XBox::MenuCB(Fl_Widget *window_p, void *userdata) {
                 {
                     int val = std::stoi(res);
                     current_index = val - 1;
-                    load_current();
+                    ((XBox *)window_p)->load_current();
                 }
                 catch (std::exception& e)
                 {
@@ -798,6 +878,7 @@ XBox::XBox(int x, int y, int w, int h) : Fl_Group(x,y,w,h)
     end();
     _img = nullptr;
     _anim = nullptr;
+    _inSlideshow = false;
 
     draw_check = true;
     draw_scale = ScaleMode::None;
@@ -809,4 +890,20 @@ XBox::XBox(int x, int y, int w, int h) : Fl_Group(x,y,w,h)
     imgtkScale = 0;
 
     _mru = new MostRecentPaths(_prefs); // TODO consider singleton
+}
+
+void XBox::toggleSlideshow() {
+    _inSlideshow = !_inSlideshow;
+    if (_inSlideshow) {
+        _slideShow = new Slideshow();
+        _slideShow->setPrefs(_prefs);
+        _slideShow->setWindow(this);
+        _slideShow->start(current_index);
+    }
+    else {
+        _slideShow->stop();
+        delete _slideShow;
+        _slideShow = nullptr;
+    }
+
 }

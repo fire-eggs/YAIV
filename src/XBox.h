@@ -18,6 +18,8 @@
 #include "rotate.h"
 #include "rescaler.h"
 
+#include "Slideshow.h"
+
 class XBox : public Fl_Group
 {
 public:
@@ -166,6 +168,10 @@ public:
     void do_menu();
     void image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg);
 
+    void load_current();
+    void next_image();
+    void toggleSlideshow();
+
 private:
     void next_scale();
     void nextTkScale();
@@ -173,6 +179,9 @@ private:
     static void updateLabel();
     void updateImage();
     void wipeShowImage();
+
+    bool _inSlideshow;
+    Slideshow *_slideShow;
 };
 
 #endif //CLION_TEST2_XBOX_H
