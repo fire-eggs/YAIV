@@ -3,7 +3,7 @@ project(YAIV)
 
 # Warnings disabled pending cleanup
 # "-Wall" "-Wpedantic" "-Wextra"
-add_compile_options( "-fexceptions" "-fopenmp" ) #"-DDANBOORU" )
+add_compile_options( "-fexceptions" "-fopenmp" ) # "-DDANBOORU" )
 
 # optimize and strip appropriately
 add_link_options( "$<$<CONFIG:MINSIZEREL>:-O2;-s>" "$<$<CONFIG:RELEASE>:-O2;>" )
@@ -15,7 +15,8 @@ include_directories(. ./src /home/kevin/proj/fltk/fltk)
 
 
 add_executable(yaiv main.cpp Fl_Anim_GIF_Image.cpp Fl_Anim_GIF_Image.h humansize.cpp humansize.h list_rand.cpp list_rand.h rescaler.cpp rescaler.h rotate.cpp rotate.h MyW.h src/XBox.h Webp.cpp
-        Webp.h checker.cpp checker.h src/XBox.cpp prefs.h MostRecentPaths.h MostRecentPaths.cpp src/Slideshow.cpp src/Slideshow.h)
+        Webp.h checker.cpp checker.h src/XBox.cpp prefs.h MostRecentPaths.h MostRecentPaths.cpp src/Slideshow.cpp src/Slideshow.h
+        )
 #        sqlite-amalgamation-3350500/sqlite3.c danbooru.cpp danbooru.h)
 
 find_library(FLTK fltk /home/kevin/proj/fltk/fltk/lib)

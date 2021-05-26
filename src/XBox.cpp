@@ -64,76 +64,6 @@ int removeFolders(struct dirent *entry) {
     return val;
 }
 
-void load_current() {
-    if (!file_list || file_count < 1)
-        return;
-
-    current_index = std::min(std::max(current_index,0), file_count-1);
-
-    char n[FL_PATH_MAX<<2];
-    if (fold[strlen(fold)-1] == '/')
-        fold[strlen(fold)-1] = 0x0;
-    sprintf(n, "%s/%s", fold, file_list[current_index]->d_name);
-
-    //logit("LC-file:%s", n);
-
-    strcpy(::_w->filename, n);
-
-    if (fl_filename_isdir(n)) {
-        _b2->align(FL_ALIGN_CENTER);
-        _b2->label("@fileopen"); // show a generic folder
-        _b2->labelsize(64);
-        _b2->labelcolor(FL_LIGHT2);
-        _b2->image(nullptr,nullptr);
-        _b2->redraw();
-        goto dolabel;
-    }
-    else
-    {
-        Fl_Anim_GIF_Image::min_delay = 0.01;
-        Fl_Anim_GIF_Image::animate = true;
-
-        img = loadFile(n, _b2);
-
-        if (!img)
-        {
-            // failed to load
-            _b2->align(FL_ALIGN_CENTER);
-            _b2->label("@filenew");
-            _b2->labelsize(64);
-            _b2->labelcolor(FL_RED);
-            _b2->image(nullptr,nullptr);
-            _b2->redraw();
-            goto dolabel;
-        }
-
-#ifdef DANBOORU
-        update_danbooru(n);
-#endif
-
-        _b2->label(nullptr);
-        auto* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(img);
-        _b2->image(img, animgif);
-        _b2->redraw();
-
-#if false
-        bool anim = animgif != nullptr;
-
-        // this is a hack to force the box to resize which forces the animated image to center in the box & clear background
-        // TODO how to make this happen cleanly
-
-//        if (anim)
-//            _w->size(_w->w()+1, _w->h()+1);
-#endif
-    }
-dolabel:
-    char lbl[1000];
-    lbl[0] = 0;
-    _w->label(_b2->getLabel(n, lbl, sizeof(lbl)));
-
-    _b2->rotation = 0; // TODO keep rotation?
-}
-
 int find_file(const char *n) {
     // determine the index in the file_list of the given filename
     const char *outfn = fl_filename_name(n);
@@ -163,17 +93,12 @@ void load_file(const char *n) {
     current_index = 0;
     if (!fl_filename_isdir(n))
         current_index = find_file(n);
-    load_current();
+    _b2->load_current(); // TODO hack
 
     // TODO don't add to MRU if unsuccessful load
     // Update the MRU list
     _mru->Add(n);
     _mru->Save();
-}
-
-void next_image() {
-    current_index = std::min(current_index+1, file_count-1);
-    load_current();
 }
 
 void XBox::load_current() {
@@ -186,8 +111,6 @@ void XBox::load_current() {
     if (fold[strlen(fold)-1] == '/')
         fold[strlen(fold)-1] = 0x0;
     sprintf(n, "%s/%s", fold, file_list[current_index]->d_name);
-
-    //logit("LC-file:%s", n);
 
     strcpy(::_w->filename, n);
 
@@ -252,7 +175,7 @@ void XBox::next_image() {
     load_current();
 }
 
-void prev_image() {
+void XBox::prev_image() {
     current_index = std::max(current_index-1, 0);
     load_current();
 }
@@ -467,8 +390,8 @@ int XBox::handle(int msg) {
 
                 if (Fl::event_state() & FL_CTRL)
                 {
-                    view_danbooru();
-
+                    view_danbooru(_prefs);
+                    update_danbooru(file_list[current_index]->d_name);
                 }
                 break;
 #endif
@@ -537,7 +460,7 @@ void XBox::MenuCB(Fl_Widget *window_p, void *userdata) {
             {
             long int path = ndata - MI_FAV0;
             char** mru = _mru->getAll(); // TODO return a single path
-            printf("MRU: %s\n", mru[path]);
+            //printf("MRU: %s\n", mru[path]);
             load_file(mru[path]);
             }
             break;

@@ -19,10 +19,13 @@ Fl_Window *dbwin = nullptr;
 Fl_Multiline_Output *txtout;
 
 // connect to db; open window to view tags
-void view_danbooru()
+void view_danbooru(Prefs *prefs)
 {
-    // TODO browse / env variable
-    int rc = sqlite3_open("/home/kevin/db2020/db2020.db", &db);
+    // TODO browse mechanism
+    char dbpath[1000];
+    prefs->get("DanbooruDB", dbpath, "", 1000);
+
+    int rc = sqlite3_open(dbpath, &db);
     if (rc)
     {
         fl_alert("Could not open danbooru database:\n%s", sqlite3_errmsg(db));

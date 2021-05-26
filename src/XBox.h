@@ -170,6 +170,7 @@ public:
 
     void load_current();
     void next_image();
+    void prev_image();
     void toggleSlideshow();
 
 private:

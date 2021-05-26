@@ -5,7 +5,9 @@
 #ifndef CLION_TEST2_DANBOORU_H
 #define CLION_TEST2_DANBOORU_H
 
-void view_danbooru();
+#include "prefs.h"
+
+void view_danbooru(Prefs *prefs);
 void update_danbooru(char *filename);
 void shutdown_danbooru();
 
