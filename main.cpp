@@ -1,7 +1,7 @@
 
 #include <clocale>     // setlocale()..
 
-void load_file(const char *n); // hack
+void load_file(const char *n); // TODO hack
 
 #include "MyW.h"
 #include "XBox.h"
@@ -30,7 +30,7 @@ void MyW::resize(int x, int y, int w, int h) {
 void MyW::toggle_border() {
     _border = !_border;
     border(_border);
-    _prefs->set("BORDER", _border);
+    _prefs->set2("BORDER", _border);
 }
 
 int dvisual = 0;
@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
     setlocale(LC_ALL, "");    // enable multilanguage errors in file chooser
     makeChecker();
 
-    Fl_Image::RGB_scaling(FL_RGB_SCALING_BILINEAR);
+    Fl_Image::RGB_scaling(FL_RGB_SCALING_BILINEAR); // TODO use a fl_imgtk scaler by default
 
     // TODO rework to add options, filename, etc
     int i = 1;

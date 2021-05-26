@@ -39,7 +39,7 @@ public:
         flush();
     }
 
-    void set(const char* n, int val)
+    void set2(const char* n, int val)
     {
         Fl_Preferences::set(n, val);
         flush();
