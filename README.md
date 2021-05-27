@@ -5,7 +5,12 @@ A FLTK-based image viewer, intended to (eventually) replace [feh](https://feh.fi
 
 Very much a work-in-progress, mostly a platform for experimentation.
 
-Pulls together [GIF animation](https://github.com/wcout/fltk-gif-animation) from wcout, [improved FLTK rotation/scaling](https://github.com/rageworx/fl_imgtk) from rageworx, Webp and animated webp.
+Combines: 
+- [FLTK 1.4](https://www.fltk.org/)
+- [GIF animation](https://github.com/wcout/fltk-gif-animation) from wcout
+- [improved FLTK rotation/scaling](https://github.com/rageworx/fl_imgtk) from rageworx
+- [Animated PNG](http://apngdis.sourceforge.net) support from Max Stepin
+- [Webp and animated webp](https://developers.google.com/speed/webp/download) from Google
 
 The GUI is very limited right now. To load images the choices are:
 1. Add YAIV as an application when double-clicking an image in the file manager.
@@ -19,6 +24,7 @@ Keyboard commands:
 - c : toggle the checkboard background (visible w/ transparent images)
 - s : cycle through scaling options (none,fit,to-width,to-height)
 - z : cycle through imgTk options (when not at 100% zoom)
+- w : toggle slideshow mode (currently hardcoded at 5 seconds per image)
 - Ctrl+arrows : scroll the current image
 - Up / down arrows: zoom in/out
 - Left / right arrows : next/prev image
@@ -27,9 +33,9 @@ Keyboard commands:
 
 Requirements
 
-  - libwebp
   - FLTK 1.4
+  - libwebp
   - openmp
 
-The project currently builds against fltk_png rather than use libpng. That is not a 'hard' requirement currently, pending
-the addition of animated-PNG support. I've also been using libturbo_jpeg instead of libjpeg.
+The project currently builds against fltk_png rather than use libpng. That is 
+not a 'hard' requirement. I've also been using libturbo_jpeg instead of libjpeg.
