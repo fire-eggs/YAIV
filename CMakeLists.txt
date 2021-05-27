@@ -16,7 +16,7 @@ include_directories(. ./src /home/kevin/proj/fltk/fltk)
 
 add_executable(yaiv main.cpp Fl_Anim_GIF_Image.cpp Fl_Anim_GIF_Image.h humansize.cpp humansize.h list_rand.cpp list_rand.h rescaler.cpp rescaler.h rotate.cpp rotate.h MyW.h src/XBox.h Webp.cpp
         Webp.h checker.cpp checker.h src/XBox.cpp prefs.h MostRecentPaths.h MostRecentPaths.cpp src/Slideshow.cpp src/Slideshow.h
-        )
+        src/apng.cpp src/apng.h)
 #        sqlite-amalgamation-3350500/sqlite3.c danbooru.cpp danbooru.h)
 
 find_library(FLTK fltk /home/kevin/proj/fltk/fltk/lib)

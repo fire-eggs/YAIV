@@ -9,8 +9,7 @@
 #include "list_rand.h"
 #include "XBox.h"
 #include "Webp.h"
-
-
+#include "apng.h"
 
 // NOTE borrowed from feh gib_list.c gib_list_randomize
 // TODO needs to go in list container
@@ -108,6 +107,10 @@ Fl_Image *loadFile(char *filename, XBox *owner)
 {
     // 1. Try to open as webp [animated or not]
     Fl_Image *img = LoadWebp(filename, owner);
+    if (img)
+        return img;
+
+    img = LoadAPNG(filename, owner);
     if (img)
         return img;
 
