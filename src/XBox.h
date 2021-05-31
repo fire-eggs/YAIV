@@ -102,70 +102,7 @@ public:
 
     void change_zoom(int delta) {_zoom_step += delta; updateImage();}
 
-    void draw() override
-    {
-        Fl_Group::draw();
-        if ((!_showImg || !_showImg->w() || !_showImg->h()) && !_anim)
-            return;
-
-        // Note: offset to not overwrite the box outline
-        int drawx = x()+1;
-        int drawy = y()+1;
-
-        if (draw_center) {
-            int iw;
-            int ih;
-            if (_anim) {iw = _anim->w(); ih = _anim->h();}
-            else {iw = _showImg->w(); ih = _showImg->h();}
-
-            deltax = std::max(1, (w() - iw) / 2);
-            deltay = std::max(1, (h() - ih) / 2);
-        }
-
-        if (_anim && draw_check)
-        {
-            // animation frames currently update here, not in updateImage()
-            int outw = std::min(w(), _anim->w());
-            int outh = std::min(h(), _anim->h());
-            drawChecker(drawx + deltax, drawy + deltay, outw-2, outh-2);
-        }
-
-        if (_anim) {
-            // NOTE: this assumes the _anim scale has been set in updateImage()
-            auto tmp = _anim->image();
-            //printf("Draw Anim %d,%d | %d,%d \n", tmp->w(),tmp->h(), tmp->data_w(), tmp->data_h());
-            // TODO for some reason the frame scale() isn't "sticking"???
-            // TODO 4009.webp gets this far then crashes because image() returns null
-            if (tmp)
-                tmp->scale(_anim->w(), _anim->h(), 1, 1);
-            _anim->draw(drawx, drawy, w() - 2, h() - 2, -deltax, -deltay);
-        }
-        else {
-            _showImg->draw(drawx, drawy, w() - 2, h() - 2, -deltax, -deltay);
-        }
-
-        drawMinimap();
-
-        {
-            char hack[1000];
-            char hack2[1]={'\0'};
-            label(getLabel(hack2,hack,1000));
-            labelsize(20);
-            labelcolor(FL_DARK_GREEN);    // TODO options
-            labeltype(FL_EMBOSSED_LABEL); // TODO options
-            align(FL_ALIGN_BOTTOM_RIGHT); // TODO options
-
-            if (label())
-            {
-                int lw,lh;
-                measure_label(lw,lh);
-                fl_font(labelfont(), labelsize());
-                fl_color(labelcolor());
-                draw_label(x()+w()-lw-2, y()+h()-lh-2, lw, lh, align()); // TODO options
-            }
-            label(""); // TODO prevent extra label draw?
-        }
-    }
+    void draw() override;
 
     void do_menu();
     void image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg);
@@ -184,6 +121,7 @@ private:
     void updateImage();
     void wipeShowImage();
     void drawMinimap();
+    void drawOverlay();
 
     bool _inSlideshow;
     Slideshow *_slideShow;
