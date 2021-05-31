@@ -9,7 +9,7 @@ add_compile_options( "-fexceptions" "-fopenmp" ) # "-DDANBOORU" )
 add_link_options( "$<$<CONFIG:MINSIZEREL>:-O2;-s>" "$<$<CONFIG:RELEASE>:-O2;>" )
 
 set(CMAKE_CXX_STANDARD 14)
-set(LINK_FLAGS -fopenmp -lX11 -lXext -lm -ldl -lXinerama -lXcursor -lXi -lXrender -lXfixes -ljpeg -lz -lXft -lfontconfig -pthread -lpthread -lwebp -lwebpdemux)
+set(LINK_FLAGS -no-pie -fopenmp -lX11 -lXext -lm -ldl -lXinerama -lXcursor -lXi -lXrender -lXfixes -ljpeg -lz -lXft -lfontconfig -pthread -lpthread -lwebp -lwebpdemux)
 
 include_directories(. ./src /home/kevin/proj/fltk/fltk)
 
