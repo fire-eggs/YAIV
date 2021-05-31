@@ -383,6 +383,10 @@ int XBox::handle(int msg) {
                 toggleSlideshow();
                 return 1;
 
+            case 'm':
+                toggleMinimap();
+                return 1;
+
 #ifdef DANBOORU
             case 'd':
                 if (!file_list || file_count<=1)
@@ -813,6 +817,11 @@ XBox::XBox(int x, int y, int w, int h) : Fl_Group(x,y,w,h)
     imgtkScale = 0;
 
     _mru = new MostRecentPaths(_prefs); // TODO consider singleton
+
+    _mmoc = Fl_Color(0xFF555500); // TODO preferences
+    _mmic = fl_lighter(_mmoc);    // TODO preferences
+    _miniMapSize = 150; // TODO preferences?
+    _minimap = true;
 }
 
 void XBox::toggleSlideshow() {
@@ -829,4 +838,42 @@ void XBox::toggleSlideshow() {
         _slideShow = nullptr;
     }
 
+}
+
+void XBox::toggleMinimap() {
+    _minimap = !_minimap;
+    redraw();
+}
+
+Fl_Color XBox::_mmoc;
+Fl_Color XBox::_mmic;
+int XBox::_miniMapSize;
+
+void XBox::drawMinimap() {
+    if (!_minimap || !_showImg) return; // minimap off, no image
+
+    int iw = _showImg->w();
+    int ih = _showImg->h();
+
+    if (iw < w() && ih < h()) return; // image fits inside window, no map necessary
+
+    // Size the outer rectangle proportional to the image
+    int mmw = _miniMapSize;
+    int mmh = _miniMapSize;
+    if (iw < ih)
+        mmw = (int)(_miniMapSize * (double)iw / (double)ih);
+    else
+        mmh = (int)(_miniMapSize * (double)ih / (double)iw);
+
+    int mmx = x() + w() - mmw - 2; // TODO options: where mmap is located
+    int mmy = y() + 2;
+    fl_rect(mmx, mmy, mmw, mmh, _mmoc); // minimap outer
+
+    // draw the inner rect. NOTE may be positioned outside the inner rect depending on scrolling!
+    int mmix = (int)((double)-deltax / (double)iw * (double)mmw) + 1;
+    int mmiy = (int)((double)-deltay / (double)ih * (double)mmh) + 1;
+    int mmiw = std::min((int)((double)w() / (double)iw * (double)mmw), mmw-2);
+    int mmih = std::min((int)((double)h() / (double)ih * (double)mmh), mmh-2);
+
+    fl_rect(mmx + mmix, mmy + mmiy, mmiw, mmih, _mmic); // minimap inner
 }

@@ -144,6 +144,8 @@ public:
             _showImg->draw(drawx, drawy, w() - 2, h() - 2, -deltax, -deltay);
         }
 
+        drawMinimap();
+
         {
             char hack[1000];
             char hack2[1]={'\0'};
@@ -172,6 +174,7 @@ public:
     void next_image();
     void prev_image();
     void toggleSlideshow();
+    void toggleMinimap();
 
 private:
     void next_scale();
@@ -180,9 +183,15 @@ private:
     static void updateLabel();
     void updateImage();
     void wipeShowImage();
+    void drawMinimap();
 
     bool _inSlideshow;
     Slideshow *_slideShow;
+
+    bool _minimap;
+    static Fl_Color _mmoc;
+    static Fl_Color _mmic;
+    static int _miniMapSize;
 };
 
 #endif //CLION_TEST2_XBOX_H
