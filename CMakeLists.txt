@@ -3,7 +3,7 @@ project(YAIV)
 
 # Warnings disabled pending cleanup
 # "-Wall" "-Wpedantic" "-Wextra"
-add_compile_options( "-fexceptions" "-fopenmp" ) # "-DDANBOORU" )
+add_compile_options( "-fexceptions" "-fopenmp" "-DFLTK_USE_SVG" ) # "-DDANBOORU" )
 
 # optimize and strip appropriately
 add_link_options( "$<$<CONFIG:MINSIZEREL>:-O2;-s>" "$<$<CONFIG:RELEASE>:-O2;>" )

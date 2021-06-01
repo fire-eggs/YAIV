@@ -5,6 +5,9 @@
 #include <stdlib.h> // srand, rand
 #include <time.h> // time
 #include <FL/Fl_File_Chooser.H>  // dirent
+#ifdef FLTK_USE_SVG
+#include <FL/Fl_SVG_Image.H>
+#endif
 
 #include "list_rand.h"
 #include "XBox.h"
