@@ -130,7 +130,8 @@ void XBox::load_current() {
 
         img = loadFile(n, _b2);
 
-        if (!img)
+        // 590B-01.jpg failed to load and resulted in crash further on
+        if (!img || img->fail() || img->w() == 0 || img->h() == 0)
         {
             // failed to load
             _b2->align(FL_ALIGN_CENTER);
@@ -574,7 +575,7 @@ void XBox::updateImage() {
     // 1. dispose of any existing showImg because we're building a new one
     wipeShowImage();
 
-    if (!_img) {
+    if (!_img || _img->w() == 0 || _img->h() == 0) {
         _showImg = nullptr;
         return;
     }
