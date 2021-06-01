@@ -25,6 +25,7 @@ Keyboard commands:
 - s : cycle through scaling options (none,fit,to-width,to-height)
 - z : cycle through imgTk options (when not at 100% zoom)
 - w : toggle slideshow mode (currently hardcoded at 5 seconds per image)
+- m : toggle mini-map display
 - Ctrl+arrows : scroll the current image
 - Up / down arrows: zoom in/out
 - Left / right arrows : next/prev image
