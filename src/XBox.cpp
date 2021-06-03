@@ -297,7 +297,7 @@ int XBox::handle(int msg) {
                 //printf("Box: Right arrow, state:%d\n", Fl::event_state());
                 if (Fl::event_state() & FL_CTRL)
                 {
-                    deltax -= 10; // direction matches FEH
+                    deltax -= _scroll_speed; // direction matches FEH
                 }
                 else
                 {
@@ -336,7 +336,7 @@ int XBox::handle(int msg) {
             case FL_Down:
                 if (Fl::event_state() & FL_CTRL)
                 {
-                    deltay -= 10; // direction matches FEH
+                    deltay -= _scroll_speed; // direction matches FEH
                 }
                 else
                 {
