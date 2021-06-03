@@ -864,7 +864,7 @@ void XBox::drawMinimap() {
     int iw = _showImg->w();
     int ih = _showImg->h();
 
-    if (iw < w() && ih < h()) return; // image fits inside window, no map necessary
+    if (iw <= w() && ih <= h()) return; // image fits inside window, no map necessary
 
     // Size the outer rectangle proportional to the image
     int mmw = _miniMapSize;
