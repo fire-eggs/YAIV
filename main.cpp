@@ -14,6 +14,10 @@ Prefs *_prefs;
 MyW::MyW(int x, int y, int w, int h) : Fl_Double_Window(x,y,w,h),
 _xoff(0), _yoff(0), _border(1) {
     // NOTE do _not_ toggle the border in here. Prevents minimize/restore.
+#ifdef __linux__
+    // some Linux window manager cannot handle resize by thin window border.
+    border( 2 );
+#endif 
 }
 
 void MyW::updateLabel() {
@@ -33,7 +37,7 @@ void MyW::toggle_border() {
     _prefs->set2("BORDER", _border);
 }
 
-int dvisual = 0;
+static int dvisual = 0;
 int arg(int, char **argv, int &i) {
     if (argv[i][1] == '8') {dvisual = 1; i++; return 1;}
     return 0;
@@ -42,9 +46,14 @@ int arg(int, char **argv, int &i) {
 int main(int argc, char **argv) {
 
    Fl::lock(); /// thread lock must be called in this time for init.
+#if (FLTK_EXT_VERSION>0)
+    Fl::scheme("flat");
+#else
     Fl::scheme("gtk+"); // TODO ability to change - see unittests
-    setlocale(LC_ALL, "");    // enable multilanguage errors in file chooser
-    makeChecker();
+#endif
+    // set to system local to "C" default for mostly work.
+    setlocale(LC_ALL, "C");
+    makeChecker(); // TODO move to more appropriate location
 
     Fl_Image::RGB_scaling(FL_RGB_SCALING_BILINEAR); // TODO use a fl_imgtk scaler by default
 

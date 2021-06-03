@@ -5,10 +5,15 @@
 #ifndef CLION_TEST2_MYW_H
 #define CLION_TEST2_MYW_H
 
+#include <FL/Fl.H>
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Group.H>
 #include <FL/filename.H>
 #include <prefs.h>
+
+#if (FL_MINOR_VERSION<4)
+    #error "Error, required FLTK 1.4 or later"
+#endif
 
 #ifdef DANBOORU
 #include "danbooru.h"
@@ -52,7 +57,7 @@ public:
 
     void resize(int x, int y, int w, int h) override;
 
-    int handle(int e)
+    int handle(int e) override
     {
         int ret;
         ret = Fl_Double_Window::handle(e);

@@ -23,6 +23,9 @@
 #include <FL/Fl_GIF_Image.H>
 #include <FL/Fl_Group.H>
 
+#if (FL_MINOR_VERSION<4)
+    #error "Error, required FLTK 1.4 or later"
+#endif
 #include "gif_load.h"
 #include "Fl_Anim_GIF_Image.h"
 
@@ -143,13 +146,16 @@ private:
 };
 
 
+// -- NOTICE --
+// do not define 'DEBUG' as preprocessor,
+// most compilers are using this word used to compiler's preprocessor.
 #define LOG(x) if (debug()) printf x
-#define DEBUG(x) if (debug() >= 2) printf x
+   #define DBG(x) if (debug() >= 2) printf x
 #ifndef LOG
 #define LOG(x)
 #endif
-#ifndef DEBUG
-#define DEBUG(x)
+    #ifndef DBG
+        #define DBG(x)
 #endif
 
 
@@ -165,8 +171,13 @@ Fl_Anim_GIF_Image::FrameInfo::~FrameInfo() {
 void Fl_Anim_GIF_Image::FrameInfo::clear() {
     // release all allocated memory
     while (frames_size-- > 0) {
+#if(FL_MINOR_VERSION>3)        
         if (frames[frames_size].scalable)
             frames[frames_size].scalable->release();
+#else
+        if (frames[frames_size].scalable)
+            delete frames[frames_size].scalable;
+#endif
         delete frames[frames_size].rgb;
     }
     delete[] offscreen;
@@ -261,7 +272,7 @@ void Fl_Anim_GIF_Image::FrameInfo::dispose(int frame_) {
                 setToBackGround(frame_);
                 return;
             }
-            DEBUG(("  dispose frame %d to previous frame %d\n", frame_ + 1, prev + 1));
+            DBG(("  dispose frame %d to previous frame %d\n", frame_ + 1, prev + 1));
             // copy the previous image data..
             uchar *dst = offscreen;
             const char *src = frames[prev].rgb->data()[0];
@@ -269,7 +280,7 @@ void Fl_Anim_GIF_Image::FrameInfo::dispose(int frame_) {
             break;
         }
         case DISPOSE_BACKGROUND:
-            DEBUG(("  dispose frame %d to background\n", frame_ + 1));
+            DBG(("  dispose frame %d to background\n", frame_ + 1));
             setToBackGround(frame_);
             break;
 
@@ -359,7 +370,7 @@ void Fl_Anim_GIF_Image::FrameInfo::onFrameLoaded(GIF_WHDR &whdr_) {
                                              whdr_.cpal[frame.transparent_color_index].G,
                                              whdr_.cpal[frame.transparent_color_index].B);
     }
-    DEBUG(("#%d %d/%d %dx%d delay: %d, dispose: %d transparent_color: %d\n",
+    DBG(("#%d %d/%d %dx%d delay: %d, dispose: %d transparent_color: %d\n",
             (int)frames_size + 1,
             frame.x, frame.y, frame.w, frame.h,
             delay, whdr_.mode, whdr_.tran));
@@ -417,7 +428,7 @@ void Fl_Anim_GIF_Image::FrameInfo::onExtensionLoaded(GIF_WHDR &whdr_) {
     if (memcmp(ext, "NETSCAPE2.0", 11) == 0 && ext[11] >= 3) {
         uchar *params = &ext[12];
         loop_count = params[1] | (params[2] << 8);
-        DEBUG(("netscape loop count: %u\n", loop_count));
+        DBG(("netscape loop count: %u\n", loop_count));
     }
 }
 
@@ -485,14 +496,14 @@ void Fl_Anim_GIF_Image::FrameInfo::setToBackGround(int frame_) {
     // reset offscreen to background color
     int bg = background_color_index;
     int tp = frame_ >= 0 ? frames[frame_].transparent_color_index : bg;
-    DEBUG(("  setToBackGround [%d] tp = %d, bg = %d\n", frame_, tp, bg));
+    DBG(("  setToBackGround [%d] tp = %d, bg = %d\n", frame_, tp, bg));
     RGBA_Color color = background_color;
     if (tp >= 0)
         color = frames[frame_].transparent_color;
     if (tp >= 0 && bg >= 0)
         bg = tp;
     color.alpha = tp == bg ? T_FULL : tp < 0 ? T_FULL : T_NONE;
-    DEBUG(("  setToColor %d/%d/%d alpha=%d\n", color.r, color.g, color.b, color.alpha));
+    DBG(("  setToColor %d/%d/%d alpha=%d\n", color.r, color.g, color.b, color.alpha));
     for (uchar *p = offscreen + canvas_w * canvas_h * 4 - 4; p >= offscreen; p -= 4)
         memcpy(p, &color, 4);
 }
@@ -910,7 +921,7 @@ bool Fl_Anim_GIF_Image::kbrtest(const char *name_)
 }
 
 bool Fl_Anim_GIF_Image::load(const char *name_) {
-    DEBUG(("\nFl_Anim_GIF_Image::load '%s'\n", name_));
+    DBG(("\nFl_Anim_GIF_Image::load '%s'\n", name_));
     clear_frames();
     free(_name);
     _name = name_ ? _strdup(name_) : 0;
@@ -998,7 +1009,7 @@ bool Fl_Anim_GIF_Image::next_frame() {
     if (frame >= _fi->frames_size)  {
         _fi->loop++;
         if (Fl_Anim_GIF_Image::loop && _fi->loop_count > 0 && _fi->loop > _fi->loop_count) {
-            DEBUG(("loop count %d reached - stopped!\n", _fi->loop_count));
+            DBG(("loop count %d reached - stopped!\n", _fi->loop_count));
             stop();
         }
         else
@@ -1009,7 +1020,7 @@ bool Fl_Anim_GIF_Image::next_frame() {
     set_frame(frame);
     double delay = _fi->frames[frame].delay;
     if (min_delay && delay < min_delay) {
-        DEBUG(("#%d: correct delay %f => %f\n", frame, delay, min_delay));
+        DBG(("#%d: correct delay %f => %f\n", frame, delay, min_delay));
         delay = min_delay;
     }
     if (is_animated() && delay > 0 && _speed > 0) {  // normal GIF has no delay

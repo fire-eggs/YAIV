@@ -37,7 +37,6 @@ void makeChecker()
 }
 
 void drawChecker(int X, int Y, int W, int H) {
-// TODO checkerboard position/size needs to be recalculated for rotation
 // TODO FL_Tiled_Image is drawing incorrectly when using params 5 and 6 (cx,cy)
 //::checkerBoard->draw(drawx, drawy, outw-2, outh-2, deltax, deltay); // see -2 comment below
     checkerBoard->draw(X,Y,W,H);

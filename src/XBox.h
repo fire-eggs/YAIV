@@ -13,6 +13,10 @@
 #include <FL/Fl_Menu_Item.H>
 #include <FL/fl_draw.H>
 
+#if (FL_MINOR_VERSION<4)
+    #error "Error, required FLTK 1.4 or later"
+#endif
+
 #include "humansize.h"
 #include "checker.h"
 #include "rotate.h"
@@ -28,7 +32,7 @@ public:
 
 private:
     // 100%; Scale if larger; Scale to window; Scale to width; Scale to height
-    enum ScaleMode { None, Auto, Fit, Wide, High, MAX };
+    enum ScaleMode { None=0, Auto, Fit, Wide, High, MAX };
 
     static char *humanScale(ScaleMode val, char *buff, int buffsize)
     {
