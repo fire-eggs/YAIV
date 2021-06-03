@@ -23,6 +23,17 @@
 #define snprintf_nowarn(...) \
             (snprintf(__VA_ARGS__) < 0 ? abort() : (void)0)
 
+#if (FL_MINOR_VERSION<=3)
+    #define data_w  w
+    #define data_h  h
+#endif
+
+#ifndef __APPLE__
+    #define CTRL_P_KEY      FL_CTRL
+#else
+    #define CTRL_P_KEY      FL_COMMAND
+#endif
+
 extern XBox *_b2;
 extern MyW *_w;
 extern Prefs *_prefs;
@@ -148,7 +159,7 @@ void XBox::load_current() {
 #endif
 
         _b2->label(nullptr);
-        auto* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(img);
+        Fl_Anim_GIF_Image* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(img);
         _b2->image(img, animgif);
         _b2->redraw();
 
@@ -295,7 +306,7 @@ int XBox::handle(int msg) {
 
             case FL_Right:
                 //printf("Box: Right arrow, state:%d\n", Fl::event_state());
-                if (Fl::event_state() & FL_CTRL)
+                if (Fl::event_state() & CTRL_P_KEY)
                 {
                     deltax -= _scroll_speed; // direction matches FEH
                 }
@@ -308,7 +319,7 @@ int XBox::handle(int msg) {
                 return 1;
 
             case FL_Left: // TODO consider for pan
-                if (Fl::event_state() & FL_CTRL)
+                if (Fl::event_state() & CTRL_P_KEY)
                 {
                     deltax += _scroll_speed; // direction matches FEH
                 }
@@ -322,7 +333,7 @@ int XBox::handle(int msg) {
 
             case FL_Up:
                 //printf("Box: Up arrow, state:%d\n", Fl::event_state());
-                if (Fl::event_state() & FL_CTRL)
+                if (Fl::event_state() & CTRL_P_KEY)
                 {
                     deltay += _scroll_speed; // direction matches FEH
                 }
@@ -334,7 +345,7 @@ int XBox::handle(int msg) {
                 return 1;
 
             case FL_Down:
-                if (Fl::event_state() & FL_CTRL)
+                if (Fl::event_state() & CTRL_P_KEY)
                 {
                     deltay -= _scroll_speed; // direction matches FEH
                 }
@@ -393,7 +404,7 @@ int XBox::handle(int msg) {
                 if (!file_list || file_count<=1)
                     break;
 
-                if (Fl::event_state() & FL_CTRL)
+                if (Fl::event_state() & CTRL_P_KEY)
                 {
                     view_danbooru(_prefs);
                     update_danbooru(file_list[current_index]->d_name);
@@ -410,13 +421,7 @@ int XBox::handle(int msg) {
 
 void XBox::MenuCB(Fl_Widget *window_p, void *userdata) {
 
-    // MinGW-W64 cannot cast void* to data.
-    // But crashes in gcc if userdata is NULL.
-#if defined(__MINGW32__) || defined(__MINGW64__)
-    long int ndata = * (long int*)(userdata);
-#else
-    auto ndata = (long int)userdata;
-#endif
+    size_t ndata = (size_t)userdata;
 
     switch( ndata )
     {        
@@ -485,7 +490,9 @@ char * XBox::getLabel(char *n, char *buff, int buffsize)
     char * res = humanScale(draw_scale, scaletxt, sizeof(scaletxt)-1);
 
     if (res == nullptr || img == nullptr)
-        sprintf(buff, "%d/%d - huh? - %s", current_index+1,file_count,n);
+    {
+        snprintf( buff, buffsize, "%d/%d - huh? - %s", current_index+1,file_count,n);
+    }
     else
     {
         char nicesize[10];
@@ -582,13 +589,13 @@ void XBox::updateImage() {
 
     // Covert any Fl_Pixmap into a Fl_RGB_Image so imgTk can rotate/scale
     Fl_RGB_Image *vImg;
-    auto *pimg = dynamic_cast<Fl_Pixmap *>(_img);
+    Fl_Pixmap *pimg = dynamic_cast<Fl_Pixmap *>(_img);
     if (!pimg) {
         vImg = (Fl_RGB_Image *)_img->copy();
     } else {
         // draw pixmap to a 32-bit image surface
 
-        auto *imgSurf = new Fl_Image_Surface(_img->w(), _img->h());
+        Fl_Image_Surface *imgSurf = new Fl_Image_Surface(_img->w(), _img->h());
         Fl_Surface_Device::push_current(imgSurf);
         _img->draw(0, 0);
         vImg = imgSurf->image();
@@ -621,7 +628,7 @@ void XBox::updateImage() {
 
     // 3. scale showimage
 
-    auto basezoom = 1.0;
+    double basezoom = 1.0;
     bool noscale = false;
 
     switch (draw_scale) {
@@ -730,7 +737,7 @@ void XBox::updateImage() {
     // Draw the checker and image in a surface and use the surface to draw later
     // TODO animated image frames currently update in draw(), not here, so skip
     if (!_anim) {
-        auto *imgSurf = new Fl_Image_Surface(_showImg->w(), _showImg->h());
+        Fl_Image_Surface *imgSurf = new Fl_Image_Surface(_showImg->w(), _showImg->h());
         Fl_Surface_Device::push_current(imgSurf);
         if (draw_check) {
             drawChecker(0, 0, _showImg->w(), _showImg->h());
@@ -775,10 +782,11 @@ void XBox::do_menu() {
         memset(&(dyn_menu[j]), 0, sizeof(Fl_Menu_Item));
 
     // initialize it with the static menu contents
-    for (int j = 0; j <= i; j++)
+    for (size_t j = 0; j <= i; j++)
     {
         dyn_menu[j] = right_click_menu[j];
-        dyn_menu[j].callback(MenuCB, (void *)(unsigned long)(MI_LOAD + j)); // TODO just 'j'?
+        size_t menuparam = (size_t)MI_LOAD + j;
+        dyn_menu[j].callback(MenuCB, (void*)menuparam ); // TODO just 'j'?
     }
 
     // TODO if numfavs == 0 disable the "last used"
@@ -910,7 +918,7 @@ void XBox::draw() {
 
     if (_anim) {
         // NOTE: this assumes the _anim scale has been set in updateImage()
-        auto tmp = _anim->image();
+        Fl_Image* tmp = _anim->image();
         //printf("Draw Anim %d,%d | %d,%d \n", tmp->w(),tmp->h(), tmp->data_w(), tmp->data_h());
         // TODO for some reason the frame scale() isn't "sticking"???
         // TODO 4009.webp gets this far then crashes because image() returns null
