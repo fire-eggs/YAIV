@@ -745,7 +745,8 @@ void XBox::updateImage() {
             drawChecker(0, 0, _showImg->w(), _showImg->h());
         }
         else{
-            fl_color(fl_rgb_color(252,243,207)); // TODO hard-coded background color
+            //fl_color(fl_rgb_color(252,243,207)); // TODO hard-coded background color
+            fl_color(color()); // canvas color from preferences
             fl_rectf(0,0,_showImg->w(),_showImg->h());
         }
 
