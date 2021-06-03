@@ -491,7 +491,9 @@ char * XBox::getLabel(char *n, char *buff, int buffsize)
 
     if (res == nullptr || img == nullptr)
     {
-        snprintf( buff, buffsize, "%d/%d - huh? - %s", current_index+1,file_count,n);
+        // for the image label currently don't have filename, don't display extra dashes
+        snprintf( buff, buffsize, "%d/%d%s%s", current_index+1,
+                  file_count, n[0] == '\0' ? "" : " - ", n);
     }
     else
     {
@@ -889,8 +891,10 @@ void XBox::drawMinimap() {
 
 void XBox::draw() {
     Fl_Group::draw();
-    if ((!_showImg || !_showImg->w() || !_showImg->h()) && !_anim)
+    if ((!_showImg || !_showImg->w() || !_showImg->h()) && !_anim) {
+        drawOverlay();
         return;
+    }
 
     fl_push_clip( x(), y(), w(), h() );
 
@@ -937,6 +941,9 @@ void XBox::draw() {
 }
 
 void XBox::drawOverlay() {
+
+    if (!file_count)
+        return;
 
     char hack[1001];
     char hack2[1]={'\0'};
