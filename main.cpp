@@ -17,7 +17,14 @@ _xoff(0), _yoff(0), _border(1) {
 #ifdef __linux__
     // some Linux window manager cannot handle resize by thin window border.
     border( 2 );
-#endif 
+#endif
+
+    // Colors from preferences so RaphK can have dark and I can have light :)
+    int fg, bg;
+    _prefs->get("MainColor", bg, FL_BACKGROUND_COLOR);
+    _prefs->get("MainLabelColor", fg, FL_FOREGROUND_COLOR);
+    color(bg);
+    labelcolor(fg);
 }
 
 void MyW::updateLabel() {

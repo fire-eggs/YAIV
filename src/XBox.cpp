@@ -812,8 +812,14 @@ XBox::XBox(int x, int y, int w, int h) : Fl_Group(x,y,w,h)
 {
     align(FL_ALIGN_INSIDE|FL_ALIGN_TOP|FL_ALIGN_LEFT|FL_ALIGN_CLIP);
     box(FL_BORDER_BOX);
-    color(fl_rgb_color(252,243,207));
+
+    int bg, fg;
+    _prefs->get("CanvasColor", bg, FL_BACKGROUND_COLOR);
+    _prefs->get("CanvasLabelColor", fg, FL_FOREGROUND_COLOR);
+    color(bg);
+    labelcolor(fg);
     end();
+    
     _img = nullptr;
     _anim = nullptr;
     _inSlideshow = false;
