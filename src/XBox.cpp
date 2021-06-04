@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "modernize-use-auto"
 //
 // Created by kevin on 5/12/21.
 //
@@ -22,7 +24,7 @@
 #define snprintf_nowarn(...) \
             (snprintf(__VA_ARGS__) < 0 ? abort() : (void)0)
 
-#if (FL_MINOR_VERSION<=3)
+#if (FL_MINOR_VERSION < 4)
     #define data_w  w
     #define data_h  h
 #endif
@@ -36,20 +38,7 @@
 extern XBox *_b2;
 extern MyW *_w;
 extern Prefs *_prefs;
-MostRecentPaths *_mru; // TODO consider member variable
 
-Fl_Image *img;  // Original image TODO consider member variable
-Fl_Image *showImg; // rotated/scaled image TODO consider member variable
-
-bool _overlay = true;
-
-static char name[1024]; // filename load TODO consider member variable
-
-// TODO these go to some file list container
-int current_index;
-char fold[FL_PATH_MAX];
-struct dirent **file_list;
-int file_count;
 
 void logit(const char *format, char *arg) // TODO varargs
 {
@@ -76,7 +65,7 @@ int removeFolders(struct dirent *entry) {
     return val;
 }
 
-int find_file(const char *n) {
+int XBox::find_file(const char *n) {
     // determine the index in the file_list of the given filename
     const char *outfn = fl_filename_name(n);
     logit("file_file:|%s|", (char *)outfn);
@@ -86,7 +75,7 @@ int find_file(const char *n) {
     return 0;
 }
 
-void load_filelist(const char *n) {
+void XBox::load_filelist(const char *n) {
 
     if (file_list)
         fl_filename_free_list(&file_list, file_count);
@@ -99,13 +88,13 @@ void load_filelist(const char *n) {
     file_count = fl_filename_list(fold, &file_list, fl_numericsort, removeFolders); // TODO how to filter for images?
 }
 
-void load_file(const char *n) {
+void XBox::load_file(const char *n) {
 
     load_filelist(n); // TODO background process
     current_index = 0;
     if (!fl_filename_isdir(n))
         current_index = find_file(n);
-    _b2->load_current(); // TODO hack
+    load_current();
 
     // TODO don't add to MRU if unsuccessful load
     // Update the MRU list
@@ -126,61 +115,48 @@ void XBox::load_current() {
 
     strcpy(::_w->filename, n);
 
-    if (fl_filename_isdir(n)) {
-        _b2->align(FL_ALIGN_CENTER);
-        _b2->label("@fileopen"); // show a generic folder
-        _b2->labelsize(64);
-        _b2->labelcolor(FL_LIGHT2);
-        _b2->image(nullptr,nullptr);
-        _b2->redraw();
-        goto dolabel;
+    rotation = 0; // TODO anything else need resetting?
+
+    if (fl_filename_isdir(n)) 
+    {
+        align(FL_ALIGN_CENTER);
+        label("@fileopen"); // show a generic folder
+        labelsize(64);
+        labelcolor(FL_LIGHT2);
+        image(nullptr,nullptr);
     }
     else
     {
-        Fl_Anim_GIF_Image::min_delay = 0.01;
-        Fl_Anim_GIF_Image::animate = true;
-
-        img = loadFile(n, _b2);
+        Fl_Image *img = loadFile(n, this);
 
         // 590B-01.jpg failed to load and resulted in crash further on
         if (!img || img->fail() || img->w() == 0 || img->h() == 0)
         {
-            // failed to load
-            _b2->align(FL_ALIGN_CENTER);
-            _b2->label("@filenew");
-            _b2->labelsize(64);
-            _b2->labelcolor(FL_RED);
-            _b2->image(nullptr,nullptr);
-            _b2->redraw();
-            goto dolabel;
+            // failed to load - show a red file placeholder
+            align(FL_ALIGN_CENTER);
+            label("@filenew");
+            labelsize(64);
+            labelcolor(FL_RED);
+            image(nullptr,nullptr);
         }
+        else
+        {
+            Fl_Anim_GIF_Image::min_delay = 0.01;
+            Fl_Anim_GIF_Image::animate = true;
 
 #ifdef DANBOORU
-        update_danbooru(n);
+            update_danbooru(n);
 #endif
 
-        _b2->label(nullptr);
-        Fl_Anim_GIF_Image* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(img);
-        _b2->image(img, animgif);
-        _b2->redraw();
-
-#if false
-        bool anim = animgif != nullptr;
-
-        // this is a hack to force the box to resize which forces the animated image to center in the box & clear background
-        // TODO how to make this happen cleanly
-
-//        if (anim)
-//            _w->size(_w->w()+1, _w->h()+1);
-#endif
+            label(nullptr); // wipe any previous folder/error-file
+            Fl_Anim_GIF_Image* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(img);
+            image(img, animgif);
+        }
     }
-    dolabel:
-    char lbl[1000];
-    lbl[0] = 0;
+
+    redraw();
+    char lbl[1000] = {0};
     _w->label(_b2->getLabel(n, lbl, sizeof(lbl)));
-
-    _b2->rotation = 0; // TODO keep rotation?
-
 }
 
 void XBox::next_image() {
@@ -193,27 +169,32 @@ void XBox::prev_image() {
     load_current();
 }
 
-void file_cb(const char *n) {
-    if (!strcmp(name,n)) return;
+void XBox::file_cb(const char *n) {
+    if (!strcmp(filecb_name, n)) return;
     load_file(n); // TODO intermediate folders are being displayed/remembered; only want selected via OK?
-    strcpy(name,n);
+    strcpy(filecb_name, n);
 }
 
-void button_cb(Fl_Widget *,void *) {
-    fl_file_chooser_callback(file_cb);
+static XBox *fc_owner; // TODO hack
+static void fc_file_cb(const char *n) {
+    fc_owner->file_cb(n);
+}
+
+void XBox::load_request() {
+    fc_owner = this;
+    fl_file_chooser_callback(fc_file_cb);
     Fl_File_Chooser::sort = fl_numericsort;
     //const char *fname =
-    fl_file_chooser("Image file?","*.{bm,bmp,gif,jpg,png,webp"
+    fl_file_chooser("Image file?","*.{bm,bmp,gif,jpg,apng,png,webp"
                                   #ifdef FLTK_USE_SVG
                                   ",svg"
 #ifdef HAVE_LIBZ
                                       ",svgz"
 #endif // HAVE_LIBZ
                                   #endif // FLTK_USE_SVG
-                                  "}\tGIF Files (*.gif)", name);
+                                  "}", filecb_name);
     //puts(fname ? fname : "(null)"); fflush(stdout);
     fl_file_chooser_callback(nullptr);
-    _b2->take_focus();
 }
 
 int XBox::handle(int msg) {
@@ -401,7 +382,8 @@ int XBox::handle(int msg) {
                 return 1;
 
             case 'o':
-                _overlay = false;
+                draw_overlay = !draw_overlay;
+                redraw();
                 return 1;
 
 #ifdef DANBOORU
@@ -423,15 +405,24 @@ int XBox::handle(int msg) {
     return ret;
 }
 
+struct menucall {XBox *who; int menu;};
+static void xbox_menucb(Fl_Widget *window_p, void *userdata) {
 
-void XBox::MenuCB(Fl_Widget *window_p, void *userdata) {
+    struct menucall *mc = static_cast<struct menucall *>(userdata);
+    if (mc == nullptr) return;
+    fc_owner = mc->who;
+    mc->who->MenuCB(window_p, mc->menu);
+}
 
-    size_t ndata = (size_t)userdata;
+void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
+
+    size_t ndata = menuid;
 
     switch( ndata )
     {        
         case MI_LOAD:
-            button_cb(window_p, (void *)userdata);
+            load_request();
+            this->take_focus();
             break;
 
         case MI_COPYPATH:
@@ -494,7 +485,7 @@ char * XBox::getLabel(char *n, char *buff, int buffsize)
     char scaletxt[10];
     char * res = humanScale(draw_scale, scaletxt, sizeof(scaletxt)-1);
 
-    if (res == nullptr || img == nullptr)
+    if (res == nullptr || _img == nullptr)
     {
         // for the image label currently don't have filename, don't display extra dashes
         snprintf( buff, buffsize, "%d/%d%s%s", current_index+1,
@@ -728,8 +719,11 @@ void XBox::updateImage() {
     }
     else _zoom = basezoom;
 
-    // TODO anim is updated in draw so skip those here
-    if (!_anim && (int) imgtkScale && !noscale)
+    // anim is updated in draw so we're done
+    if (_anim)
+        return;
+
+    if ((int) imgtkScale && !noscale)
     {
         // imgTK scaling is going to draw the image, so undo the pseudo-scaling from before
         int target_w = _showImg->w();
@@ -742,25 +736,21 @@ void XBox::updateImage() {
     }
 
     // Draw the checker and image in a surface and use the surface to draw later
-    // TODO animated image frames currently update in draw(), not here, so skip
-    if (!_anim) {
-        Fl_Image_Surface *imgSurf = new Fl_Image_Surface(_showImg->w(), _showImg->h());
-        Fl_Surface_Device::push_current(imgSurf);
-        if (draw_check) {
-            drawChecker(0, 0, _showImg->w(), _showImg->h());
-        }
-        else{
-            //fl_color(fl_rgb_color(252,243,207)); // TODO hard-coded background color
-            fl_color(color()); // canvas color from preferences
-            fl_rectf(0,0,_showImg->w(),_showImg->h());
-        }
-
-        _showImg->draw(0,0);
-        _showImg->release();
-        _showImg = imgSurf->image();
-        Fl_Surface_Device::pop_current();
-        delete imgSurf;
+    Fl_Image_Surface *imgSurf = new Fl_Image_Surface(_showImg->w(), _showImg->h());
+    Fl_Surface_Device::push_current(imgSurf);
+    if (draw_check) {
+        drawChecker(0, 0, _showImg->w(), _showImg->h());
     }
+    else{
+        fl_color(color()); // canvas color from preferences
+        fl_rectf(0,0,_showImg->w(),_showImg->h());
+    }
+
+    _showImg->draw(0,0);
+    _showImg->release();
+    _showImg = imgSurf->image();
+    Fl_Surface_Device::pop_current();
+    delete imgSurf;
 }
 
 void XBox::resize(int x,int y,int w,int h) {
@@ -783,7 +773,7 @@ void XBox::do_menu() {
 
     // create a new menu
     unsigned long newCount = right_click_menu->size() + numfavs;
-    auto* dyn_menu = new Fl_Menu_Item[newCount];
+    Fl_Menu_Item* dyn_menu = new Fl_Menu_Item[newCount];
 
     // make sure the rest of the allocated menu is clear
     for (int j = 0; j < newCount; j++)
@@ -794,7 +784,10 @@ void XBox::do_menu() {
     {
         dyn_menu[j] = right_click_menu[j];
         size_t menuparam = (size_t)MI_LOAD + j;
-        dyn_menu[j].callback(MenuCB, (void*)menuparam ); // TODO just 'j'?
+        menucall *hold = new menucall; // TODO memory leak per menu invocation?
+        hold->who = this;
+        hold->menu = menuparam;
+        dyn_menu[j].callback(xbox_menucb, (void*)hold );
     }
 
     // TODO if numfavs == 0 disable the "last used"
@@ -803,8 +796,11 @@ void XBox::do_menu() {
     for (long j = 0; j < numfavs; j++)
     {
         dyn_menu[i + 1 + j].label(favs[j]);
-        dyn_menu[i + 1 + j].callback(MenuCB);
-        dyn_menu[i + 1 + j].argument(MI_FAV0 + j);
+        menucall *hold = new menucall; // TODO memory leak per menu invocation?
+        hold->who = this;
+        hold->menu = MI_FAV0 + j;
+        dyn_menu[i + 1 + j].callback(xbox_menucb, (void*)hold);
+        //dyn_menu[i + 1 + j].argument(MI_FAV0 + j);
     }
 
     // show the menu
@@ -812,6 +808,8 @@ void XBox::do_menu() {
     const Fl_Menu_Item *m = dyn_menu->popup(Fl::event_x(), Fl::event_y(), "YAIV", nullptr, nullptr);
     if (m && m->callback())
         m->do_callback(this, m->user_data());
+
+    // TODO cleanup dyn_menu entries here?
 }
 
 XBox::XBox(int x, int y, int w, int h) : Fl_Group(x,y,w,h)
@@ -845,6 +843,10 @@ XBox::XBox(int x, int y, int w, int h) : Fl_Group(x,y,w,h)
     _mmic = fl_lighter(_mmoc);    // TODO preferences
     _miniMapSize = 150; // TODO preferences?
     _minimap = true;
+
+    file_count = 0;
+    current_index = 0;
+    file_list = nullptr;
 }
 
 void XBox::toggleSlideshow() {
@@ -954,7 +956,7 @@ void XBox::draw() {
 
 void XBox::drawOverlay() {
 
-    if (!file_count || !_overlay)
+    if (!file_count || !draw_overlay)
         return;
 
     char hack[1001];
@@ -976,3 +978,5 @@ void XBox::drawOverlay() {
     }
     label(""); // TODO prevent extra label draw?
 }
+
+#pragma clang diagnostic pop

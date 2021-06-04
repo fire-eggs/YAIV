@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
     _w->resizable(_b2);
     _w->end();
 
-    if (argv[1]) load_file(argv[1]); // TODO add more options
+    if (argv[1]) _b2->load_file(argv[1]); // TODO add more options
 
     _w->show(argc,argv);
     return Fl::run();
