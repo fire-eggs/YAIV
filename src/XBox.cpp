@@ -731,8 +731,11 @@ void XBox::updateImage() {
         _showImg->scale(_showImg->data_w(),_showImg->data_h(),0,1);
         Fl_RGB_Image *itksimg = fl_imgtk::rescale(_showImg, target_w, target_h,
                                             static_cast<fl_imgtk::rescaletype>(imgtkScale-1));
-        _showImg->release();
-        _showImg = itksimg;
+
+        if (itksimg != nullptr) { // CATMULL was not exposed in released fl_imgtk
+            _showImg->release();
+            _showImg = itksimg;
+        }
     }
 
     // Draw the checker and image in a surface and use the surface to draw later
