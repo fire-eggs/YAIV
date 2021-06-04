@@ -13,8 +13,7 @@
 #include "list_rand.h"
 #include "prefs.h"
 #include "MostRecentPaths.h"
-#include "rescaler.h"
-#include "rotate.h"
+#include "fl_imgtk.h"
 
 #ifdef DANBOORU
 #include "danbooru.h"
@@ -41,6 +40,8 @@ MostRecentPaths *_mru; // TODO consider member variable
 
 Fl_Image *img;  // Original image TODO consider member variable
 Fl_Image *showImg; // rotated/scaled image TODO consider member variable
+
+bool _overlay = true;
 
 static char name[1024]; // filename load TODO consider member variable
 
@@ -399,6 +400,10 @@ int XBox::handle(int msg) {
                 toggleMinimap();
                 return 1;
 
+            case 'o':
+                _overlay = false;
+                return 1;
+
 #ifdef DANBOORU
             case 'd':
                 if (!file_list || file_count<=1)
@@ -613,13 +618,13 @@ void XBox::updateImage() {
         switch (rotation)
         {
             case 1:
-                rimg = rotate90(vImg);
+                rimg = fl_imgtk::rotate90(vImg);
                 break;
             case 2:
-                rimg = rotate180(vImg);
+                rimg = fl_imgtk::rotate180(vImg);
                 break;
             case 3:
-                rimg = rotate270(vImg);
+                rimg = fl_imgtk::rotate270(vImg);
                 break;
             default:
                 rotation = 0;
@@ -730,8 +735,8 @@ void XBox::updateImage() {
         int target_w = _showImg->w();
         int target_h = _showImg->h();
         _showImg->scale(_showImg->data_w(),_showImg->data_h(),0,1);
-        Fl_RGB_Image *itksimg = itk_rescale(_showImg, target_w, target_h,
-                                            imgtkScale-1);
+        Fl_RGB_Image *itksimg = fl_imgtk::rescale(_showImg, target_w, target_h,
+                                            static_cast<fl_imgtk::rescaletype>(imgtkScale-1));
         _showImg->release();
         _showImg = itksimg;
     }
@@ -820,7 +825,7 @@ XBox::XBox(int x, int y, int w, int h) : Fl_Group(x,y,w,h)
     color(bg);
     labelcolor(fg);
     end();
-    
+
     _img = nullptr;
     _anim = nullptr;
     _inSlideshow = false;
@@ -949,7 +954,7 @@ void XBox::draw() {
 
 void XBox::drawOverlay() {
 
-    if (!file_count)
+    if (!file_count || !_overlay)
         return;
 
     char hack[1001];

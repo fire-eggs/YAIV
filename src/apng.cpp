@@ -13,6 +13,8 @@ zlib license
 
 // Adapted to provide a Fl_RGB_Image* or a Fl_Anim_GIF_Image*, as necessary
 
+#include <cstdio>
+#include <cstring>
 #include <vector>
 #include <Fl_Anim_GIF_Image.h>
 #include "apng.h"
@@ -445,4 +447,7 @@ Fl_Image* LoadAPNG(const char *filename, Fl_Widget *canvas= nullptr)
     }
 
     // TODO may need a container to wipe the Image instances when freed
+
+    // prevent compiler detects as error or warning.
+    return nullptr;
 }

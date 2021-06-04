@@ -5,7 +5,8 @@
 #ifndef CLION_TEST2_XBOX_H
 #define CLION_TEST2_XBOX_H
 
-#include <string> // stoi
+#include <string>
+#include <cstring>
 #include <climits> // INT_MAX, INT_MIN
 
 #include <FL/Fl_Group.H>
