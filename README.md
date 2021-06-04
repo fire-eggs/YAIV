@@ -9,6 +9,7 @@ Combines:
 - [FLTK 1.4](https://www.fltk.org/)
 - [GIF animation](https://github.com/wcout/fltk-gif-animation) from wcout
 - [improved FLTK rotation/scaling](https://github.com/rageworx/fl_imgtk) from rageworx
+- minimap courtesy of rageworx
 - [Animated PNG](http://apngdis.sourceforge.net) support from Max Stepin
 - [Webp and animated webp](https://developers.google.com/speed/webp/download) from Google
 
@@ -37,6 +38,7 @@ Requirements
   - FLTK 1.4
   - libwebp
   - openmp
+  - fl_imgtk
 
 The project currently builds against fltk_png rather than use libpng. That is 
 not a 'hard' requirement. I've also been using libturbo_jpeg instead of libjpeg.
