@@ -8,7 +8,7 @@
 // TODO manually changing current image in XBox needs to reset timer
 
 #include <FL/Fl.H>
-#include "Slideshow.h"
+//#include "Slideshow.h"
 #include "XBox.h"
 
 Slideshow::Slideshow() {

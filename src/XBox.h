@@ -20,8 +20,6 @@
 
 #include "humansize.h"
 #include "checker.h"
-#include "rotate.h"
-#include "rescaler.h"
 
 #include "Slideshow.h"
 
