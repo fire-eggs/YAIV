@@ -8,7 +8,6 @@
 #include "prefs.h"
 
 class XBox;
-
 class Slideshow
 {
 public:
@@ -30,6 +29,5 @@ private:
     int _timeout = -1;    // current slide countdown
     int _slideDelay = -1; // seconds between slides
 };
-
 
 #endif //YAIV_SLIDESHOW_H

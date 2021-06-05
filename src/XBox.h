@@ -22,8 +22,10 @@
 #include "humansize.h"
 #include "checker.h"
 
-#include "Slideshow.h"
 #include "MostRecentPaths.h"
+
+class YaivWin;
+class Slideshow;
 
 class XBox : public Fl_Group
 {
@@ -100,7 +102,7 @@ private:
     };
 
 public:
-    XBox(int x, int y, int w, int h);
+    XBox(int x, int y, int w, int h, Prefs*);
 
     int handle(int) override;
     char * getLabel(char *n, char *buff, int buffsize);
@@ -122,6 +124,9 @@ public:
     // exposed for static file chooser callback
     void file_cb(const char *); // process filename from file chooser
 
+    // TODO XBox and YaivMain tightly coupled, need to fix
+    void parent(YaivWin* who) {_dad=who;}
+
 private:
 
     void load_filelist(const char *);
@@ -132,7 +137,7 @@ private:
     void next_scale();
     void nextTkScale();
     void nextRotation();
-    static void updateLabel();
+    void updateLabel();
     void updateImage();
     void wipeShowImage();
     void drawMinimap();
@@ -149,8 +154,11 @@ private:
     static Fl_Color _mmic;
     static int _miniMapSize;
 
-    MostRecentPaths *_mru;
+    YaivWin* _dad;
+
+    MostRecentPaths* _mru;
     char filecb_name[1024]; // filename load TODO dynamic?
+    Prefs* _prefs;
 
     // TODO go into a separate 'loader' class
     int current_index;

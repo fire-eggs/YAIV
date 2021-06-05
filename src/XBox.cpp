@@ -10,12 +10,13 @@
 #include <FL/Fl_Menu_Item.H>
 #include <FL/Fl_Image_Surface.H>
 
+#include "yaiv_win.h"
 #include "XBox.h"
-#include "MyW.h"
 #include "list_rand.h"
 #include "prefs.h"
 #include "MostRecentPaths.h"
 #include "fl_imgtk.h"
+#include "Slideshow.h"
 
 #ifdef DANBOORU
 #include "danbooru.h"
@@ -34,11 +35,6 @@
 #else
     #define CTRL_P_KEY      FL_COMMAND
 #endif
-
-extern XBox *_b2;
-extern MyW *_w;
-extern Prefs *_prefs;
-
 
 void logit(const char *format, char *arg) // TODO varargs
 {
@@ -113,7 +109,7 @@ void XBox::load_current() {
         fold[strlen(fold)-1] = 0x0;
     sprintf(n, "%s/%s", fold, file_list[current_index]->d_name);
 
-    strcpy(::_w->filename, n);
+    _dad->setFilename(n); // TODO just track here?
 
     rotation = 0; // TODO anything else need resetting?
 
@@ -155,8 +151,7 @@ void XBox::load_current() {
     }
 
     redraw();
-    char lbl[1000] = {0};
-    _w->label(_b2->getLabel(n, lbl, sizeof(lbl)));
+    updateLabel();
 }
 
 void XBox::next_image() {
@@ -370,7 +365,7 @@ int XBox::handle(int msg) {
                 return 1;
 
             case 'b':
-                ::_w->toggle_border();
+                _dad->toggle_border();
                 return 1;
 
             case 'w':
@@ -536,7 +531,7 @@ void XBox::nextRotation() {
 }
 
 void XBox::updateLabel() {
-    ::_w->updateLabel(); // TODO super hack
+    _dad->updateLabel(); // TODO super hack
 }
 
 void XBox::image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg)
@@ -815,7 +810,8 @@ void XBox::do_menu() {
     // TODO cleanup dyn_menu entries here?
 }
 
-XBox::XBox(int x, int y, int w, int h) : Fl_Group(x,y,w,h)
+XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : Fl_Group(x,y,w,h),
+    _prefs(prefs)
 {
     align(FL_ALIGN_INSIDE|FL_ALIGN_TOP|FL_ALIGN_LEFT|FL_ALIGN_CLIP);
     box(FL_BORDER_BOX);
