@@ -9,10 +9,22 @@
 #include <FL/Fl_Preferences.H>
 
 #define APPLICATION "yaiv"
-#define ORGANIZATION "iglite.com"
+#define ORGANIZATION "yaiv.org"
 
 #define MAIN_PREFIX "main"
 #define MRU_GROUP "MRU"
+
+#define CANVAS_COLOR "CanvasColor"
+#define CANVAS_LABEL_COLOR "CanvasLabelColor"
+
+#define MAIN_COLOR "MainColor"
+#define MAIN_LABEL_COLOR "MainLabelColor"
+
+#define SLIDESHOW_DELAY "SlideShow_Delay"
+
+#define BORDER_FLAG "BORDER"
+
+#define MOUSE_PAN "PanWithMouse"
 
 class Prefs : public Fl_Preferences
 {

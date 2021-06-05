@@ -25,8 +25,8 @@ YaivWin::YaivWin(int x, int y, int w, int h, Prefs* prefs) : Fl_Double_Window(x,
 
     // Colors from preferences so RaphK can have dark and I can have light :)
     int fg, bg;
-    _prefs->get("MainColor", bg, FL_BACKGROUND_COLOR);
-    _prefs->get("MainLabelColor", fg, FL_FOREGROUND_COLOR);
+    _prefs->get(MAIN_COLOR, bg, FL_BACKGROUND_COLOR);
+    _prefs->get(MAIN_LABEL_COLOR, fg, FL_FOREGROUND_COLOR);
     color(bg);
     labelcolor(fg);
 }
@@ -45,7 +45,7 @@ void YaivWin::resize(int x, int y, int w, int h) {
 void YaivWin::toggle_border() {
     _border = !_border;
     border(_border);
-    _prefs->set2("BORDER", _border);
+    _prefs->set2(BORDER_FLAG, _border);
 }
 
 void YaivWin::push() {
@@ -67,8 +67,6 @@ int YaivWin::handle(int e)
 
         case FL_DRAG: drag(); ret=1; break;
 
-        //case FL_RELEASE: rel(); ret=1; break;
-
         case FL_FOCUS:
             _child->take_focus();
             break;
@@ -80,7 +78,7 @@ int YaivWin::handle(int e)
             {
             // cannot initialize border state until window has actually been shown
             int val;
-            _prefs->get("BORDER", val, true);
+            _prefs->get(BORDER_FLAG, val, true);
             _border = !val;
             toggle_border();
             }

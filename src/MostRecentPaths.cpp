@@ -9,7 +9,7 @@
 
 MostRecentPaths::MostRecentPaths(Prefs* root)
 {
-    _prefs = new Fl_Preferences(root, "MRU");
+    _prefs = new Fl_Preferences(root, MRU_GROUP);
     char name[2] = "0";
     for (int i = 0; i < 10; i++)
     {

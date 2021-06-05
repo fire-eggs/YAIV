@@ -19,7 +19,7 @@ void Slideshow::start(int current) {
 
     _window->load_current();
     if (_prefs)
-        _prefs->get("SlideShow_Delay", _slideDelay, 10);
+        _prefs->get(SLIDESHOW_DELAY, _slideDelay, 10);
     setTimer();
 
     // TODO options from prefs

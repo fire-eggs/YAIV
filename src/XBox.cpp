@@ -388,6 +388,7 @@ int XBox::handle(int msg) {
 
             case 'p':
                 _pan_with_mouse = !_pan_with_mouse;
+                _prefs->set2(MOUSE_PAN, _pan_with_mouse);
                 return 1;
 #ifdef DANBOORU
             case 'd':
@@ -857,8 +858,8 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : Fl_Group(x,y,w,h),
     box(FL_BORDER_BOX);
 
     int bg, fg;
-    _prefs->get("CanvasColor", bg, FL_BACKGROUND_COLOR);
-    _prefs->get("CanvasLabelColor", fg, FL_FOREGROUND_COLOR);
+    _prefs->get(CANVAS_COLOR, bg, FL_BACKGROUND_COLOR);
+    _prefs->get(CANVAS_LABEL_COLOR, fg, FL_FOREGROUND_COLOR);
     color(bg);
     labelcolor(fg);
     end();
@@ -887,7 +888,9 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : Fl_Group(x,y,w,h),
     current_index = 0;
     file_list = nullptr;
 
-    _pan_with_mouse = false;
+    int mp;
+    _prefs->get(MOUSE_PAN,mp,false); // TODO define 'bool' getter
+    _pan_with_mouse = mp != 0;
     dragging = false;
 }
 
