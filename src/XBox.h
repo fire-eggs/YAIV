@@ -146,6 +146,13 @@ private:
     void toggleSlideshow();
     void toggleMinimap();
 
+private:
+    bool _pan_with_mouse;
+    int dragStartX;
+    int dragStartY;
+    bool dragging;
+    int mousePan(int);
+
     bool _inSlideshow;
     Slideshow *_slideShow;
 

@@ -239,6 +239,11 @@ int XBox::handle(int msg) {
                 do_menu();
                 return 1;
             }
+            return mousePan(FL_PUSH);
+            break;
+        case FL_DRAG:
+        case FL_RELEASE:
+            return mousePan(msg);
             break;
     }
 
@@ -381,6 +386,9 @@ int XBox::handle(int msg) {
                 redraw();
                 return 1;
 
+            case 'p':
+                _pan_with_mouse = !_pan_with_mouse;
+                return 1;
 #ifdef DANBOORU
             case 'd':
                 if (!file_list || file_count<=1)
@@ -396,8 +404,40 @@ int XBox::handle(int msg) {
         }
     }
 
-
     return ret;
+}
+
+int XBox::mousePan(int msg)
+{
+    if (!_pan_with_mouse || !_img) return 0;
+
+    int mouseX = Fl::event_x();
+    int mouseY = Fl::event_y();
+
+    switch (msg) {
+        case FL_PUSH:
+            dragStartX = mouseX - deltax;
+            dragStartY = mouseY - deltay;
+            dragging = true;
+            break;
+        case FL_DRAG: {
+            if (!dragging) return 0;
+
+            int movX = dragStartX - mouseX;
+            int movY = dragStartY - mouseY;
+            fl_cursor(FL_CURSOR_MOVE);
+
+            deltax = -movX;
+            deltay = -movY;
+            redraw();
+            }
+            break;
+        case FL_RELEASE:
+            fl_cursor(FL_CURSOR_ARROW);
+            dragging = false;
+            break;
+    }
+    return 1;
 }
 
 struct menucall {XBox *who; int menu;};
@@ -846,6 +886,9 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : Fl_Group(x,y,w,h),
     file_count = 0;
     current_index = 0;
     file_list = nullptr;
+
+    _pan_with_mouse = false;
+    dragging = false;
 }
 
 void XBox::toggleSlideshow() {
