@@ -110,20 +110,20 @@ public:
      The color_average() method applies the specified color_average
      to all frames of the animation.
      */
-    virtual void color_average(Fl_Color c_, float i_);
+    virtual void color_average(Fl_Color c_, float i_) override;
     /**
      The virtual copy() method makes a copy of the animated image
      and resizes all of its frame images to W x H using
      the current resize method.
      */
-    virtual Fl_Image *copy(int W_, int H_);
+    virtual Fl_Image *copy(int W_, int H_) override;
     int debug() const;
     /**
      The desaturate() method applies desaturate() to all frames
      of the animation.
      */
-    virtual void desaturate();
-    virtual void draw(int x_, int y_, int w_, int h_, int cx_ = 0, int cy_ = 0);
+    virtual void desaturate() override;
+    virtual void draw(int x_, int y_, int w_, int h_, int cx_ = 0, int cy_ = 0) override;
     /**
      Return the delay of frame 'frame_' `[0-frames() -1]` in seconds
      */
@@ -224,7 +224,7 @@ public:
     /**
       Uncache all cached image data now. Re-implemented from Fl_Pixmap.
     */
-    virtual void uncache();
+    virtual void uncache() override;
     /**
      The valid() method returns if the class has
      successfully loaded and the image has at least
