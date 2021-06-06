@@ -54,13 +54,6 @@ int filename_path(const char* buf, char *to) { // TODO hack pending adding to FL
     return 1;
 }
 
-int removeFolders(struct dirent *entry) {
-    // TODO this is a hack, we're not provided the base path
-    const char * out = fl_filename_ext(entry->d_name);
-    bool val = out != nullptr && *out != 0 && (out[1] != 0);
-    return val;
-}
-
 int XBox::find_file(const char *n) {
     // determine the index in the file_list of the given filename
     const char *outfn = fl_filename_name(n);
@@ -70,6 +63,16 @@ int XBox::find_file(const char *n) {
             return i;
     return 0;
 }
+
+//TODO a file-filter callback is not in "vanilla" FLTK
+#if 0
+int removeFolders(struct dirent *entry) {
+    // TODO this is a hack, we're not provided the base path
+    const char * out = fl_filename_ext(entry->d_name);
+    bool val = out != nullptr && *out != 0 && (out[1] != 0);
+    return val;
+}
+#endif
 
 void XBox::load_filelist(const char *n) {
 
@@ -81,7 +84,10 @@ void XBox::load_filelist(const char *n) {
     else
         fl_filename_absolute(fold, FL_PATH_MAX, n);
 
-    file_count = fl_filename_list(fold, &file_list, fl_numericsort, removeFolders); // TODO how to filter for images?
+    // TODO how best to filter for images?
+    //TODO a file-filter callback is not in "vanilla" FLTK
+    //file_count = fl_filename_list(fold, &file_list, fl_numericsort, removeFolders);
+    file_count = fl_filename_list(fold, &file_list, fl_numericsort);
 }
 
 void XBox::load_file(const char *n) {
