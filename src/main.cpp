@@ -2,6 +2,8 @@
 #include <clocale>     // setlocale()..
 
 #include "yaiv_win.h"
+#include "Fl_TransBox.h"
+#include "XBoxDisplayInfoEvent.h"
 
 int main(int argc, char **argv) {
 
@@ -24,7 +26,15 @@ int main(int argc, char **argv) {
     _w->child(b2);
     b2->parent(_w);
     _w->resizable(static_cast<Fl_Widget *>(b2));
+
+    // TODO transbox location, size from prefs
+    int TB_HIGH=35;
+    Fl_TransBox *tb = new Fl_TransBox(0, _w->h()-TB_HIGH, _w->w(), TB_HIGH);
     _w->end();
+
+    XBoxDspInfoEI* xbdiei = new XBoxDspInfoEI();
+    xbdiei->setDestination(tb);
+    b2->displayEventHandler(xbdiei);
 
     if (argv[1]) b2->load_file(argv[1]); // TODO add more options
 

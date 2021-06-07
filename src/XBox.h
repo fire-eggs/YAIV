@@ -15,6 +15,8 @@
 #include <FL/fl_draw.H>
 #include <FL/filename.H>
 
+#include "XBoxDisplayInfoEvent.h"
+
 #if (FL_MINOR_VERSION<4)
     #error "Error, required FLTK 1.4 or later"
 #endif
@@ -35,6 +37,7 @@ public:
 private:
     // 100%; Scale if larger; Scale to window; Scale to width; Scale to height
     enum ScaleMode { None=0, Auto, Fit, Wide, High, MAX };
+    enum OverlayMode { OM_None=0, Text, TBox, OM_MAX };
 
     static char *humanScale(ScaleMode val, char *buff, int buffsize)
     {
@@ -57,7 +60,7 @@ private:
     bool draw_check{true};
     ScaleMode draw_scale{ScaleMode::None};
     bool draw_center{false};
-    bool draw_overlay{true};
+    OverlayMode draw_overlay{OverlayMode::OM_None};
     double _zoom{1.0};
     int _zoom_step = 0;
     int _scroll_speed = 20;
@@ -171,7 +174,12 @@ private:
     int current_index;
     char fold[FL_PATH_MAX];
     dirent** file_list;
-    int file_count;    
+    int file_count;
+
+private:
+    XBoxDisplayInfoEvent *_dispevent;
+public:
+    void displayEventHandler(XBoxDisplayInfoEvent *hand) {_dispevent = hand;}
 };
 
 #endif //CLION_TEST2_XBOX_H

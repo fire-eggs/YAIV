@@ -388,7 +388,9 @@ int XBox::handle(int msg) {
                 return 1;
 
             case 'o':
-                draw_overlay = !draw_overlay;
+                draw_overlay = (OverlayMode)(((int)draw_overlay) + 1);
+                if (draw_overlay == OverlayMode::OM_MAX)
+                    draw_overlay = OverlayMode::OM_None;
                 redraw();
                 return 1;
 
@@ -1010,24 +1012,30 @@ void XBox::drawOverlay() {
     if (!file_count || !draw_overlay)
         return;
 
-    char hack[1001];
-    char hack2[1]={'\0'};
+    char hack[501];
+    char hack2[1] = {'\0'};
+    char *l = getLabel(hack2, hack, 500);
 
-    label(getLabel(hack2,hack,1000));
-    labelsize(20);
-    labelcolor(FL_DARK_GREEN);    // TODO options
-    labeltype(FL_EMBOSSED_LABEL); // TODO options
-    align(FL_ALIGN_BOTTOM_RIGHT); // TODO options
+    if (draw_overlay == OverlayMode::Text) {
+        label(l);
+        labelsize(20);
+        labelcolor(FL_DARK_GREEN);    // TODO options
+        labeltype(FL_EMBOSSED_LABEL); // TODO options
+        align(FL_ALIGN_BOTTOM_RIGHT); // TODO options
 
-    if (label())
-    {
-        int lw,lh;
-        measure_label(lw,lh);
-        fl_font(labelfont(), labelsize());
-        fl_color(labelcolor());
-        draw_label(x()+w()-lw-2, y()+h()-lh-2, lw, lh, align()); // TODO options
+        if (label()) {
+            int lw, lh;
+            measure_label(lw, lh);
+            fl_font(labelfont(), labelsize());
+            fl_color(labelcolor());
+            draw_label(x() + w() - lw - 2, y() + h() - lh - 2, lw, lh, align()); // TODO options
+        }
+        label(""); // TODO prevent extra label draw?
     }
-    label(""); // TODO prevent extra label draw?
+
+    if (draw_overlay == OverlayMode::TBox && _dispevent) {
+        _dispevent->OnDisplayInfo(l);
+    }
 }
 
 #pragma clang diagnostic pop
