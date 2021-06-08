@@ -49,7 +49,13 @@ struct Image
         for (unsigned int j=1; j<h; j++)
             rows[j] = rows[j-1] + rowbytes;
     }
-    void free() const { delete[] rows; delete[] p; }
+    void free() //const
+    {
+        if (rows) delete[] rows;
+        if (p)    delete[] p;
+        rows = nullptr;
+        p = nullptr;
+    }
 };
 
 void compose_frame(unsigned char ** rows_dst, unsigned char ** rows_src,
@@ -389,6 +395,7 @@ int load_apng(const char * szIn, std::vector<Image>& img)
             }
         }
         frameRaw.free();
+        // frameCur.free(); // valgrind mem leak
 
         if (!img.empty())
             res = (skipFirst) ? 0 : 1;
@@ -435,6 +442,7 @@ Fl_Image* LoadAPNG(const char *filename, Fl_Widget *canvas= nullptr)
             // *10 would be tenths of second as per Fl_Anim_GIF_Image
             gif->add_frame(imgs[i].p, (int)delay * 20, w, h);
         }
+        // TODO need to copy imgs[i].p and free imgs[] to avoid memory leak
         gif->start();
         gif->canvas(canvas, Fl_Anim_GIF_Image::Flags::DontResizeCanvas |
                                   Fl_Anim_GIF_Image::Flags::DontSetAsImage);
@@ -442,12 +450,16 @@ Fl_Image* LoadAPNG(const char *filename, Fl_Widget *canvas= nullptr)
     }
     else {
         Image img=imgs[0];
-        Fl_RGB_Image *ours = new Fl_RGB_Image((const uchar *)img.p, img.w, img.h, img.bpp, 0);
+
+        // valgrind memory leak
+        uchar *buf = new uchar[img.w * img.h * img.bpp]; // TODO to size_t for huge image
+        memcpy(buf, img.p, img.w * img.h * img.bpp);
+        Fl_RGB_Image *ours = new Fl_RGB_Image((const uchar *)buf, img.w, img.h, img.bpp, 0);
+        ours->alloc_array = 1;
+        img.free();
         return ours;
     }
-
-    // TODO may need a container to wipe the Image instances when freed
-
+    
     // prevent compiler detects as error or warning.
     return nullptr;
 }

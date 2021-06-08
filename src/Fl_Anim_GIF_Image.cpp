@@ -182,7 +182,7 @@ void Fl_Anim_GIF_Image::FrameInfo::clear() {
     }
     delete[] offscreen;
     offscreen = 0;
-    delete[] frames;
+    free(frames); // allocated with realloc delete[] frames;
     frames = 0;
     frames_size = 0;
 }

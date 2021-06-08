@@ -183,6 +183,7 @@ static void fc_file_cb(const char *n) {
 
 void XBox::load_request() {
     fc_owner = this;
+    filecb_name[0] = '\0'; // valgrind: uninit data
     fl_file_chooser_callback(fc_file_cb);
     Fl_File_Chooser::sort = fl_numericsort;
     //const char *fname =
@@ -826,15 +827,18 @@ void XBox::do_menu() {
     for (int j = 0; j < newCount; j++)
         memset(&(dyn_menu[j]), 0, sizeof(Fl_Menu_Item));
 
+    std::vector<menucall *> *totoss = new std::vector<menucall*>();
+
     // initialize it with the static menu contents
     for (size_t j = 0; j <= i; j++)
     {
         dyn_menu[j] = right_click_menu[j];
         size_t menuparam = (size_t)MI_LOAD + j;
-        menucall *hold = new menucall; // TODO memory leak per menu invocation?
+        menucall *hold = new menucall;
         hold->who = this;
         hold->menu = menuparam;
         dyn_menu[j].callback(xbox_menucb, (void*)hold );
+        totoss->push_back(hold);
     }
 
     // TODO if numfavs == 0 disable the "last used"
@@ -843,11 +847,11 @@ void XBox::do_menu() {
     for (long j = 0; j < numfavs; j++)
     {
         dyn_menu[i + 1 + j].label(favs[j]);
-        menucall *hold = new menucall; // TODO memory leak per menu invocation?
+        menucall *hold = new menucall;
         hold->who = this;
         hold->menu = MI_FAV0 + j;
         dyn_menu[i + 1 + j].callback(xbox_menucb, (void*)hold);
-        //dyn_menu[i + 1 + j].argument(MI_FAV0 + j);
+        totoss->push_back(hold);
     }
 
     // show the menu
@@ -856,7 +860,11 @@ void XBox::do_menu() {
     if (m && m->callback())
         m->do_callback(this, m->user_data());
 
-    // TODO cleanup dyn_menu entries here?
+    // Memory cleanup
+    for (int i=0; i<totoss->size();i++)
+        delete totoss->at(i);
+    delete totoss;
+    delete [] dyn_menu;
 }
 
 XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : Fl_Group(x,y,w,h),
@@ -1024,7 +1032,8 @@ void XBox::drawOverlay() {
         align(FL_ALIGN_BOTTOM_RIGHT); // TODO options
 
         if (label()) {
-            int lw, lh;
+            int lw = 0; // valgrind uninit data
+            int lh = 0;
             measure_label(lw, lh);
             fl_font(labelfont(), labelsize());
             fl_color(labelcolor());
