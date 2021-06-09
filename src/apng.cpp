@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "modernize-use-auto"
 //
 // Created by kevin on 5/27/21.
 //
@@ -395,7 +397,6 @@ int load_apng(const char * szIn, std::vector<Image>& img)
             }
         }
         frameRaw.free();
-        // frameCur.free(); // valgrind mem leak
 
         if (!img.empty())
             res = (skipFirst) ? 0 : 1;
@@ -411,8 +412,6 @@ int load_apng(const char * szIn, std::vector<Image>& img)
 
     return res;
 }
-
-
 
 Fl_Image* LoadAPNG(const char *filename, Fl_Widget *canvas= nullptr)
 {
@@ -440,9 +439,10 @@ Fl_Image* LoadAPNG(const char *filename, Fl_Widget *canvas= nullptr)
             // TODO where is loopcount stored?
             // TODO the 20 multiplier is arbitrary but approximates the playback speed in Chrome
             // *10 would be tenths of second as per Fl_Anim_GIF_Image
-            gif->add_frame(imgs[i].p, (int)delay * 20, w, h);
+            gif->add_frame(imgs[i].p, (int)delay * 20, w, h, true); // cleanup on release()
+            imgs[i].p = nullptr; // cleanup
+            imgs[i].free();
         }
-        // TODO need to copy imgs[i].p and free imgs[] to avoid memory leak
         gif->start();
         gif->canvas(canvas, Fl_Anim_GIF_Image::Flags::DontResizeCanvas |
                                   Fl_Anim_GIF_Image::Flags::DontSetAsImage);
@@ -452,14 +452,15 @@ Fl_Image* LoadAPNG(const char *filename, Fl_Widget *canvas= nullptr)
         Image img=imgs[0];
 
         // valgrind memory leak
-        uchar *buf = new uchar[img.w * img.h * img.bpp]; // TODO to size_t for huge image
-        memcpy(buf, img.p, img.w * img.h * img.bpp);
-        Fl_RGB_Image *ours = new Fl_RGB_Image((const uchar *)buf, img.w, img.h, img.bpp, 0);
-        ours->alloc_array = 1;
+        Fl_RGB_Image *ours = new Fl_RGB_Image((const uchar *)img.p, img.w, img.h, img.bpp, 0);
+        ours->alloc_array = 1; // cleanup on release()
+        img.p = nullptr; // cleanup
         img.free();
         return ours;
     }
-    
+
     // prevent compiler detects as error or warning.
     return nullptr;
 }
+
+#pragma clang diagnostic pop
