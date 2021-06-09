@@ -1122,7 +1122,7 @@ bool Fl_Anim_GIF_Image::valid() const {
     return _valid;
 }
 
-bool Fl_Anim_GIF_Image::add_frame(unsigned char *frameRGBA, int duration, int cw, int ch) {
+bool Fl_Anim_GIF_Image::add_frame(unsigned char *frameRGBA, int duration, int cw, int ch, bool alloc) {
 
     memset((void*)&_fi->frame, 0, sizeof(FrameInfo::GifFrame)); // KBR cast to remove warning
 
@@ -1132,6 +1132,7 @@ bool Fl_Anim_GIF_Image::add_frame(unsigned char *frameRGBA, int duration, int cw
     _fi->frame.w = cw;
     _fi->frame.h = ch;
     _fi->frame.rgb = new Fl_RGB_Image(frameRGBA, cw, ch, 4);
+    _fi->frame.rgb->alloc_array = alloc;
     _fi->frame.delay = _fi->convertDelay(duration) / 10.0;
 
     return _fi->push_back_frame(_fi->frame);

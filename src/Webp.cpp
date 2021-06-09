@@ -298,13 +298,14 @@ Fl_Image* LoadWebp(const char* filename, Fl_Widget *canvas=nullptr)
         for (unsigned int i = 0; i < image->num_frames; i++)
         {
             DecodedFrame frame = image->frames[i];
-            gif->add_frame(frame.rgba, frame.duration, W, H);
+            gif->add_frame(frame.rgba, frame.duration, W, H, true);
         }
         gif->start();
         gif->canvas(canvas, Fl_Anim_GIF_Image::Flags::DontResizeCanvas |
                             Fl_Anim_GIF_Image::Flags::DontSetAsImage);
+
+        WebPFree((void*)data); // valgrind mem leak
         return gif;
-        // TODO need to clean up AnimatedImage w/o killing the gif ??
     }
 
     WebPDecBuffer* const output_buffer = &config.output;
@@ -319,18 +320,10 @@ Fl_Image* LoadWebp(const char* filename, Fl_Widget *canvas=nullptr)
         return nullptr;
     }
 
-    //Fl_RGB_Image* ours = new Fl_RGB_Image(output_buffer->u.RGBA.rgba,
-
     Webp_Image* ours = new Webp_Image(output_buffer->u.RGBA.rgba,
                                       output_buffer->width, output_buffer->height,
                                       bitstream->has_alpha ? 4 : 3);
 
-    // TODO need to copy this, or deallocate properly from the Fl_RGB_Image?
-//		WebPFreeDecBuffer(output_buffer);
-
-    //ours->alloc_array = 1;
-
     WebPFree((void*)data);
-    //return outSI;
     return ours;
 }

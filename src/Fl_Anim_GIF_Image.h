@@ -246,7 +246,7 @@ public:
     int frame_w(int frame_) const;
     int frame_h(int frame_) const;
 
-    bool add_frame(unsigned char *frameRGBA, int duration, int cw, int ch);  // KBR webp
+    bool add_frame(unsigned char *frameRGBA, int duration, int cw, int ch, bool alloc=false);  // KBR webp
 
     /** Sets the drawing size of the image. See Fl_Image::scale() for details.
      */
