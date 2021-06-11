@@ -9,6 +9,7 @@
 #include <FL/Fl_File_Chooser.H>
 #include <FL/Fl_Menu_Item.H>
 #include <FL/Fl_Image_Surface.H>
+#include <FL/Fl_SVG_Image.H>
 
 #include "yaiv_win.h"
 #include "XBox.h"
@@ -624,44 +625,50 @@ void XBox::updateImage() {
         return;
     }
 
-    // Covert any Fl_Pixmap into a Fl_RGB_Image so imgTk can rotate/scale
-    Fl_RGB_Image *vImg;
-    Fl_Pixmap *pimg = dynamic_cast<Fl_Pixmap *>(_img);
-    if (!pimg) {
-        vImg = (Fl_RGB_Image *)_img->copy();
-    } else {
-        // draw pixmap to a 32-bit image surface
-
-        Fl_Image_Surface *imgSurf = new Fl_Image_Surface(_img->w(), _img->h());
-        Fl_Surface_Device::push_current(imgSurf);
-        _img->draw(0, 0);
-        vImg = imgSurf->image();
-        Fl_Surface_Device::pop_current();
-        delete imgSurf;
+    Fl_SVG_Image *svgImg = dynamic_cast<Fl_SVG_Image *>(_img);
+    if (svgImg) {
+        _showImg = (Fl_RGB_Image *) svgImg->copy(); // fl_imgTk cannot rotate/scale SVG
+        // TODO no rotation of SVG
     }
-
-    // 2. rotate the original
-    // TODO rotation of _anim : problematic as frames change via draw(), not here
-    Fl_RGB_Image *rimg = vImg;
-    if (rotation && !_anim)
+    else
     {
-        switch (rotation)
-        {
-            case 1:
-                rimg = fl_imgtk::rotate90(vImg);
-                break;
-            case 2:
-                rimg = fl_imgtk::rotate180(vImg);
-                break;
-            case 3:
-                rimg = fl_imgtk::rotate270(vImg);
-                break;
-            default:
-                rotation = 0;
-                break;
+        // Covert any Fl_Pixmap into a Fl_RGB_Image so imgTk can rotate/scale
+        Fl_RGB_Image *vImg;
+        Fl_Pixmap *pimg = dynamic_cast<Fl_Pixmap *>(_img);
+        if (!pimg) {
+            vImg = (Fl_RGB_Image *) _img->copy();
+        } else {
+            // draw pixmap to a 32-bit image surface
+
+            Fl_Image_Surface *imgSurf = new Fl_Image_Surface(_img->w(), _img->h());
+            Fl_Surface_Device::push_current(imgSurf);
+            _img->draw(0, 0);
+            vImg = imgSurf->image();
+            Fl_Surface_Device::pop_current();
+            delete imgSurf;
         }
+
+        // 2. rotate the original
+        // TODO rotation of _anim : problematic as frames change via draw(), not here
+        Fl_RGB_Image *rimg = vImg;
+        if (rotation && !_anim) {
+            switch (rotation) {
+                case 1:
+                    rimg = fl_imgtk::rotate90(vImg);
+                    break;
+                case 2:
+                    rimg = fl_imgtk::rotate180(vImg);
+                    break;
+                case 3:
+                    rimg = fl_imgtk::rotate270(vImg);
+                    break;
+                default:
+                    rotation = 0;
+                    break;
+            }
+        }
+        _showImg = rimg;
     }
-    _showImg = rimg;
 
     // 3. scale showimage
 
@@ -772,7 +779,7 @@ void XBox::updateImage() {
     if (_anim)
         return;
 
-    if ((int) imgtkScale && !noscale)
+    if ((int) imgtkScale && !noscale && !svgImg)
     {
         // imgTK scaling is going to draw the image, so undo the pseudo-scaling from before
         int target_w = _showImg->w();
