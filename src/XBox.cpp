@@ -671,7 +671,7 @@ void XBox::updateImage() {
     switch (draw_scale) {
         case ScaleMode::None:
             {
-                // TODO is none of this necessary?
+                // TODO is any of this necessary?
                 if (_anim)
                     _anim->scale(_anim->data_w(), _anim->data_h());
                 else
@@ -730,11 +730,21 @@ void XBox::updateImage() {
             {
                 if (_anim) {
                     _anim->scale(w(), h());
+                    if (_anim->w() <= w() && _anim->h() <= h()) {
+                        noscale = true;
+                        basezoom = 1.0;
+                    }
+                    else
                     basezoom = std::max( (double)_anim->w() / _anim->data_w(),
                                       (double)_anim->h() / _anim->data_h());
                 }
                 else {
                     _showImg->scale(w(),h());
+                    if (_showImg->w() <= w() && _showImg->h() <= h()) {
+                        noscale = true;
+                        basezoom = 1.0;
+                    }
+                    else
                     basezoom = std::max( (double)_showImg->w() / _showImg->data_w(),
                                       (double)_showImg->h() / _showImg->data_h());
                 }
