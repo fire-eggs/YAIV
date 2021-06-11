@@ -29,7 +29,6 @@ class Fl_TransBox : public Fl_Box
 
     private:
         void fill_buffer();
-        void free_fl_rgb( Fl_RGB_Image* r );
 
     private:
         unsigned char*  buffer;
@@ -39,6 +38,7 @@ class Fl_TransBox : public Fl_Box
         unsigned char   alpha;
         Fl_RGB_Image*   img;
         bool            dragEnabled;
+        static bool     isInResize;
 };
 
 #endif /// __FL_TRANSBOX_H__

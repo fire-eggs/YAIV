@@ -1,5 +1,5 @@
 #include "Fl_TransBox.h"
-
+#include <new>
 
 Fl_TransBox::Fl_TransBox(int x, int y, int w, int h, const char* l)
  : Fl_Box(x, y, w, h, l),
@@ -8,27 +8,19 @@ Fl_TransBox::Fl_TransBox(int x, int y, int w, int h, const char* l)
  {
     box(FL_NO_BOX);
     align( FL_ALIGN_CENTER );
-    buffer = new unsigned char[4*w*h];
-    img = new Fl_RGB_Image(buffer, w, h, 4);
+    buffer = new (std::nothrow) unsigned char[4*w*h];
+    img = new (std::nothrow) Fl_RGB_Image(buffer, w, h, 4);
     color(-51130624);        // TODO from prefs
     labelcolor(FL_DARK_GREEN); // TODO from prefs
-
-
 }
 
 Fl_TransBox::~Fl_TransBox()
 {
-    if ( img != NULL )
-    {
-        //free_fl_rgb( img );
-        delete img;
-    }
-
-    if ( buffer != NULL )
-    {
-        delete[] buffer;
-    }
+    delete img;
+    delete[] buffer;
 }
+
+bool Fl_TransBox::isInResize = false;
 
 void Fl_TransBox::color(unsigned int c)
 {
@@ -47,68 +39,37 @@ void Fl_TransBox::set_alpha(unsigned char a)
     img->uncache();
 }
 
-static bool isInResize = false;
-
 void Fl_TransBox::resize(int x, int y, int w, int h)
 {
     Fl_Box::resize(x,y,w,h);
 
-    if ( isInResize == true )
+    if ( isInResize )
         return;
 
     isInResize = true;
 
-    if ( buffer != NULL )
-    {
-        delete[] buffer;
-        buffer = NULL;
-    }
+    delete[] buffer;
+    delete img;
 
-    if ( img != NULL )
+    buffer = new (std::nothrow) unsigned char[4*w*h];
+    if ( buffer != nullptr )
     {
-        //free_fl_rgb( img );
-        delete img;
-    }
-
-    buffer = new unsigned char[4*w*h];
-    if ( buffer != NULL )
-    {
-        img = new Fl_RGB_Image(buffer, w, h, 4);
-
-        if ( img != NULL )
+        img = new (std::nothrow) Fl_RGB_Image(buffer, w, h, 4);
+        if ( img != nullptr )
         {
             fill_buffer();
             img->uncache();
         }
+        else
+            delete buffer; // cleanup buffer after img alloc failure
     }
 
     isInResize = false;
 }
 
-void Fl_TransBox::free_fl_rgb( Fl_RGB_Image* r )
-{
-    if ( r != NULL )
-    {
-#if FLTK_ABI_VERSION <= 10303
-        if ( ( r->alloc_array == 0 ) && ( r->array != NULL ) )
-        {
-            delete[] r->array;
-        }
-#else
-        if ( ( r->alloc_array == 1 ) && ( r->array != NULL ) )
-        {
-            delete[] r->array;
-        }
-#endif // FLTK_ABI_VERSION
-        delete r;
-        r = NULL;
-    }
-}
-
 void Fl_TransBox::fill_buffer()
 {
     unsigned char *p = buffer;
-
     for (int i = 0; i < 4*w()*h(); i+=4)
     {
         *p++ = r;
@@ -122,7 +83,7 @@ void Fl_TransBox::draw()
 {
     fl_push_clip( x(), y(), w(), h() );
 
-    if ( ( img != NULL ) && ( isInResize == false ) )
+    if ( img && !isInResize )
     {
         int putX = ( w() - img->w() ) / 2;
         int putY = ( h() - img->h() ) / 2;
@@ -130,7 +91,7 @@ void Fl_TransBox::draw()
         img->draw(x() + putX, y() + putY);
     }
 
-    if ( image() != NULL )
+    if ( image() )
     {
         Fl_Image* dispimg = image();
 
@@ -140,7 +101,7 @@ void Fl_TransBox::draw()
         dispimg->draw(x() + putX, y() + putY);
     }
 
-    if( label() != NULL )
+    if( label() != nullptr )
     {
         draw_label();
     }
