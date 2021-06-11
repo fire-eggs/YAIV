@@ -10,8 +10,8 @@
 class XBoxDisplayInfoEvent
 {
 public:
-    virtual void OnDisplayInfo( const char* info ) {};
-    virtual void OnHideInfo() {};
+    virtual void OnDisplayInfo( const char* info ) = 0;
+    virtual void OnActivate(bool activate) = 0;
 };
 
 // TODO goes in separate header?
@@ -19,12 +19,18 @@ public:
 class XBoxDspInfoEI : public XBoxDisplayInfoEvent
 {
 private:
-    Fl_TransBox *_infoBox;
+    Fl_TransBox *_infoBox {};
 
 public:
-    void setDestination(Fl_TransBox *tb) { _infoBox = tb;}
+    XBoxDspInfoEI(Fl_TransBox* dest) { _infoBox = dest; }
 
-    void OnDisplayInfo( const char* info )
+    void OnActivate(bool show) override
+    {
+        if (show) _infoBox->show();
+        else _infoBox->hide();
+    }
+
+    void OnDisplayInfo( const char* info ) override
     {
         if (!_infoBox || !info)
             return;

@@ -389,10 +389,7 @@ int XBox::handle(int msg) {
                 return 1;
 
             case 'o':
-                draw_overlay = (OverlayMode)(((int)draw_overlay) + 1);
-                if (draw_overlay == OverlayMode::OM_MAX)
-                    draw_overlay = OverlayMode::OM_None;
-                redraw();
+                toggleOverlay();
                 return 1;
 
             case 'p':
@@ -783,22 +780,26 @@ void XBox::updateImage() {
         }
     }
 
-    // Draw the checker and image in a surface and use the surface to draw later
-    Fl_Image_Surface *imgSurf = new Fl_Image_Surface(_showImg->w(), _showImg->h());
-    Fl_Surface_Device::push_current(imgSurf);
-    if (draw_check) {
-        drawChecker(0, 0, _showImg->w(), _showImg->h());
-    }
-    else{
-        fl_color(color()); // canvas color from preferences
-        fl_rectf(0,0,_showImg->w(),_showImg->h());
-    }
+    size_t pixels = (size_t)_showImg->w() * _showImg->h();
+    if (pixels < (INT_MAX >> 2))
+    {
+        // Draw the checker and image in a surface and use the surface to draw later
+        Fl_Image_Surface *imgSurf = new Fl_Image_Surface(_showImg->w(), _showImg->h());
+        Fl_Surface_Device::push_current(imgSurf);
+        if (draw_check) {
+            drawChecker(0, 0, _showImg->w(), _showImg->h());
+        }
+        else{
+            fl_color(color()); // canvas color from preferences
+            fl_rectf(0,0,_showImg->w(),_showImg->h());
+        }
 
-    _showImg->draw(0,0);
-    _showImg->release();
-    _showImg = imgSurf->image();
-    Fl_Surface_Device::pop_current();
-    delete imgSurf;
+        _showImg->draw(0,0);
+        _showImg->release();
+        _showImg = imgSurf->image();
+        Fl_Surface_Device::pop_current();
+        delete imgSurf;
+    }
 }
 
 void XBox::resize(int x,int y,int w,int h) {
@@ -928,6 +929,24 @@ void XBox::toggleSlideshow() {
 
 void XBox::toggleMinimap() {
     _minimap = !_minimap;
+    redraw();
+}
+
+void XBox::toggleOverlay() {
+    draw_overlay = (OverlayMode)(((int)draw_overlay) + 1);
+    if (draw_overlay == OverlayMode::OM_MAX)
+        draw_overlay = OverlayMode::OM_None;
+    switch (draw_overlay)
+    {
+        case OverlayMode::TBox:
+            if (_dispevent)
+                _dispevent->OnActivate(true);
+            break;
+        default:
+            if (_dispevent)
+                _dispevent->OnActivate(false);
+            break;
+    }
     redraw();
 }
 

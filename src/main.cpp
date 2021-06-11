@@ -32,9 +32,9 @@ int main(int argc, char **argv) {
     Fl_TransBox *tb = new Fl_TransBox(0, _w->h()-TB_HIGH, _w->w(), TB_HIGH);
     _w->end();
 
-    XBoxDspInfoEI* xbdiei = new XBoxDspInfoEI();
-    xbdiei->setDestination(tb);
+    XBoxDspInfoEI* xbdiei = new XBoxDspInfoEI(tb);
     b2->displayEventHandler(xbdiei);
+    xbdiei->OnActivate(false); // TODO tie to initial state from options
 
     if (argv[1]) b2->load_file(argv[1]); // TODO add more options
 

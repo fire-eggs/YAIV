@@ -148,6 +148,7 @@ private:
 
     void toggleSlideshow();
     void toggleMinimap();
+    void toggleOverlay();
 
 private:
     bool _pan_with_mouse;
