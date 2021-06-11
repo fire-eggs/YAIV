@@ -952,12 +952,14 @@ Fl_Color XBox::_mmic;
 int XBox::_miniMapSize;
 
 void XBox::drawMinimap() {
-    if (!_minimap || !_showImg) return; // minimap off, no image
+    if (!_minimap || (!_showImg && !_anim)) return; // minimap off, no image
 
-    int iw = _showImg->w();
-    int ih = _showImg->h();
+    int iw = _anim ? _anim->w() : _showImg->w();
+    int ih = _anim ? _anim->h() : _showImg->h();
+    int ww = w();
+    int wh = h();
 
-    if (iw <= w() && ih <= h()) return; // image fits inside window, no map necessary
+    if (iw <= ww && ih <= wh) return; // image fits inside window, no map necessary
 
     // Size the outer rectangle proportional to the image
     int mmw = _miniMapSize;
@@ -967,7 +969,7 @@ void XBox::drawMinimap() {
     else
         mmh = (int)(_miniMapSize * (double)ih / (double)iw);
 
-    int mmx = x() + w() - mmw - 2; // TODO options: where mmap is located
+    int mmx = x() + ww - mmw - 2; // TODO options: where mmap is located
     int mmy = y() + 2;
     fl_rect(mmx, mmy, mmw, mmh, _mmoc); // minimap outer
 
