@@ -115,7 +115,9 @@ void XBox::load_current() {
         fold[strlen(fold)-1] = 0x0;
     sprintf(n, "%s/%s", fold, file_list[current_index]->d_name);
 
-    _dad->setFilename(n); // TODO just track here?
+    logit("Load %s\n", n);
+
+    _dad->setFilename(n); // TODO just track in XBox, rather than parent?
 
     rotation = 0; // TODO anything else need resetting?
 
@@ -203,7 +205,6 @@ int XBox::handle(int msg) {
 
     if (msg == FL_FOCUS || msg == FL_UNFOCUS) // TODO _must_ this go before Fl_Group::handle?
     {
-        //printf("box:focus %d\n", msg);
         return 1;
     }
 
@@ -231,7 +232,6 @@ int XBox::handle(int msg) {
             char *fpath = new char[i + 1 - 7];
             strncpy(fpath, urls + 7, i + 1 - 7);
             fpath[i - 7] = '\0';
-            logit("Drop path |%s|", fpath);
             fl_decode_uri(fpath);
             load_file(fpath);
             delete[] fpath;
@@ -294,7 +294,6 @@ int XBox::handle(int msg) {
             return 1;
 
             case FL_Right:
-                //printf("Box: Right arrow, state:%d\n", Fl::event_state());
                 if (Fl::event_state() & CTRL_P_KEY)
                 {
                     deltax -= _scroll_speed; // direction matches FEH
@@ -321,7 +320,6 @@ int XBox::handle(int msg) {
                 return 1;
 
             case FL_Up:
-                //printf("Box: Up arrow, state:%d\n", Fl::event_state());
                 if (Fl::event_state() & CTRL_P_KEY)
                 {
                     deltay += _scroll_speed; // direction matches FEH
@@ -508,7 +506,6 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
             {
             long int path = ndata - MI_FAV0;
             char** mru = _mru->getAll(); // TODO return a single path
-            //printf("MRU: %s\n", mru[path]);
             load_file(mru[path]);
             }
             break;
