@@ -3,11 +3,10 @@
 
 Fl_TransBox::Fl_TransBox(int x, int y, int w, int h, const char* l)
  : Fl_Box(x, y, w, h, l),
-   alpha(0x40), // TODO from prefs
-   dragEnabled(false)
+   alpha(0x40) // TODO from prefs
  {
     box(FL_NO_BOX);
-    align( FL_ALIGN_CENTER );
+    align( FL_ALIGN_CENTER ); // TODO from prefs
     buffer = new (std::nothrow) unsigned char[4*w*h];
     img = new (std::nothrow) Fl_RGB_Image(buffer, w, h, 4);
     color(-51130624);        // TODO from prefs

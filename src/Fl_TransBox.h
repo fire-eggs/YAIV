@@ -16,16 +16,16 @@
 class Fl_TransBox : public Fl_Box
 {
     public:
-        Fl_TransBox(int x,int y,int w,int h, const char* l = 0);
-        virtual ~Fl_TransBox();
+        Fl_TransBox(int x,int y,int w,int h, const char* l = nullptr);
+        ~Fl_TransBox() override;
 
     public:
         void color(unsigned int c);
         void set_alpha(unsigned char a);
 
     protected:
-        void resize(int x, int y, int w, int h);
-        void draw();
+        void resize(int x, int y, int w, int h) override;
+        void draw() override;
 
     private:
         void fill_buffer();
@@ -37,7 +37,6 @@ class Fl_TransBox : public Fl_Box
         unsigned char   b;
         unsigned char   alpha;
         Fl_RGB_Image*   img;
-        bool            dragEnabled;
         static bool     isInResize;
 };
 
