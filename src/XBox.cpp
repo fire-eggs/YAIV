@@ -554,8 +554,8 @@ void XBox::next_scale() {
         draw_scale = ScaleMode::None;
     _zoom_step = 0;
 
-    updateLabel();
     updateImage();
+    updateLabel();
     redraw();
 }
 
@@ -563,15 +563,15 @@ void XBox::nextTkScale() {
     imgtkScale++;
     if (imgtkScale > 6) imgtkScale = 0;
 
-    updateLabel();
     updateImage();
+    updateLabel();
     redraw();
 }
 
 void XBox::nextRotation() {
     rotation++;
-    updateLabel();
     updateImage();
+    updateLabel();
     redraw();
 }
 

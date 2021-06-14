@@ -112,7 +112,7 @@ public:
 
     void resize(int,int,int,int) override;
 
-    void change_zoom(int delta) {_zoom_step += delta; updateImage();}
+    void change_zoom(int delta) {_zoom_step += delta; updateImage(); updateLabel();}
 
     void draw() override;
 
