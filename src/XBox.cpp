@@ -37,9 +37,14 @@
     #define CTRL_P_KEY      FL_COMMAND
 #endif
 
+#ifdef DANBOORU
+static const std::string LOGFILE = "yaiv_db.log";
+#else
+static const std::string LOGFILE = "yaiv.log";
+#endif
 void logit(const char *format, char *arg) // TODO varargs
 {
-    FILE *f = fopen("yaiv.log", "a+");
+    FILE *f = fopen(LOGFILE.c_str(), "a+");
     fprintf(f, format, arg);
     fputs("\n", f);
     fclose(f);
@@ -116,7 +121,7 @@ void XBox::load_current() {
         fold[strlen(fold)-1] = 0x0;
     sprintf(n, "%s/%s", fold, file_list[current_index]->d_name);
 
-    logit("Load %s\n", n);
+    logit("Load %s", n);
 
     _dad->setFilename(n); // TODO just track in XBox, rather than parent?
 
