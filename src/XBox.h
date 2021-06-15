@@ -127,6 +127,7 @@ private:
     void nextRotation();
     void updateLabel();
     void updateImage();
+
     void wipeShowImage();
     void drawMinimap();
     void drawOverlay();
@@ -161,6 +162,12 @@ private:
     char fold[FL_PATH_MAX];
     dirent** file_list;
     int file_count;
+
+    bool _inResize;
+    void resizeTimer();
+    void restartResizeTimer();
+public:
+    void resizeTimerFire(); // public for callback access
 
 private:
     XBoxDisplayInfoEvent *_dispevent;

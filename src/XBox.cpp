@@ -42,6 +42,7 @@ static const std::string LOGFILE = "yaiv_db.log";
 #else
 static const std::string LOGFILE = "yaiv.log";
 #endif
+
 void logit(const char *format, char *arg) // TODO varargs
 {
     FILE *f = fopen(LOGFILE.c_str(), "a+");
@@ -824,9 +825,44 @@ void XBox::updateImage() {
     }
 }
 
+void resizeTimerCallback(void *d)
+{
+    // Timer callback during resizing
+    XBox *who = dynamic_cast<XBox *>((Fl_Widget *)d);
+    if (who)
+        who->resizeTimerFire();
+}
+
+void XBox::resizeTimerFire()
+{
+    // Our timer has fired, go ahead and resize the cached image
+    _inResize = false;
+    updateImage();
+    redraw();
+}
+
+void XBox::resizeTimer()
+{
+    // Don't update the cached image until resizing has settled for a little bit
+    Fl::add_timeout(0.25, resizeTimerCallback, (void *)this);
+}
+
+void XBox::restartResizeTimer()
+{
+    // got another resize call while timer active. reset to try again.
+    Fl::remove_timeout(resizeTimerCallback);
+    resizeTimer();
+}
+
 void XBox::resize(int x,int y,int w,int h) {
     Fl_Group::resize(x,y,w,h);
-    updateImage(); // e.g. resize to fit/wide/high
+
+    // Prevent constant / glitchy resizing of the cached image
+    if (_inResize)
+        restartResizeTimer();
+    else
+        resizeTimer();
+    _inResize = true;
 }
 
 void XBox::do_menu() {
@@ -908,6 +944,7 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : Fl_Group(x,y,w,h),
     _inSlideshow = false;
 
     draw_check = true;
+
     std::string defaultScale;
     _prefs->getS(SCALE_MODE, defaultScale, scaleModeToName(Noscale));
     draw_scale = nameToScaleMode(defaultScale);
@@ -917,6 +954,7 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : Fl_Group(x,y,w,h),
 
     _prefs->getS(OVERLAY, defaultScale, overlayModeToName(OverlayNone));
     draw_overlay = nameToOverlayMode(defaultScale);
+
     draw_center = false;
 
     deltax = 0;
@@ -1014,6 +1052,7 @@ void XBox::drawMinimap() {
 
 void XBox::draw() {
     Fl_Group::draw();
+
     if ((!_showImg || !_showImg->w() || !_showImg->h()) && !_anim) {
         drawOverlay();
         return;
