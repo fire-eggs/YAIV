@@ -43,7 +43,7 @@ private:
     Fl_Anim_GIF_Image *_anim{}; // an original animation loaded from disk
 
     bool draw_check{true};
-    ScaleMode draw_scale{ScaleNone};
+    ScaleMode draw_scale{Noscale};
     bool draw_center{false};
     OverlayMode draw_overlay{OverlayNone};
     double _zoom{1.0};

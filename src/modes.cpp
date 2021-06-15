@@ -17,7 +17,7 @@ ScaleMode nameToScaleMode( std::string s )
 {
     auto res = std::find( ScaleModeNames, ScaleModeNames+ScaleModeMAX, s);
     ScaleMode val = ScaleMode( res - ScaleModeNames );
-    return val == ScaleModeMAX ? ScaleNone : val;
+    return val == ScaleModeMAX ? Noscale : val;
 }
 
 std::string scaleModeToName(ScaleMode mode)

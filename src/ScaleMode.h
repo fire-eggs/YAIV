@@ -12,11 +12,11 @@
 // 100%; Scale if larger; Scale to window; Scale to width; Scale to height
 
 #define MODES(X)  \
-    X(ScaleNone), \
-    X(ScaleAuto), \
-    X(ScaleFit),  \
-    X(ScaleWide), \
-    X(ScaleHigh)
+    X(Noscale), \
+    X(Auto), \
+    X(Fit),  \
+    X(Wide), \
+    X(High)
 
 #define X(e) e
 enum ScaleMode { MODES(X), ScaleModeMAX };

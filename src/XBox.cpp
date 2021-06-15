@@ -558,7 +558,7 @@ char * XBox::getLabel(char *n, char *buff, int buffsize)
 void XBox::next_scale() {
     draw_scale = (ScaleMode)((int)draw_scale + 1);
     if (draw_scale >= ScaleModeMAX)
-        draw_scale = ScaleMode::ScaleNone;
+        draw_scale = ScaleMode::Noscale;
     _zoom_step = 0;
 
     updateImage();
@@ -684,7 +684,7 @@ void XBox::updateImage() {
     bool noscale = false;
 
     switch (draw_scale) {
-        case ScaleMode::ScaleNone:
+        case ScaleMode::Noscale:
             {
                 // TODO is any of this necessary?
                 if (_anim)
@@ -696,7 +696,7 @@ void XBox::updateImage() {
             }
             break;
 
-        case ScaleMode::ScaleWide:
+        case ScaleMode::Wide:
             {
                 int new_w = w();
                 int new_h = (int)((double)_showImg->h() * w() / (double)_showImg->w());
@@ -711,7 +711,7 @@ void XBox::updateImage() {
             }
             break;
 
-        case ScaleMode::ScaleHigh:
+        case ScaleMode::High:
             {
                 int new_h = h();
                 int new_w = (int)((double)_showImg->w() * h() / (double)_showImg->h());
@@ -726,7 +726,7 @@ void XBox::updateImage() {
             }
             break;
 
-        case ScaleMode::ScaleFit:
+        case ScaleMode::Fit:
             {
                 if (_anim) {
                     _anim->scale(w(), h(), 1, 1);
@@ -741,7 +741,7 @@ void XBox::updateImage() {
             }
             break;
 
-        case ScaleMode::ScaleAuto:
+        case ScaleMode::Auto:
             {
                 if (_anim) {
                     _anim->scale(w(), h());
@@ -909,7 +909,7 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : Fl_Group(x,y,w,h),
 
     draw_check = true;
     std::string defaultScale;
-    _prefs->getS(SCALE_MODE, defaultScale, scaleModeToName(ScaleNone));
+    _prefs->getS(SCALE_MODE, defaultScale, scaleModeToName(Noscale));
     draw_scale = nameToScaleMode(defaultScale);
 
     _prefs->getS(DITHER_MODE, defaultScale, zScaleModeToName(ZScaleMode::None));
