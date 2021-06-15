@@ -16,6 +16,9 @@
 #include <FL/filename.H>
 
 #include "XBoxDisplayInfoEvent.h"
+#include "ScaleMode.h"
+#include "tkScaleMode.h"
+#include "overlayMode.h"
 
 #if (FL_MINOR_VERSION<4)
     #error "Error, required FLTK 1.4 or later"
@@ -35,32 +38,14 @@ public:
     void MenuCB(Fl_Widget *window_p, int menuid);
 
 private:
-    // 100%; Scale if larger; Scale to window; Scale to width; Scale to height
-    enum ScaleMode { None=0, Auto, Fit, Wide, High, MAX };
-    enum OverlayMode { OM_None=0, Text, TBox, OM_MAX };
-
-    static char *humanScale(ScaleMode val, char *buff, int buffsize)
-    {
-        const char *strs[] = {"None","Auto","Fit","Wide","High"};
-        strncpy(buff, strs[(int)val], buffsize);
-        return buff;
-    }
-
-    static char *humanZScale(int val, char *buff, int buffsize)
-    {
-        static const char *strs[] = {"None","Box","Bilinear","Bicubic","Lanczos","Bspline","CatMull"};
-        strncpy(buff, strs[(int)val], buffsize);
-        return buff;
-    }
-
     Fl_Image *_img{}; // the original image loaded from disk
     Fl_RGB_Image *_showImg{}; // the "back-buffer" image: rotated, scaled, checkered
     Fl_Anim_GIF_Image *_anim{}; // an original animation loaded from disk
 
     bool draw_check{true};
-    ScaleMode draw_scale{ScaleMode::None};
+    ScaleMode draw_scale{ScaleNone};
     bool draw_center{false};
-    OverlayMode draw_overlay{OverlayMode::OM_None};
+    OverlayMode draw_overlay{OverlayNone};
     double _zoom{1.0};
     int _zoom_step = 0;
     int _scroll_speed = 20;
@@ -70,7 +55,7 @@ private:
     int deltay{0};
 
     int rotation; // cycle through clockwise rotations of 90 degrees
-    int imgtkScale; // cycle through fl_imgtk scale values
+    ZScaleMode imgtkScale{ZScaleMode::None}; // cycle through fl_imgtk scale values
 
     enum
     {
@@ -99,7 +84,7 @@ private:
         {"Goto Image",      0, nullptr, (void *)MI_GOTO, FL_MENU_DIVIDER},
         {"Options",         0, nullptr, (void *)MI_OPTIONS, FL_MENU_DIVIDER},
 
-        {"Last Used",       0, nullptr, 0, FL_SUBMENU},
+        {"Last Used",       0, nullptr, nullptr, FL_SUBMENU},
             {nullptr}, // end of sub menu
         {nullptr} // end of menu
     };

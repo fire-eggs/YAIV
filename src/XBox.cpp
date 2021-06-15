@@ -258,6 +258,8 @@ int XBox::handle(int msg) {
         case FL_RELEASE:
             return mousePan(msg);
             break;
+        default:
+            break;
     }
 
     if (msg == FL_KEYDOWN) {
@@ -555,8 +557,8 @@ char * XBox::getLabel(char *n, char *buff, int buffsize)
 
 void XBox::next_scale() {
     draw_scale = (ScaleMode)((int)draw_scale + 1);
-    if (draw_scale == ScaleMode::MAX)
-        draw_scale = ScaleMode::None;
+    if (draw_scale >= ScaleModeMAX)
+        draw_scale = ScaleMode::ScaleNone;
     _zoom_step = 0;
 
     updateImage();
@@ -565,8 +567,9 @@ void XBox::next_scale() {
 }
 
 void XBox::nextTkScale() {
-    imgtkScale++;
-    if (imgtkScale > 6) imgtkScale = 0;
+    imgtkScale = (ZScaleMode)((int)imgtkScale + 1);
+    if (imgtkScale >= ZScaleModeMAX)
+        imgtkScale = ZScaleMode::None;
 
     updateImage();
     updateLabel();
@@ -681,7 +684,7 @@ void XBox::updateImage() {
     bool noscale = false;
 
     switch (draw_scale) {
-        case ScaleMode::None:
+        case ScaleMode::ScaleNone:
             {
                 // TODO is any of this necessary?
                 if (_anim)
@@ -693,7 +696,7 @@ void XBox::updateImage() {
             }
             break;
 
-        case ScaleMode::Wide:
+        case ScaleMode::ScaleWide:
             {
                 int new_w = w();
                 int new_h = (int)((double)_showImg->h() * w() / (double)_showImg->w());
@@ -708,7 +711,7 @@ void XBox::updateImage() {
             }
             break;
 
-        case ScaleMode::High:
+        case ScaleMode::ScaleHigh:
             {
                 int new_h = h();
                 int new_w = (int)((double)_showImg->w() * h() / (double)_showImg->h());
@@ -723,7 +726,7 @@ void XBox::updateImage() {
             }
             break;
 
-        case ScaleMode::Fit:
+        case ScaleMode::ScaleFit:
             {
                 if (_anim) {
                     _anim->scale(w(), h(), 1, 1);
@@ -738,7 +741,7 @@ void XBox::updateImage() {
             }
             break;
 
-        case ScaleMode::Auto:
+        case ScaleMode::ScaleAuto:
             {
                 if (_anim) {
                     _anim->scale(w(), h());
@@ -764,7 +767,7 @@ void XBox::updateImage() {
             break;
 
         default:
-        case MAX:
+        case ScaleMode::ScaleModeMAX:
             break;
     }
 
@@ -905,13 +908,20 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : Fl_Group(x,y,w,h),
     _inSlideshow = false;
 
     draw_check = true;
-    draw_scale = ScaleMode::None;
+    std::string defaultScale;
+    _prefs->getS(SCALE_MODE, defaultScale, scaleModeToName(ScaleNone));
+    draw_scale = nameToScaleMode(defaultScale);
+
+    _prefs->getS(DITHER_MODE, defaultScale, zScaleModeToName(ZScaleMode::None));
+    imgtkScale = nameToZScaleMode(defaultScale);
+
+    _prefs->getS(OVERLAY, defaultScale, overlayModeToName(OverlayNone));
+    draw_overlay = nameToOverlayMode(defaultScale);
     draw_center = false;
 
     deltax = 0;
     deltay = 0;
     rotation = 0;
-    imgtkScale = 0;
 
     _mru = new MostRecentPaths(_prefs); // TODO consider singleton
 
@@ -952,12 +962,10 @@ void XBox::toggleMinimap() {
 }
 
 void XBox::toggleOverlay() {
-    draw_overlay = (OverlayMode)(((int)draw_overlay) + 1);
-    if (draw_overlay == OverlayMode::OM_MAX)
-        draw_overlay = OverlayMode::OM_None;
+    draw_overlay = nextOverlay(draw_overlay);
     switch (draw_overlay)
     {
-        case OverlayMode::TBox:
+        case OverlayBox:
             if (_dispevent)
                 _dispevent->OnActivate(true);
             break;
@@ -1064,7 +1072,7 @@ void XBox::drawOverlay() {
     char hack2[1] = {'\0'};
     char *l = getLabel(hack2, hack, 500);
 
-    if (draw_overlay == OverlayMode::Text) {
+    if (draw_overlay == OverlayText) {
         label(l);
         labelsize(20);
         labelcolor(FL_DARK_GREEN);    // TODO options
@@ -1082,7 +1090,7 @@ void XBox::drawOverlay() {
         label(""); // TODO prevent extra label draw?
     }
 
-    if (draw_overlay == OverlayMode::TBox && _dispevent) {
+    if (draw_overlay == OverlayBox && _dispevent) {
         _dispevent->OnDisplayInfo(l);
     }
 }
