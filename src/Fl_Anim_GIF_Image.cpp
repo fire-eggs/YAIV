@@ -18,6 +18,7 @@
 #include <cstdlib>
 #include <cerrno>
 #include <cmath> // lround()
+#include <new> // std::nothrow
 
 #include <FL/Fl.H>
 #include <FL/Fl_GIF_Image.H>
@@ -485,7 +486,8 @@ void Fl_Anim_GIF_Image::FrameInfo::scale_frame(int frame_) {
   frames[frame_].scalable->scale(new_w, new_h, 0, 1);
 #else
     Fl_RGB_Image *copied = (Fl_RGB_Image *)frames[frame_].rgb->copy(new_w, new_h);
-    delete frames[frame_].rgb;
+    //delete frames[frame_].rgb; // this crashes - invalid free()
+    free(frames[frame_].rgb);
     frames[frame_].rgb = copied;
 #endif
     Fl_Image::RGB_scaling(old_scaling); // restore scaling method
@@ -562,7 +564,7 @@ static char *readin(const char *name_, long &sz_) {
     FILE *gif = fl_fopen(name_, "rb"); // KBR needed to add binary flag
     if (!gif)
         return buf;
-    buf = new char[sz_];
+    buf = new (std::nothrow) char[sz_];
     if (!buf)
     {
         if (gif) fclose(gif);
@@ -575,12 +577,7 @@ static char *readin(const char *name_, long &sz_) {
         delete[] buf;
         buf = NULL;
     }
-    //if (!(gif                                &&
-    //     (buf = (char *)malloc((size_t)sz_)) &&
-    //     fread(buf, 1, (size_t)sz_, gif) == (size_t)sz_)) {
-    //  free(buf);
-    //  buf = 0;
-    //}
+
     if (gif) fclose(gif);
     return buf;
 }
@@ -665,7 +662,6 @@ void Fl_Anim_GIF_Image::canvas(Fl_Widget *canvas_, unsigned short flags_/* = 0*/
     if (_canvas && !(flags_ & DontSetAsImage))
     {
         _canvas->image(this); // set animation as image() of canvas
-        printf("setimage\n");
     }
     if (_canvas && !(flags_ & DontResizeCanvas))
         _canvas->size(w(), h());
@@ -900,11 +896,6 @@ bool Fl_Anim_GIF_Image::is_animated() const {
 }
 
 
-/*static*/
-//bool Fl_Anim_GIF_Image::is_animated(const char *name_) {
-//  Fl_Anim_GIF_Image gif;
-//  return gif.frame_count(name_);
-//}
 
 bool Fl_Anim_GIF_Image::kbrtest(const char *name_)
 {
