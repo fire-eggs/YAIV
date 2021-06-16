@@ -179,7 +179,8 @@ void Fl_Anim_GIF_Image::FrameInfo::clear() {
         if (frames[frames_size].scalable)
             delete frames[frames_size].scalable;
 #endif
-        delete frames[frames_size].rgb;
+        //delete frames[frames_size].rgb; // this crashes
+        free(frames[frames_size].rgb);
     }
     delete[] offscreen;
     offscreen = 0;
@@ -894,7 +895,6 @@ Fl_Image *Fl_Anim_GIF_Image::image(int frame_) const {
 bool Fl_Anim_GIF_Image::is_animated() const {
     return _valid && _fi->frames_size > 1;
 }
-
 
 
 bool Fl_Anim_GIF_Image::kbrtest(const char *name_)
