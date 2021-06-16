@@ -291,21 +291,38 @@ Fl_Image* LoadWebp(const char* filename, Fl_Widget *canvas=nullptr)
         if (!image)
             return nullptr;
 
-        // convert to FL_Animate_GIF_Image compatible
-        unsigned int W = image->canvas_width;
-        unsigned int H = image->canvas_height;
-        auto* gif = new Fl_Anim_GIF_Image(filename, (int)image->loop_count, W, H);
-        for (unsigned int i = 0; i < image->num_frames; i++)
+        // TODO 4009.gif doesn't have transparent background, 4009.webp does
+        // TODO is 4009.webp actually a playback issue?
+        // 4009.webp is an instance of an animated webp with only one frame. When treating it as a
+        // Fl_Animate_GIF_Image file, nothing would appear. This may be a flaw in animated GIF
+        // playback, but rather than address that now, treat the file as a static image.
+        if (image->num_frames == 1)
         {
-            DecodedFrame frame = image->frames[i];
-            gif->add_frame(frame.rgba, frame.duration, W, H, true);
+            DecodedFrame frame = image->frames[0];
+            Webp_Image* ours = new Webp_Image(frame.rgba,
+                                              image->canvas_width, image->canvas_height,
+                                              bitstream->has_alpha ? 4 : 3);
+            WebPFree((void*)data);
+            return ours;
         }
-        gif->start();
-        gif->canvas(canvas, Fl_Anim_GIF_Image::Flags::DontResizeCanvas |
-                            Fl_Anim_GIF_Image::Flags::DontSetAsImage);
+        else
+        {
+            // convert to FL_Animate_GIF_Image compatible
+            unsigned int W = image->canvas_width;
+            unsigned int H = image->canvas_height;
+            auto* gif = new Fl_Anim_GIF_Image(filename, (int)image->loop_count, W, H);
+            for (unsigned int i = 0; i < image->num_frames; i++)
+            {
+                DecodedFrame frame = image->frames[i];
+                gif->add_frame(frame.rgba, frame.duration, W, H, true);
+            }
+            gif->start();
+            gif->canvas(canvas, Fl_Anim_GIF_Image::Flags::DontResizeCanvas |
+                                Fl_Anim_GIF_Image::Flags::DontSetAsImage);
 
-        WebPFree((void*)data); // valgrind mem leak
-        return gif;
+            WebPFree((void*)data); // valgrind mem leak
+            return gif;
+        }
     }
 
     WebPDecBuffer* const output_buffer = &config.output;
