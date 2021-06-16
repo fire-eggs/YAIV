@@ -170,7 +170,13 @@ void XBox::load_current() {
 }
 
 void XBox::next_image() {
-    current_index = std::min(current_index+1, file_count-1);
+    current_index++;
+    if (current_index >= file_count) {
+        current_index = file_count-1;
+        if (_quitAtEnd)
+            exit(0);
+    }
+//    current_index = std::min(current_index+1, file_count-1);
     load_current();
 }
 
@@ -978,6 +984,12 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : Fl_Group(x,y,w,h),
     dragging = false;
 }
 
+void XBox::forceSlideshow() {
+    _inSlideshow = false;
+    toggleSlideshow();
+    _slideShow->forceDelay(2);
+}
+
 void XBox::toggleSlideshow() {
     _inSlideshow = !_inSlideshow;
     if (_inSlideshow) {
@@ -1132,6 +1144,20 @@ void XBox::drawOverlay() {
     if (draw_overlay == OverlayBox && _dispevent) {
         _dispevent->OnDisplayInfo(l);
     }
+}
+
+void XBox::forceScale(const char *val)
+{
+    std::string temp = val;
+    ScaleMode res = nameToScaleMode(val);
+    draw_scale = res;
+}
+
+void XBox::forceDither(const char *val)
+{
+    std::string temp = val;
+    ZScaleMode res = nameToZScaleMode(val);
+    imgtkScale = res;
 }
 
 #pragma clang diagnostic pop

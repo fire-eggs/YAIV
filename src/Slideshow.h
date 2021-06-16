@@ -13,6 +13,7 @@ class Slideshow
 public:
     Slideshow();
 
+    void forceDelay(int val) { _slideDelay = val; } // command line override
     void setPrefs(Prefs * prefs) {_prefs = prefs;}
     void setWindow(XBox *win) {_window = win;}
     void start(int current);
@@ -21,7 +22,6 @@ public:
     void setTimer();
     void countdown();
     void slideNext();
-    void redrawOverlay();
 
 private:
     Prefs *_prefs = nullptr;

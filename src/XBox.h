@@ -92,6 +92,11 @@ private:
 public:
     XBox(int x, int y, int w, int h, Prefs*);
 
+    void forceSlideshow(); // command line override
+    void forceQuitAtEnd() { _quitAtEnd = true; }; // command line
+    void forceScale(const char *);
+    void forceDither(const char *);
+
     int handle(int) override;
     char * getLabel(char *n, char *buff, int buffsize);
 
@@ -116,6 +121,8 @@ public:
     void parent(YaivWin* who) {_dad=who;}
 
 private:
+
+    bool _quitAtEnd {false};
 
     void load_filelist(const char *);
     int find_file(const char *n);

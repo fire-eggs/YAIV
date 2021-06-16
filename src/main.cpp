@@ -5,6 +5,25 @@
 #include "Fl_TransBox.h"
 #include "XBoxDisplayInfoEvent.h"
 
+void cmdline(int argc, char **argv, XBox *box)
+{
+    if (argc < 2 || !argv)
+        return;
+    for (int i=1; i < argc; i++)
+    {
+        if (!strcmp(argv[i], "-w"))
+            box->forceSlideshow();
+        else if (!strcmp(argv[i], "-q"))
+            box->forceQuitAtEnd();
+        else if (!strncmp(argv[i], "-s:", 3))
+            box->forceScale(&(argv[i][3]));
+        else if (!strncmp(argv[i], "-d:", 3))
+            box->forceDither(&(argv[i][3]));
+        else
+            box->load_file(argv[i]);
+    }
+}
+
 int main(int argc, char **argv) {
 
    Fl::lock(); /// thread lock must be called in this time for init.
@@ -36,8 +55,10 @@ int main(int argc, char **argv) {
     b2->displayEventHandler(xbdiei);
     xbdiei->OnActivate(false); // TODO tie to initial state from options
 
-    if (argv[1]) b2->load_file(argv[1]); // TODO add more options
+    cmdline(argc, argv, b2);
+    //if (argv[1]) b2->load_file(argv[1]); // TODO add more options
 
-    _w->show(argc,argv);
+    //_w->show(argc,argv);
+    _w->show();
     return Fl::run();
 }
