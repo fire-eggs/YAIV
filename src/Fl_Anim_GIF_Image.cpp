@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "modernize-use-auto"
 //
 // Copyright 2016-2019 Christian Grabner <wcout@gmx.net>
 //
@@ -555,7 +557,6 @@ bool Fl_Anim_GIF_Image::loop = true;
 //
 //  helper functions
 //
-#include <FL/fl_utf8.h>
 static char *readin(const char *name_, long &sz_) {
     char *buf = nullptr;
     struct stat s = {};
@@ -568,7 +569,7 @@ static char *readin(const char *name_, long &sz_) {
     buf = new (std::nothrow) char[sz_];
     if (!buf)
     {
-        if (gif) fclose(gif);
+        fclose(gif);
         return buf;
     }
 
@@ -576,10 +577,10 @@ static char *readin(const char *name_, long &sz_) {
     if (bytesread != (size_t)sz_) // KBR size difference
     {
         delete[] buf;
-        buf = NULL;
+        buf = nullptr;
     }
 
-    if (gif) fclose(gif);
+    fclose(gif);
     return buf;
 }
 
@@ -638,7 +639,7 @@ Fl_Anim_GIF_Image::Fl_Anim_GIF_Image(const char* name, int loopC, int cw, int ch
     h(ch);
     d(4);
 
-    _canvas = NULL;
+    _canvas = nullptr;
     _frame = -1;
     _uncache = false;
     _speed = 1;
@@ -658,7 +659,7 @@ Fl_Anim_GIF_Image::~Fl_Anim_GIF_Image() {
 
 void Fl_Anim_GIF_Image::canvas(Fl_Widget *canvas_, unsigned short flags_/* = 0*/) {
     if (_canvas)
-        _canvas->image(0);
+        _canvas->image(nullptr);
     _canvas = canvas_;
     if (_canvas && !(flags_ & DontSetAsImage))
     {
@@ -897,25 +898,11 @@ bool Fl_Anim_GIF_Image::is_animated() const {
 }
 
 
-bool Fl_Anim_GIF_Image::kbrtest(const char *name_)
-{
-    Fl_GIF_Image tmp(name_);
-    if (tmp.ld() || tmp.w() <= 0 || tmp.h() <= 0 || !tmp.data())
-        return false;
-    Inherited::data(tmp.data(), tmp.count());
-    alloc_data = tmp.alloc_data;
-    tmp.alloc_data = 0;
-    w(tmp.w());
-    h(tmp.h());
-
-    return true;
-}
-
 bool Fl_Anim_GIF_Image::load(const char *name_) {
     DBG(("\nFl_Anim_GIF_Image::load '%s'\n", name_));
     clear_frames();
     free(_name); // strdup uses malloc
-    _name = name_ ? _strdup(name_) : 0;
+    _name = name_ ? _strdup(name_) : nullptr;
 
     // as load() can be called multiple times
     // we have to replicate the actions of the pixmap destructor here
@@ -935,9 +922,9 @@ bool Fl_Anim_GIF_Image::load(const char *name_) {
         FILE *fp;
         char header[10];
         // Pre-test for GIF header. Avoids the "not a gif file" message from FL_GIF_Image.
-        if ((fp = fl_fopen(name_, "rb")) == NULL)
+        if ((fp = fl_fopen(name_, "rb")) == nullptr)
             return false;
-        int count = fread(header, 1, sizeof(header), fp);
+        size_t count = fread(header, 1, sizeof(header), fp);
         fclose(fp);
         if (count==0)
             return false;
@@ -946,8 +933,14 @@ bool Fl_Anim_GIF_Image::load(const char *name_) {
     }
 
     // load the base class pixmap
-    if (!kbrtest(name_))
+    Fl_GIF_Image tmp(name_);
+    if (tmp.ld() || tmp.w() <= 0 || tmp.h() <= 0 || !tmp.data())
         return false;
+    Inherited::data(tmp.data(), tmp.count());
+    alloc_data = tmp.alloc_data;
+    tmp.alloc_data = 0;
+    w(tmp.w());
+    h(tmp.h());
 
     // KBR TODO if name_ is null above, when/how would we get here?
 
@@ -971,8 +964,7 @@ bool Fl_Anim_GIF_Image::load(const char *name_) {
     }
     if (buf[3]!='8' || buf[4] >'9' || buf[5] != 'a') {
         Fl::warning("%s is version %c%c%c.", name_, buf[3], buf [4], buf[5]);
-        buf[3] = '8'; buf[4]='9'; buf[5] = 'a';
-        //strncpy(&buf[3], "89a", 3); // make gif_load happy
+        buf[3] = '8'; buf[4]='9'; buf[5] = 'a'; // makes gif_load happy
     }
 
     // decode GIF using gif_load.h
@@ -982,7 +974,7 @@ bool Fl_Anim_GIF_Image::load(const char *name_) {
     _valid = _fi->valid;
 
     if (!_valid) {
-        Fl::error("Fl_Anim_GIF: %s has invalid format.\n", name_);
+        //Fl::error("Fl_Anim_GIF: %s has invalid format.\n", name_);
         ld(ERR_FORMAT);
     }
     return _valid;
@@ -1137,3 +1129,5 @@ void Fl_Anim_GIF_Image::scale(int width, int height, int proportional, int can_e
     }
 }
 
+
+#pragma clang diagnostic pop

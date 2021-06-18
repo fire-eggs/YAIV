@@ -62,7 +62,7 @@ public:
         flush();
     }
 
-    void getS(const char *val, std::string& str, std::string defaultVal)
+    void getS(const char *val, std::string& str, const std::string& defaultVal)
     {
         char *text;
         Fl_Preferences::get(val, text, defaultVal.c_str());

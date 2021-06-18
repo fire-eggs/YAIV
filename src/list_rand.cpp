@@ -10,7 +10,6 @@
 #endif
 
 #include "list_rand.h"
-#include "XBox.h"
 #include "Webp.h"
 #include "apng.h"
 

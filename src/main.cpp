@@ -2,8 +2,6 @@
 #include <clocale>     // setlocale()..
 
 #include "yaiv_win.h"
-#include "Fl_TransBox.h"
-#include "XBoxDisplayInfoEvent.h"
 
 void cmdline(int argc, char **argv, XBox *box)
 {

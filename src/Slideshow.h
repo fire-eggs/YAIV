@@ -14,11 +14,12 @@ public:
     Slideshow();
 
     void forceDelay(int val) { _slideDelay = val; } // command line override
+
     void setPrefs(Prefs * prefs) {_prefs = prefs;}
     void setWindow(XBox *win) {_window = win;}
     void start(int current);
     void stop();
-    void clearTimer();
+    static void clearTimer();
     void setTimer();
     void countdown();
     void slideNext();

@@ -44,7 +44,7 @@ void drawChecker(int X, int Y, int W, int H) {
     if ( checkerBoard != NULL )
         checkerBoard->draw(X,Y);
 #else
-    if ( checkerBoard != NULL )
+    if ( checkerBoard != nullptr )
     checkerBoard->draw(X,Y,W,H);
 #endif
 }

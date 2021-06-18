@@ -116,14 +116,14 @@ public:
      and resizes all of its frame images to W x H using
      the current resize method.
      */
-    virtual Fl_Image *copy(int W_, int H_) override;
+    Fl_Image *copy(int W_, int H_) override;
     int debug() const;
     /**
      The desaturate() method applies desaturate() to all frames
      of the animation.
      */
-    virtual void desaturate() override;
-    virtual void draw(int x_, int y_, int w_, int h_, int cx_ = 0, int cy_ = 0) override;
+    void desaturate() override;
+    void draw(int x_, int y_, int w_, int h_, int cx_ = 0, int cy_ = 0) override; // TODO default parameters not valid on overrides
     /**
      Return the delay of frame 'frame_' `[0-frames() -1]` in seconds
      */
@@ -178,7 +178,6 @@ public:
      animation from another file.
      */
     bool load(const char *name_);
-    bool kbrtest(const char* name_);
 
     /**
      The loop flag can be used to (dis-)allow loop count.

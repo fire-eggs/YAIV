@@ -7,15 +7,11 @@
 
 #include <FL/filename.H>
 #include <FL/Fl_File_Chooser.H>
-#include <FL/Fl_Menu_Item.H>
 #include <FL/Fl_Image_Surface.H>
 #include <FL/Fl_SVG_Image.H>
 
 #include "yaiv_win.h"
-#include "XBox.h"
 #include "list_rand.h"
-#include "prefs.h"
-#include "MostRecentPaths.h"
 #include "fl_imgtk.h"
 #include "Slideshow.h"
 
@@ -874,10 +870,10 @@ void XBox::resize(int x,int y,int w,int h) {
 void XBox::do_menu() {
 
     // 1. find the submenu in the "master" menu
-    int i;
-    for (i = 0; i < right_click_menu->size(); i++)
+    int submenuNdx;
+    for (submenuNdx = 0; submenuNdx < right_click_menu->size(); submenuNdx++)
     {
-        if (strcmp(right_click_menu[i].text,"Last Used") != 0)
+        if (strcmp(right_click_menu[submenuNdx].text, "Last Used") != 0)
             continue;
         break;
     }
@@ -895,7 +891,7 @@ void XBox::do_menu() {
     std::vector<menucall *> *totoss = new std::vector<menucall*>();
 
     // initialize it with the static menu contents
-    for (size_t j = 0; j <= i; j++)
+    for (size_t j = 0; j <= submenuNdx; j++)
     {
         dyn_menu[j] = right_click_menu[j];
         size_t menuparam = (size_t)MI_LOAD + j;
@@ -911,11 +907,11 @@ void XBox::do_menu() {
     char** favs = _mru->getAll();
     for (long j = 0; j < numfavs; j++)
     {
-        dyn_menu[i + 1 + j].label(favs[j]);
+        dyn_menu[submenuNdx + 1 + j].label(favs[j]);
         menucall *hold = new menucall;
         hold->who = this;
         hold->menu = MI_FAV0 + j;
-        dyn_menu[i + 1 + j].callback(xbox_menucb, (void*)hold);
+        dyn_menu[submenuNdx + 1 + j].callback(xbox_menucb, (void*)hold);
         totoss->push_back(hold);
     }
 

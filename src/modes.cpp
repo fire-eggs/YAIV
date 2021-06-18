@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "modernize-use-auto"
 //
 // Created by kevin on 6/15/21.
 //
@@ -13,7 +15,7 @@ std::string ScaleModeNames[] = {MODES(X)};
 
 // TODO can these be template-tized? or macro-tized?
 
-ScaleMode nameToScaleMode( std::string s )
+ScaleMode nameToScaleMode( const std::string s )
 {
     auto res = std::find( ScaleModeNames, ScaleModeNames+ScaleModeMAX, s);
     ScaleMode val = ScaleMode( res - ScaleModeNames );
@@ -36,7 +38,7 @@ char *humanScale(ScaleMode val, char *buff, int buffsize)
 std::string ZScaleModeNames[] = {MODEStk(XX)};
 #undef XX
 
-ZScaleMode nameToZScaleMode( std::string s )
+ZScaleMode nameToZScaleMode( const std::string s )
 {
     auto res = std::find( ZScaleModeNames, ZScaleModeNames+ZScaleModeMAX, s);
     ZScaleMode val = ZScaleMode( res - ZScaleModeNames );
@@ -76,3 +78,4 @@ OverlayMode nextOverlay(OverlayMode val)
     OverlayMode res = (OverlayMode)((int) val + 1);
     return res >= OverlayModeMAX ? OverlayNone : res;
 }
+#pragma clang diagnostic pop

@@ -11,6 +11,7 @@ Fl_TransBox::Fl_TransBox(int x, int y, int w, int h, const char* l)
     img = new (std::nothrow) Fl_RGB_Image(buffer, w, h, 4);
     color(-51130624);        // TODO from prefs
     labelcolor(FL_DARK_GREEN); // TODO from prefs
+    r = g = b = 0;
 }
 
 Fl_TransBox::~Fl_TransBox()

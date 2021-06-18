@@ -4,13 +4,7 @@
 
 #include "humansize.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <FL/Fl.H>
-#include <FL/fl_utf8.h> // fl_stat
-// -- platform dependancy --
-// #include <sys/stat.h>   // stat in Fl/Fl.H
+#include <FL/Fl.H> // stat, fl_stat
 
 static char *humanSize(size_t bytes, char *buf, int bufsize)
 {
@@ -34,6 +28,6 @@ char *humanSize(char *fname, char *buf, int bufsize)
     buf[0] = '\0'; // make sure empty string on fl_stat failure
     struct stat s;
     if (fl_stat(fname, &s))
-        return NULL;
+        return nullptr;
     return humanSize(s.st_size, buf, bufsize);
 }

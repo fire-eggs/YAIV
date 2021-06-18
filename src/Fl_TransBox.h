@@ -20,7 +20,7 @@ class Fl_TransBox : public Fl_Box
         ~Fl_TransBox() override;
 
     public:
-        void color(unsigned int c);
+        void color(unsigned int c); // hides base function
         void set_alpha(unsigned char a);
 
     protected:
