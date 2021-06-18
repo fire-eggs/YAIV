@@ -83,14 +83,14 @@ void XBox::load_filelist(const char *n) {
         fl_filename_free_list(&file_list, file_count);
 
     if (!fl_filename_isdir(n))
-        filename_path(n, fold);
+        filename_path(n, folder_name);
     else
-        fl_filename_absolute(fold, FL_PATH_MAX, n);
+        fl_filename_absolute(folder_name, FL_PATH_MAX, n);
 
     // TODO how best to filter for images?
     //TODO a file-filter callback is not in "vanilla" FLTK
-    //file_count = fl_filename_list(fold, &file_list, fl_numericsort, removeFolders);
-    file_count = fl_filename_list(fold, &file_list, fl_numericsort);
+    //file_count = fl_filename_list(folder_name, &file_list, fl_numericsort, removeFolders);
+    file_count = fl_filename_list(folder_name, &file_list, fl_numericsort);
 }
 
 void XBox::load_file(const char *n) {
@@ -113,18 +113,18 @@ void XBox::load_current() {
 
     current_index = std::min(std::max(current_index,0), file_count-1);
 
-    char n[FL_PATH_MAX<<2];
-    if (fold[strlen(fold)-1] == '/')
-        fold[strlen(fold)-1] = 0x0;
-    sprintf(n, "%s/%s", fold, file_list[current_index]->d_name);
+    if (folder_name[strlen(folder_name) - 1] == '/')
+        folder_name[strlen(folder_name) - 1] = 0x0;
+    strncpy(file_name, file_list[current_index]->d_name, FL_PATH_MAX);
 
-    logit("Load %s", n);
+    char fullpath[FL_PATH_MAX<<2];
+    sprintf(fullpath, "%s/%s", folder_name, file_list[current_index]->d_name);
 
-    _dad->setFilename(n); // TODO just track in XBox, rather than parent?
+    logit("Load %s", fullpath);
 
     rotation = 0; // TODO anything else need resetting?
 
-    if (fl_filename_isdir(n)) 
+    if (fl_filename_isdir(fullpath))
     {
         align(FL_ALIGN_CENTER);
         label("@fileopen"); // show a generic folder
@@ -134,7 +134,7 @@ void XBox::load_current() {
     }
     else
     {
-        Fl_Image *img = loadFile(n, this);
+        Fl_Image *img = loadFile(fullpath, this);
 
         // 590B-01.jpg failed to load and resulted in crash further on
         if (!img || img->fail() || img->w() == 0 || img->h() == 0)
@@ -152,7 +152,7 @@ void XBox::load_current() {
             Fl_Anim_GIF_Image::animate = true;
 
 #ifdef DANBOORU
-            update_danbooru(n);
+            update_danbooru(file_name);
 #endif
 
             label(nullptr); // wipe any previous folder/error-file
@@ -482,12 +482,12 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
                 break;
 
             char n[FL_PATH_MAX<<2];
-            sprintf(n, "%s/%s", fold, file_list[current_index]->d_name);
+            sprintf(n, "%s/%s", folder_name, file_list[current_index]->d_name);
             Fl::copy(n, (int)strlen(n), 1);
         }
             break;
 
-        case MI_GOTO:		    // TODO hacky
+        case MI_GOTO:
         {
             int dex = current_index + 1;
             char def[256];
@@ -499,7 +499,7 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
                 {
                     int val = std::stoi(res);
                     current_index = val - 1;
-                    ((XBox *)window_p)->load_current();
+                    dynamic_cast<XBox *>(window_p)->load_current(); // TODO hack
                 }
                 catch (std::exception& e)
                 {
@@ -525,8 +525,11 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
     }
 }
 
-char * XBox::getLabel(char *n, char *buff, int buffsize)
+char * XBox::getLabel(bool include_filename, char *buff, int buffsize) // TODO temp hack, pass non-empty string for 'prefix' to include path
 {
+    // TODO customize label : full path or just filename
+    std::string fullpath = folder_name + std::string("/") + file_name;
+
     int outzoom = (int)(_zoom * 100.0 + 0.5);
     int w = _img ? _img->w() : 0;
     int h = _img ? _img->h() : 0;
@@ -539,12 +542,13 @@ char * XBox::getLabel(char *n, char *buff, int buffsize)
     {
         // for the image label currently don't have filename, don't display extra dashes
         snprintf( buff, buffsize, "%d/%d%s%s", current_index+1,
-                  file_count, n[0] == '\0' ? "" : " - ", n);
+                  file_count, !include_filename ? "" : " - ",
+                  include_filename ? fullpath.c_str() : "");
     }
     else
     {
         char nicesize[10];
-        humanSize(n, nicesize, sizeof(nicesize)-1);
+        humanSize((char *)fullpath.c_str(), nicesize, sizeof(nicesize)-1);
 
         char Zscaletxt[10];
         humanZScale(imgtkScale, Zscaletxt, sizeof(Zscaletxt)-1);
@@ -552,8 +556,9 @@ char * XBox::getLabel(char *n, char *buff, int buffsize)
         // for the image label currently don't have filename, don't display extra dashes
         snprintf_nowarn(buff, buffsize, "%d/%d - [%dx%dx%d%s%s] - (%d%%)[%s][%s]%s%s",
                         current_index+1, file_count, w, h, depth,
-                        n[0] == '\0' ? "" : " - ",
-                        nicesize, outzoom, scaletxt, Zscaletxt, n[0] == '\0' ? "" : " - ", n);
+                        !include_filename ? "" : " - ",
+                        nicesize, outzoom, scaletxt, Zscaletxt, !include_filename ? "" : " - ",
+                        include_filename ? fullpath.c_str() : "");
     }
     return buff;
 }
@@ -830,7 +835,7 @@ void XBox::updateImage() {
 void resizeTimerCallback(void *d)
 {
     // Timer callback during resizing
-    XBox *who = dynamic_cast<XBox *>((Fl_Widget *)d);
+    XBox *who = static_cast<XBox *>(d);
     if (who)
         who->resizeTimerFire();
 }
@@ -978,6 +983,13 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : Fl_Group(x,y,w,h),
     _prefs->get(MOUSE_PAN,mp,false); // TODO define 'bool' getter
     _pan_with_mouse = mp != 0;
     dragging = false;
+
+    dragStartX = dragStartY = 0;
+    _slideShow = nullptr;
+    _dad = nullptr;
+    _inResize = false;
+    _dispevent = nullptr;
+    filecb_name[0] = '\0';
 }
 
 void XBox::forceSlideshow() {
@@ -1116,8 +1128,7 @@ void XBox::drawOverlay() {
         return;
 
     char hack[501];
-    char hack2[1] = {'\0'};
-    char *l = getLabel(hack2, hack, 500);
+    char *l = getLabel(false, hack, 500);
 
     if (draw_overlay == OverlayText) {
         label(l);
@@ -1144,14 +1155,12 @@ void XBox::drawOverlay() {
 
 void XBox::forceScale(const char *val)
 {
-    std::string temp = val;
     ScaleMode res = nameToScaleMode(val);
     draw_scale = res;
 }
 
 void XBox::forceDither(const char *val)
 {
-    std::string temp = val;
     ZScaleMode res = nameToZScaleMode(val);
     imgtkScale = res;
 }

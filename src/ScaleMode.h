@@ -22,7 +22,7 @@
 enum ScaleMode { MODES(X), ScaleModeMAX };
 #undef X
 
-ScaleMode nameToScaleMode( std::string s );
+ScaleMode nameToScaleMode( const std::string& s );
 std::string scaleModeToName(ScaleMode mode);
 char *humanScale(ScaleMode val, char *buff, int buffsize);
 

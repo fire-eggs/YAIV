@@ -16,7 +16,7 @@ X(OverlayBox)
 enum OverlayMode { OverModes(X), OverlayModeMAX };
 #undef X
 
-OverlayMode nameToOverlayMode( std::string s );
+OverlayMode nameToOverlayMode( const std::string& s );
 std::string overlayModeToName(OverlayMode mode);
 OverlayMode nextOverlay(OverlayMode val);
 

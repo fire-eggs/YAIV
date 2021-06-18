@@ -22,7 +22,7 @@ private:
     Fl_TransBox *_infoBox {};
 
 public:
-    XBoxDspInfoEI(Fl_TransBox* dest) { _infoBox = dest; }
+    explicit XBoxDspInfoEI(Fl_TransBox* dest) { _infoBox = dest; }
 
     void OnActivate(bool show) override
     {

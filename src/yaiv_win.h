@@ -33,15 +33,10 @@ private:
     int _xoff;
     int _yoff;
 
-
-    char filename[FL_PATH_MAX];
-
 public:
     YaivWin(int, int, int, int, Prefs*);
 
     void child(XBox *canvas) {_child = canvas;}
-
-    void setFilename(char *fn) { strncpy(filename, fn, FL_PATH_MAX); }
 
     Prefs* prefs() {return _prefs;}
 

@@ -108,7 +108,7 @@ void info_fn(png_structp png_ptr, png_infop info_ptr)
 
 void row_fn(png_structp png_ptr, png_bytep new_row, png_uint_32 row_num, int pass)
 {
-    Image * image = (Image *)png_get_progressive_ptr(png_ptr);
+    Image * image = static_cast<Image *>(png_get_progressive_ptr(png_ptr));
     png_progressive_combine_row(png_ptr, image->rows[row_num], new_row);
 }
 
@@ -196,15 +196,12 @@ inline unsigned int read_chunk(FILE * f, CHUNK * pChunk)
 int load_apng(const char * szIn, std::vector<Image>& img)
 {
     FILE * f;
-    unsigned int j, w, h, w0, h0, x0, y0;
-    unsigned int delay_num, delay_den, dop, bop, imagesize;
     unsigned char sig[8];
     png_structp png_ptr;
     png_infop info_ptr;
     CHUNK chunk;
     CHUNK chunkIHDR;
     std::vector<CHUNK> chunksInfo;
-    bool isAnimated = false;
     bool skipFirst = false;
     bool hasInfo = false;
     Image frameRaw;
@@ -229,6 +226,7 @@ int load_apng(const char * szIn, std::vector<Image>& img)
 
     if (id == id_IHDR && chunkIHDR.size == 25)
     {
+        unsigned int w, h, w0, h0, x0, y0;
         w0 = w = png_get_uint_32(chunkIHDR.p + 8);
         h0 = h = png_get_uint_32(chunkIHDR.p + 12);
 
@@ -240,16 +238,18 @@ int load_apng(const char * szIn, std::vector<Image>& img)
 
         x0 = 0;
         y0 = 0;
-        delay_num = 1;
-        delay_den = 10;
-        dop = 0;
-        bop = 0;
-        imagesize = w * h * 4;
+        unsigned int imagesize = w * h * 4;
 
         frameRaw.init(w, h, 4);
 
         if (!processing_start(png_ptr, info_ptr, (void *)&frameRaw, hasInfo, chunkIHDR, chunksInfo))
         {
+            unsigned int delay_num = 1;
+            unsigned int delay_den = 10;
+            bool isAnimated = false;
+            unsigned int dop, bop;
+            dop = bop = 0;
+
             frameCur.init(w, h, 4);
 
             while ( !feof(f) )
@@ -284,7 +284,7 @@ int load_apng(const char * szIn, std::vector<Image>& img)
                             {
                                 memcpy(frameNext.p, frameCur.p, imagesize);
                                 if (dop == 1)
-                                    for (j=0; j<h0; j++)
+                                    for (int j=0; j<h0; j++)
                                         memset(frameNext.rows[y0 + j] + x0*4, 0, w0*4);
                             }
                             frameCur.p = frameNext.p;
@@ -420,11 +420,11 @@ Fl_Image* LoadAPNG(const char *filename, Fl_Widget *canvas= nullptr)
     if (res == -1)
         return nullptr;
 
-    unsigned int num_frames = imgs.size();
+    int num_frames = imgs.size();
     if (num_frames > 1) {
         Image img=imgs[0];
-        unsigned int w = img.w;
-        unsigned int h = img.h;
+        int w = img.w;
+        int h = img.h;
         auto* gif = new Fl_Anim_GIF_Image(filename, num_frames, w, h);
         for (unsigned int i = 0; i < num_frames; i++) {
 
@@ -432,7 +432,7 @@ Fl_Image* LoadAPNG(const char *filename, Fl_Widget *canvas= nullptr)
             int delay_den = imgs[i].delay_den;
             if (delay_den == 0) delay_den = 100;
             double delay = ((double)delay_num / (double)delay_den);
-            if (delay_num == 0 < delay < 2.0)
+            if (delay_num == 0 || delay < 2.0)
                 delay = 2.0;
 
             // TODO how/why are images ceasing playback?

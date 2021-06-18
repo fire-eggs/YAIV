@@ -15,7 +15,7 @@ std::string ScaleModeNames[] = {MODES(X)};
 
 // TODO can these be template-tized? or macro-tized?
 
-ScaleMode nameToScaleMode( const std::string s )
+ScaleMode nameToScaleMode( const std::string& s )
 {
     auto res = std::find( ScaleModeNames, ScaleModeNames+ScaleModeMAX, s);
     ScaleMode val = ScaleMode( res - ScaleModeNames );
@@ -38,7 +38,7 @@ char *humanScale(ScaleMode val, char *buff, int buffsize)
 std::string ZScaleModeNames[] = {MODEStk(XX)};
 #undef XX
 
-ZScaleMode nameToZScaleMode( const std::string s )
+ZScaleMode nameToZScaleMode( const std::string& s )
 {
     auto res = std::find( ZScaleModeNames, ZScaleModeNames+ZScaleModeMAX, s);
     ZScaleMode val = ZScaleMode( res - ZScaleModeNames );
@@ -61,7 +61,7 @@ char *humanZScale(ZScaleMode val, char *buff, int buffsize)
 std::string OverlayModeNames[] = {OverModes(X)};
 #undef X
 
-OverlayMode nameToOverlayMode( std::string s )
+OverlayMode nameToOverlayMode( const std::string& s )
 {
     auto res = std::find( OverlayModeNames, OverlayModeNames+OverlayModeMAX, s);
     OverlayMode val = OverlayMode( res - OverlayModeNames );

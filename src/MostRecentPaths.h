@@ -19,7 +19,7 @@ private:
     MostRecentPaths& operator=(const MostRecentPaths&) = delete;
 
 public:
-    MostRecentPaths(Prefs* prefs);
+    explicit MostRecentPaths(Prefs* prefs);
     ~MostRecentPaths();
     void Add(const char* newPath);
     char** getAll();

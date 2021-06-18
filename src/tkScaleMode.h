@@ -18,7 +18,7 @@
 enum ZScaleMode { MODEStk(XX), ZScaleModeMAX };
 #undef XX
 
-ZScaleMode nameToZScaleMode( std::string s );
+ZScaleMode nameToZScaleMode( const std::string& s );
 std::string zScaleModeToName(ZScaleMode mode);
 
 char *humanZScale(ZScaleMode val, char *buff, int buffsize);

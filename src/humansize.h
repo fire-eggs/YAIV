@@ -7,7 +7,7 @@
 
 #include <cstddef>
 
-static char *humanSize(size_t bytes, char *buf, int bufsize);
+static char *humanSize(const char *bytes, char *buf, int bufsize);
 char *humanSize(char *fname, char *buf, int bufsize);
 
 #endif //CLION_TEST2_HUMANSIZE_H

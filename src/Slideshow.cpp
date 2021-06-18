@@ -30,7 +30,7 @@ void Slideshow::stop() {
 }
 
 static void secondsCallback(void* who) {
-    ((Slideshow *)who)->countdown();
+    static_cast<Slideshow *>(who)->countdown();
 }
 
 void Slideshow::countdown()

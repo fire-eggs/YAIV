@@ -81,11 +81,11 @@ public:
      If 'Start' is specified in the 'flags' parameter it calls start()
      after successful load.
      */
-    Fl_Anim_GIF_Image(const char *name_, Fl_Widget *canvas_ = 0, unsigned short flags_ = 0);
+    explicit Fl_Anim_GIF_Image(const char *name_, Fl_Widget *canvas_ = 0, unsigned short flags_ = 0);
     Fl_Anim_GIF_Image();
     Fl_Anim_GIF_Image(const char *name, int loopCount, int W, int H); // KBR webp
 
-    virtual ~Fl_Anim_GIF_Image();
+    ~Fl_Anim_GIF_Image() override;
     /**
      The canvas() method sets or gets the current widget, that
      is used for display of the frame images.

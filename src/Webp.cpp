@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "modernize-use-auto"
 //
 // Created by kevin on 5/11/21.
 //
@@ -30,18 +32,6 @@ public:
     }
 };
 
-bool strendswith(const char* str, const char* suffix)
-{
-    uint64_t len = strlen(str); // TODO portable?
-    uint64_t suffixlen = strlen(suffix);
-    if (suffixlen > len)
-    {
-        return false;
-    }
-
-    str += (len - suffixlen);
-    return strcmp(str, suffix) == 0;
-}
 
 #define W_CHAR wchar_t  // WCHAR without underscore might already be defined.
 #define TO_W_CHAR(STR) (L##STR)
@@ -54,12 +44,12 @@ int ImgIoUtilReadFile(const char* const file_name,
     size_t file_size;
     FILE* in;
 
-    if (data == NULL || data_size == NULL) return 0;
-    *data = NULL;
+    if (data == nullptr || data_size == nullptr) return 0;
+    *data = nullptr;
     *data_size = 0;
 
     in = fl_fopen(file_name, "rb");
-    if (in == NULL) {
+    if (in == nullptr) {
         return 0;
     }
     fseek(in, 0, SEEK_END);
@@ -67,7 +57,7 @@ int ImgIoUtilReadFile(const char* const file_name,
     fseek(in, 0, SEEK_SET);
     // we allocate one extra byte for the \0 terminator
     file_data = (uint8_t*)malloc(file_size + 1);
-    if (file_data == NULL) {
+    if (file_data == nullptr) {
         fclose(in);
         return 0;
     }
@@ -91,7 +81,7 @@ int LoadWebP(const char* const in_file,
     {
         char header[13];
         FILE *in = fl_fopen(in_file, "rb");
-        if (in == NULL) {
+        if (in == nullptr) {
             return 0;
         }
         bool ok = fread(header, 13, 1, in) == 1;
@@ -111,20 +101,19 @@ int LoadWebP(const char* const in_file,
     }
 
 
-
     VP8StatusCode status;
     WebPBitstreamFeatures local_features;
     if (!ImgIoUtilReadFile(in_file, data, data_size))
         return 0;
 
-    if (bitstream == NULL) {
+    if (bitstream == nullptr) {
         bitstream = &local_features;
     }
 
     status = WebPGetFeatures(*data, *data_size, bitstream);
     if (status != VP8_STATUS_OK) {
         free((void*)*data);
-        *data = NULL;
+        *data = nullptr;
         *data_size = 0;
         return 0;
     }
@@ -133,7 +122,7 @@ int LoadWebP(const char* const in_file,
 
 static int IsWebP(const uint8_t* const data, size_t data_size)
 {
-    return (WebPGetInfo(data, data_size, NULL, NULL) != 0);
+    return (WebPGetInfo(data, data_size, nullptr, nullptr) != 0);
 }
 
 typedef struct
@@ -288,7 +277,7 @@ Fl_Image* LoadWebp(const char* filename, Fl_Widget *canvas=nullptr)
     if (bitstream->has_animation)
     {
         AnimatedImage *image = ReadAnimatedImage(data, data_size);
-        if (!image)
+        if (image == nullptr)
             return nullptr;
 
         // TODO 4009.gif doesn't have transparent background, 4009.webp does
@@ -344,3 +333,5 @@ Fl_Image* LoadWebp(const char* filename, Fl_Widget *canvas=nullptr)
     WebPFree((void*)data);
     return ours;
 }
+
+#pragma clang diagnostic pop

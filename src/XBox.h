@@ -98,7 +98,7 @@ public:
     void forceDither(const char *);
 
     int handle(int) override;
-    char * getLabel(char *n, char *buff, int buffsize);
+    char * getLabel(bool include_filepath, char *buff, int buffsize);
 
     void resize(int,int,int,int) override;
 
@@ -166,7 +166,9 @@ private:
 
     // TODO go into a separate 'loader' class
     int current_index;
-    char fold[FL_PATH_MAX];
+    char folder_name[FL_PATH_MAX] {'\0'};
+    char file_name[FL_PATH_MAX] {'\0'};
+
     dirent** file_list;
     int file_count;
 

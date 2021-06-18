@@ -29,12 +29,13 @@ YaivWin::YaivWin(int x, int y, int w, int h, Prefs* prefs) : Fl_Double_Window(x,
     _prefs->get(MAIN_LABEL_COLOR, fg, FL_FOREGROUND_COLOR);
     color(bg);
     labelcolor(fg);
+    _child = nullptr;
 }
 
 void YaivWin::updateLabel() {
-    char lbl[1000];
+    char lbl[FL_PATH_MAX+250];
     lbl[0] = 0;
-    label( _child->getLabel(filename, lbl, sizeof(lbl)));
+    label( _child->getLabel(true, lbl, sizeof(lbl)));
 }
 
 void YaivWin::resize(int x, int y, int w, int h) {

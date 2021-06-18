@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "modernize-use-auto"
 
 #include <clocale>     // setlocale()..
 
@@ -53,10 +55,10 @@ int main(int argc, char **argv) {
     b2->displayEventHandler(xbdiei);
     xbdiei->OnActivate(false); // TODO tie to initial state from options
 
-    cmdline(argc, argv, b2);
-    //if (argv[1]) b2->load_file(argv[1]); // TODO add more options
-
-    //_w->show(argc,argv);
     _w->show();
+    cmdline(argc, argv, b2); // do this _after_ show() for label etc to be correct
+
     return Fl::run();
 }
+
+#pragma clang diagnostic pop

@@ -18,7 +18,7 @@ public:
     void setPrefs(Prefs * prefs) {_prefs = prefs;}
     void setWindow(XBox *win) {_window = win;}
     void start(int current);
-    void stop();
+    static void stop();
     static void clearTimer();
     void setTimer();
     void countdown();
