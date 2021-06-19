@@ -43,7 +43,7 @@ void style_unfinished_cb(int, void*) {
 // connect to db; open window to view tags
 void view_danbooru(Prefs *prefs)
 {
-    // TODO browse mechanism
+    // TODO browse mechanism for prefs editor
     char dbpath[1000];
     prefs->get("DanbooruDB", dbpath, "", 1000);
 
@@ -79,16 +79,17 @@ void shutdown_danbooru()
         dbwin->hide();
 }
 
-std::vector<std::string> *tags;
-std::vector<std::string> *tagcat;
+// TODO member vars?
+std::vector<std::string> *_tags;
+std::vector<std::string> *_tagcat;
 
 void addTags(const char *category, const char *label, std::vector<std::string> *tags, std::vector<std::string> *tagcat,
              char *tmptxt, char *tmpsty);
 
 static int id_callback(void *data, int argc, char **argv, char **azColName)
 {
-    tags->push_back(std::string(*argv));
-    tagcat->push_back(std::string(*(argv+1)));
+    _tags->push_back(std::string(*argv));
+    _tagcat->push_back(std::string(*(argv+1)));
     return 0;
 }
 
@@ -121,7 +122,7 @@ void addTags(const char *category, const char *label, std::vector<std::string> *
         }
 }
 
-void update_danbooru(char *filename)
+void update_danbooru(char *filename) // TODO class member?
 {
     if (!db) return; // db not open, nothing to do
 
@@ -139,16 +140,14 @@ void update_danbooru(char *filename)
 
     unsigned long long image_id;
     size_t posEnd;
+    bool inError = false;
     try {
         image_id = std::stoll(name, &posEnd, 10);
-    } catch (std::invalid_argument) {
-        textbuf->text("Not a danbooru file!");
-        stylebuf->text("BBBBBBBBBBBBBBBBBBBB");
-        dbwin->redraw();
-        return;
+    } catch (const std::invalid_argument& e) {
+        inError = true;
     }
 
-    if (posEnd < strlen(name)) {
+    if (inError || posEnd < strlen(name)) {
         textbuf->text("Not a danbooru file!");
         stylebuf->text("BBBBBBBBBBBBBBBBBBBB");
         dbwin->redraw();
@@ -156,10 +155,10 @@ void update_danbooru(char *filename)
     }
 
     // get all tags and categories from database as a vector of strings
-    tags = new std::vector<std::string>();
-    tagcat = new std::vector<std::string>();
+    _tags = new std::vector<std::string>();
+    _tagcat = new std::vector<std::string>();
     char query[500];
-    sprintf(query, "select name,category from tags where tag_id in (select tag_id from imageTags where image_id = '%lld') order by category,name", image_id);
+    sprintf(query, "select name,category from tags where tag_id in (select tag_id from imageTags where image_id = '%llu') order by category,name", image_id);
     auto rc = sqlite3_exec(db, query, id_callback, nullptr, &zErrMsg);
     if (rc != SQLITE_OK) {
         fl_alert("ID fetch for %s : %s", nm, zErrMsg);
@@ -167,23 +166,25 @@ void update_danbooru(char *filename)
     }
 
     // 1. Determine total size of output text [tags, labels, newlines]
-    int totsize = 0;
-    for (int t=0; t<tags->size(); t++)
-        totsize += tags->at(t).size() + 1;
+    size_t totsize = 0;
+    for (const std::string& t: *_tags)
+        totsize += t.size() + 1;
     totsize += strlen(labels) + 1;
 
     // 2. allocate temp text/style bufs
     char *tmptxt = new char[totsize + 1];
     char *tmpsty = new char[totsize + 1];
-    tmptxt[0] = '\0';
-    tmpsty[0] = '\0';
+    memset(tmptxt, 0, totsize+1);
+    memset(tmpsty, 0, totsize+1);
 
+    // TODO consider not outputting label if no tags in category
     // 3. add tags of different category with appropriate (styled) label
-    addTags("3","Copyright:",tags,tagcat,tmptxt,tmpsty);
-    addTags("1","Artist:",tags,tagcat,tmptxt,tmpsty);
-    addTags("4","Characters:",tags,tagcat,tmptxt,tmpsty);
-    addTags("5","Meta:",tags,tagcat,tmptxt,tmpsty);
-    addTags("0","Tags:",tags,tagcat,tmptxt,tmpsty);
+    addTags("3","Copyright:",_tags,_tagcat,tmptxt,tmpsty);
+    addTags("1","Artist:",_tags,_tagcat,tmptxt,tmpsty);
+    addTags("4","Characters:",_tags,_tagcat,tmptxt,tmpsty);
+    // turn off meta tags
+    //addTags("5","Meta:",tags,tagcat,tmptxt,tmpsty);
+    addTags("0","Tags:",_tags,_tagcat,tmptxt,tmpsty);
 
     // 4. set output text/style
     textbuf->text(tmptxt);
