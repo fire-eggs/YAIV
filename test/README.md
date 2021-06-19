@@ -17,6 +17,9 @@ of "none". These can be changed to any of the supported scaling and dithering
 values. See scalemodes.h and tkscalemodes.h for names.
 
 TODO: document the command line options
+
 TODO: provide the ability to set a different slideshow delay
+
 TODO: expand the script to exercise combinations of scale/dither values
+
 TODO: command line options for checker, overlay, and minimap
