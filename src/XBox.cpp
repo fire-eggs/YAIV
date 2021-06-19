@@ -943,9 +943,9 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : Fl_Group(x,y,w,h),
     align(FL_ALIGN_INSIDE|FL_ALIGN_TOP|FL_ALIGN_LEFT|FL_ALIGN_CLIP);
     box(FL_BORDER_BOX);
 
-    int bg, fg;
-    _prefs->get(CANVAS_COLOR, bg, FL_BACKGROUND_COLOR);
-    _prefs->get(CANVAS_LABEL_COLOR, fg, FL_FOREGROUND_COLOR);
+    unsigned int bg, fg;
+    _prefs->getHex(CANVAS_COLOR, bg, FL_BACKGROUND_COLOR);
+    _prefs->getHex(CANVAS_LABEL_COLOR, fg, FL_FOREGROUND_COLOR);
     color(bg);
     labelcolor(fg);
     end();

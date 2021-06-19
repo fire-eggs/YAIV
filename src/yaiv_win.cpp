@@ -24,9 +24,9 @@ YaivWin::YaivWin(int x, int y, int w, int h, Prefs* prefs) : Fl_Double_Window(x,
 #endif
 
     // Colors from preferences so RaphK can have dark and I can have light :)
-    int fg, bg;
-    _prefs->get(MAIN_COLOR, bg, FL_BACKGROUND_COLOR);
-    _prefs->get(MAIN_LABEL_COLOR, fg, FL_FOREGROUND_COLOR);
+    unsigned int fg, bg;
+    _prefs->getHex(MAIN_COLOR, bg, FL_BACKGROUND_COLOR);
+    _prefs->getHex(MAIN_LABEL_COLOR, fg, FL_FOREGROUND_COLOR);
     color(bg);
     labelcolor(fg);
     _child = nullptr;

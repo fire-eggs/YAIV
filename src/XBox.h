@@ -174,7 +174,7 @@ public:
     void resizeTimerFire(); // public for callback access
 
 private:
-    std::vector<XBoxDisplayInfoEvent *> *_dispevents;
+    std::vector<XBoxDisplayInfoEvent *> *_dispevents {nullptr};
 
     void notifyActivate(bool val);
     void notifyBorder();

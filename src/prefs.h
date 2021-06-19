@@ -70,5 +70,24 @@ public:
         free(text);
     }
 
+    void getHex(const char *n, unsigned int& val, unsigned int def)
+    {
+        char *text;
+        Fl_Preferences::get(n, text, "");
+        if (text[0] == '\0')
+            val = def;
+        else {
+            val = strtoul(text, nullptr, 16);
+        }
+        free(text);
+    }
+
+    void setHex(const char *n, unsigned int val)
+    {
+        // FLTK colors are in the format RGBA
+        char buf[10];
+        sprintf(buf, "%X", val);
+        Fl_Preferences::set(n, buf);
+    }
 };
 #endif //CLION_TEST2_PREFS_H
