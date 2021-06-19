@@ -4,6 +4,8 @@
 #include <clocale>     // setlocale()..
 
 #include "yaiv_win.h"
+#include "Fl_TransBox.h"
+#include "XBoxDisplayInfoEvent.h"
 
 void cmdline(int argc, char **argv, XBox *box)
 {
@@ -54,6 +56,9 @@ int main(int argc, char **argv) {
     XBoxDspInfoEI* xbdiei = new XBoxDspInfoEI(tb);
     b2->displayEventHandler(xbdiei);
     xbdiei->OnActivate(false); // TODO tie to initial state from options
+
+    XBoxDisplayInfoTitle* xbdit = new XBoxDisplayInfoTitle(_w);
+    b2->displayEventHandler(xbdit);
 
     _w->show();
     cmdline(argc, argv, b2); // do this _after_ show() for label etc to be correct

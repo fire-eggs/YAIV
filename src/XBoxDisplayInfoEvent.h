@@ -6,15 +6,43 @@
 #define YAIV_XBOXDISPLAYINFOEVENT_H
 
 #include "Fl_TransBox.h"
+#include "yaiv_win.h"
 
 class XBoxDisplayInfoEvent
 {
 public:
     virtual void OnDisplayInfo( const char* info ) = 0;
+    virtual void OnDisplayLabel(const char * info) = 0;
     virtual void OnActivate(bool activate) = 0;
+    virtual void OnBorder() = 0;
 };
 
 // TODO goes in separate header?
+
+class XBoxDisplayInfoTitle : public XBoxDisplayInfoEvent
+{
+private:
+    YaivWin *_win {};
+
+public:
+    explicit XBoxDisplayInfoTitle(YaivWin *win) { _win = win; }
+
+    void OnActivate(bool show) override {}
+    void OnDisplayInfo( const char* info ) override {}
+
+    void OnDisplayLabel(const char *info) override
+    {
+        if (!_win || !info)
+            return;
+        _win->label(info);
+    }
+
+    void OnBorder() override
+    {
+        _win->toggle_border();
+    }
+};
+
 
 class XBoxDspInfoEI : public XBoxDisplayInfoEvent
 {
@@ -23,6 +51,10 @@ private:
 
 public:
     explicit XBoxDspInfoEI(Fl_TransBox* dest) { _infoBox = dest; }
+
+    void OnBorder() override {}
+
+    void OnDisplayLabel(const char *info) override {}
 
     void OnActivate(bool show) override
     {

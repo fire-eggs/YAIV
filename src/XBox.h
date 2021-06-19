@@ -15,7 +15,7 @@
 #include <FL/fl_draw.H>
 #include <FL/filename.H>
 
-#include "XBoxDisplayInfoEvent.h"
+//#include "XBoxDisplayInfoEvent.h"
 #include "ScaleMode.h"
 #include "tkScaleMode.h"
 #include "overlayMode.h"
@@ -29,8 +29,8 @@
 
 #include "MostRecentPaths.h"
 
-class YaivWin;
 class Slideshow;
+class XBoxDisplayInfoEvent;
 
 class XBox : public Fl_Group
 {
@@ -117,9 +117,6 @@ public:
     // exposed for static file chooser callback
     void file_cb(const char *); // process filename from file chooser
 
-    // TODO XBox and YaivMain tightly coupled, need to fix
-    void parent(YaivWin* who) {_dad=who;}
-
 private:
 
     bool _quitAtEnd {false};
@@ -158,8 +155,6 @@ private:
     static Fl_Color _mmic;
     static int _miniMapSize;
 
-    YaivWin* _dad;
-
     MostRecentPaths* _mru;
     char filecb_name[1024]; // filename load TODO dynamic?
     Prefs* _prefs;
@@ -179,9 +174,20 @@ public:
     void resizeTimerFire(); // public for callback access
 
 private:
-    XBoxDisplayInfoEvent *_dispevent;
+    std::vector<XBoxDisplayInfoEvent *> *_dispevents;
+
+    void notifyActivate(bool val);
+    void notifyBorder();
+    void notifyDisplayInfo(const char *);
+    void notifyDisplayLabel(const char *);
+
 public:
-    void displayEventHandler(XBoxDisplayInfoEvent *hand) {_dispevent = hand;}
+    void displayEventHandler(XBoxDisplayInfoEvent *hand)
+    {
+        if (!_dispevents)
+            _dispevents = new std::vector<XBoxDisplayInfoEvent *>();
+        _dispevents->push_back(hand);
+    }
 };
 
 #endif //CLION_TEST2_XBOX_H

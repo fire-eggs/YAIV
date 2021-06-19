@@ -32,12 +32,6 @@ YaivWin::YaivWin(int x, int y, int w, int h, Prefs* prefs) : Fl_Double_Window(x,
     _child = nullptr;
 }
 
-void YaivWin::updateLabel() {
-    char lbl[FL_PATH_MAX+250];
-    lbl[0] = 0;
-    label( _child->getLabel(true, lbl, sizeof(lbl)));
-}
-
 void YaivWin::resize(int x, int y, int w, int h) {
     Fl_Double_Window::resize(x,y,w,h);
     _prefs->setWinRect(MAIN_PREFIX, x, y, w, h);

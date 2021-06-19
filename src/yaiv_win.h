@@ -23,6 +23,8 @@
 #include "danbooru.h"
 #endif
 
+class XBoxDisplayInfoTitle;
+
 class YaivWin : public Fl_Double_Window {
 private:
     bool _border;
@@ -45,7 +47,6 @@ public:
     void resize(int,int,int,int) override;
     void push();
     void drag();
-    void updateLabel();
 };
 
 YaivWin* makeMainWindow();

@@ -10,10 +10,10 @@
 #include <FL/Fl_Image_Surface.H>
 #include <FL/Fl_SVG_Image.H>
 
-#include "yaiv_win.h"
 #include "list_rand.h"
 #include "fl_imgtk.h"
 #include "Slideshow.h"
+#include "XBoxDisplayInfoEvent.h"
 
 #ifdef DANBOORU
 #include "danbooru.h"
@@ -386,7 +386,7 @@ int XBox::handle(int msg) {
                 return 1;
 
             case 'b':
-                _dad->toggle_border();
+                notifyBorder();
                 return 1;
 
             case 'w':
@@ -592,7 +592,11 @@ void XBox::nextRotation() {
 }
 
 void XBox::updateLabel() {
-    _dad->updateLabel(); // TODO super hack
+    char lbl[FL_PATH_MAX+250];
+    lbl[0] = 0;
+    getLabel(true, lbl, sizeof(lbl));
+
+    notifyDisplayLabel(lbl);
 }
 
 void XBox::image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg)
@@ -986,9 +990,7 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : Fl_Group(x,y,w,h),
 
     dragStartX = dragStartY = 0;
     _slideShow = nullptr;
-    _dad = nullptr;
     _inResize = false;
-    _dispevent = nullptr;
     filecb_name[0] = '\0';
 }
 
@@ -1024,12 +1026,10 @@ void XBox::toggleOverlay() {
     switch (draw_overlay)
     {
         case OverlayBox:
-            if (_dispevent)
-                _dispevent->OnActivate(true);
+            notifyActivate(true);
             break;
         default:
-            if (_dispevent)
-                _dispevent->OnActivate(false);
+            notifyActivate(false);
             break;
     }
     redraw();
@@ -1148,9 +1148,8 @@ void XBox::drawOverlay() {
         label(""); // TODO prevent extra label draw?
     }
 
-    if (draw_overlay == OverlayBox && _dispevent) {
-        _dispevent->OnDisplayInfo(l);
-    }
+    if (draw_overlay == OverlayBox)
+        notifyDisplayInfo(l);
 }
 
 void XBox::forceScale(const char *val)
@@ -1163,6 +1162,27 @@ void XBox::forceDither(const char *val)
 {
     ZScaleMode res = nameToZScaleMode(val);
     imgtkScale = res;
+}
+
+void XBox::notifyActivate(bool val) {
+    if (_dispevents)
+        for (XBoxDisplayInfoEvent *e : *_dispevents)
+            e->OnActivate(val);
+}
+void XBox::notifyBorder() {
+    if (_dispevents)
+        for (XBoxDisplayInfoEvent *e : *_dispevents)
+            e->OnBorder();
+}
+void XBox::notifyDisplayInfo(const char *val) {
+    if (_dispevents)
+        for (XBoxDisplayInfoEvent *e : *_dispevents)
+            e->OnDisplayInfo(val);
+}
+void XBox::notifyDisplayLabel(const char *val) {
+    if (_dispevents)
+        for (XBoxDisplayInfoEvent *e : *_dispevents)
+            e->OnDisplayLabel(val);
 }
 
 #pragma clang diagnostic pop
