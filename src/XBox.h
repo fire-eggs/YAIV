@@ -24,6 +24,7 @@
     #error "Error, required FLTK 1.4 or later"
 #endif
 
+#include "SmoothResizeGroup.h"
 #include "humansize.h"
 #include "checker.h"
 
@@ -32,7 +33,7 @@
 class Slideshow;
 class XBoxDisplayInfoEvent;
 
-class XBox : public Fl_Group
+class XBox : public SmoothResizeGroup
 {
 public:
     void MenuCB(Fl_Widget *window_p, int menuid);
@@ -100,8 +101,6 @@ public:
     int handle(int) override;
     char * getLabel(bool include_filepath, char *buff, int buffsize);
 
-    void resize(int,int,int,int) override;
-
     void change_zoom(int delta) {_zoom_step += delta; updateImage(); updateLabel();}
 
     void draw() override;
@@ -113,9 +112,6 @@ public:
     void next_image();   // exposed for slideshow
 
     void load_file(const char *n); // exposed for argv processing
-
-    // exposed for static file chooser callback
-    void file_cb(const char *); // process filename from file chooser
 
 private:
 
@@ -166,11 +162,7 @@ private:
     dirent** file_list;
     int file_count;
 
-    bool _inResize;
-    void resizeTimer();
-    void restartResizeTimer();
-public:
-    void resizeTimerFire(); // public for callback access
+    void safe_resize();
 
 private:
     std::vector<XBoxDisplayInfoEvent *> *_dispevents {nullptr};

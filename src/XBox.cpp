@@ -737,47 +737,8 @@ void XBox::updateImage() {
     }
 }
 
-void resizeTimerCallback(void *d)
-{
-    // Timer callback during resizing
-    XBox *who = static_cast<XBox *>(d);
-    if (who)
-        who->resizeTimerFire();
-}
 
-void XBox::resizeTimerFire()
-{
-    // Our timer has fired, go ahead and resize the cached image
-    _inResize = false;
-    updateImage();
-    redraw();
-}
-
-void XBox::resizeTimer()
-{
-    // Don't update the cached image until resizing has settled for a little bit
-    Fl::add_timeout(0.25, resizeTimerCallback, (void *)this);
-}
-
-void XBox::restartResizeTimer()
-{
-    // got another resize call while timer active. reset to try again.
-    Fl::remove_timeout(resizeTimerCallback);
-    resizeTimer();
-}
-
-void XBox::resize(int x,int y,int w,int h) {
-    Fl_Group::resize(x,y,w,h);
-
-    // Prevent constant / glitchy resizing of the cached image
-    if (_inResize)
-        restartResizeTimer();
-    else
-        resizeTimer();
-    _inResize = true;
-}
-
-XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : Fl_Group(x,y,w,h),
+XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : SmoothResizeGroup(x,y,w,h),
     _prefs(prefs)
 {
     align(FL_ALIGN_INSIDE|FL_ALIGN_TOP|FL_ALIGN_LEFT|FL_ALIGN_CLIP);
@@ -830,7 +791,6 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : Fl_Group(x,y,w,h),
 
     dragStartX = dragStartY = 0;
     _slideShow = nullptr;
-    _inResize = false;
 }
 
 void XBox::forceSlideshow() {
@@ -1022,6 +982,11 @@ void XBox::notifyDisplayLabel(const char *val) {
     if (_dispevents)
         for (XBoxDisplayInfoEvent *e : *_dispevents)
             e->OnDisplayLabel(val);
+}
+
+void XBox::safe_resize() {
+    updateImage();
+    redraw();
 }
 
 #pragma clang diagnostic pop
