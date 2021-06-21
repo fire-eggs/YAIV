@@ -156,7 +156,6 @@ private:
     static int _miniMapSize;
 
     MostRecentPaths* _mru;
-    char filecb_name[1024]; // filename load TODO dynamic?
     Prefs* _prefs;
 
     // TODO go into a separate 'loader' class

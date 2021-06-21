@@ -16,12 +16,12 @@ include_directories(. /home/kevin/proj/fltk/fltk /home/kevin/proj/YAIV/fl_imgtk/
 
 add_executable(yaiv main.cpp yaiv_win.cpp Fl_Anim_GIF_Image.cpp humansize.cpp list_rand.cpp
                Webp.cpp checker.cpp XBox.cpp MostRecentPaths.cpp Slideshow.cpp apng.cpp
-               Fl_TransBox.cpp modes.cpp )
+               Fl_TransBox.cpp modes.cpp XBoxMenu.cpp)
 
 add_executable(yaiv_db main.cpp Fl_Anim_GIF_Image.cpp humansize.cpp list_rand.cpp
                Webp.cpp checker.cpp XBox.cpp MostRecentPaths.cpp Slideshow.cpp apng.cpp
                Fl_TransBox.cpp danbooru.cpp yaiv_win.cpp
-               ${PROJECT_SOURCE_DIR}/sqlite-amalgamation-3350500/sqlite3.c modes.cpp )
+               ${PROJECT_SOURCE_DIR}/sqlite-amalgamation-3350500/sqlite3.c modes.cpp XBoxMenu.cpp)
 
 target_compile_definitions(yaiv_db PUBLIC "-DDANBOORU")
 
