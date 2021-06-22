@@ -1,5 +1,7 @@
+#ifndef _MSC_VER
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "modernize-use-auto"
+#endif
 
 #include <clocale>     // setlocale()..
 
@@ -66,4 +68,6 @@ int main(int argc, char **argv) {
     return Fl::run();
 }
 
+#ifndef _MSC_VER
 #pragma clang diagnostic pop
+#endif

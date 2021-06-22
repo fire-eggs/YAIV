@@ -1,5 +1,8 @@
+#ifndef _MSC_VER
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "modernize-use-auto"
+#endif
+
 //
 // Copyright 2016-2019 Christian Grabner <wcout@gmx.net>
 //
@@ -1129,5 +1132,6 @@ void Fl_Anim_GIF_Image::scale(int width, int height, int proportional, int can_e
     }
 }
 
-
+#ifndef _MSC_VER
 #pragma clang diagnostic pop
+#endif

@@ -1,5 +1,8 @@
+#ifndef _MSC_VER
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "modernize-use-auto"
+#endif
+
 //
 // Created by kevin on 5/27/21.
 //
@@ -284,7 +287,7 @@ int load_apng(const char * szIn, std::vector<Image>& img)
                             {
                                 memcpy(frameNext.p, frameCur.p, imagesize);
                                 if (dop == 1)
-                                    for (int j=0; j<h0; j++)
+                                    for (unsigned int j=0; j<h0; j++)
                                         memset(frameNext.rows[y0 + j] + x0*4, 0, w0*4);
                             }
                             frameCur.p = frameNext.p;
@@ -420,13 +423,13 @@ Fl_Image* LoadAPNG(const char *filename, Fl_Widget *canvas= nullptr)
     if (res == -1)
         return nullptr;
 
-    int num_frames = imgs.size();
+    size_t num_frames = imgs.size();
     if (num_frames > 1) {
         Image img=imgs[0];
         int w = img.w;
         int h = img.h;
-        auto* gif = new Fl_Anim_GIF_Image(filename, num_frames, w, h);
-        for (unsigned int i = 0; i < num_frames; i++) {
+        auto* gif = new Fl_Anim_GIF_Image(filename, (int)num_frames, w, h);
+        for (int i = 0; i < num_frames; i++) {
 
             int delay_num = imgs[i].delay_num;
             int delay_den = imgs[i].delay_den;
@@ -463,4 +466,6 @@ Fl_Image* LoadAPNG(const char *filename, Fl_Widget *canvas= nullptr)
     return nullptr;
 }
 
+#ifndef _MSC_VER
 #pragma clang diagnostic pop
+#endif

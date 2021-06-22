@@ -84,7 +84,7 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
         case MI_FAV3: case MI_FAV4: case MI_FAV5:
         case MI_FAV6: case MI_FAV7: case MI_FAV8: case MI_FAV9:
         {
-            long int path = ndata - MI_FAV0;
+            size_t path = ndata - MI_FAV0;
             char** mru = _mru->getAll(); // TODO return a single path
             load_file(mru[path]);
         }
@@ -105,14 +105,14 @@ void XBox::do_menu() {
         break;
     }
 
-    size_t numfavs = _mru->getCount();
+    int numfavs = _mru->getCount();
 
     // create a new menu
     unsigned long newCount = right_click_menu->size() + numfavs;
     Fl_Menu_Item* dyn_menu = new Fl_Menu_Item[newCount];
 
     // make sure the rest of the allocated menu is clear
-    for (int j = 0; j < newCount; j++)
+    for (unsigned int j = 0; j < newCount; j++)
         memset(&(dyn_menu[j]), 0, sizeof(Fl_Menu_Item));
 
     std::vector<menucall *> *totoss = new std::vector<menucall*>();
@@ -124,7 +124,7 @@ void XBox::do_menu() {
         size_t menuparam = (size_t)MI_LOAD + j;
         menucall *hold = new menucall;
         hold->who = this;
-        hold->menu = menuparam;
+        hold->menu = static_cast<int>(menuparam);
         dyn_menu[j].callback(xbox_menucb, (void*)hold );
         totoss->push_back(hold);
     }

@@ -1,5 +1,8 @@
+#ifndef _MSC_VER
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "modernize-use-auto"
+#endif
+
 //
 // Created by kevin on 5/12/21.
 //
@@ -989,4 +992,6 @@ void XBox::safe_resize() {
     redraw();
 }
 
+#ifndef _MSC_VER
 #pragma clang diagnostic pop
+#endif

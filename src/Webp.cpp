@@ -1,5 +1,8 @@
+#ifndef _MSC_VER
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "modernize-use-auto"
+#endif
+
 //
 // Created by kevin on 5/11/21.
 //
@@ -333,5 +336,6 @@ Fl_Image* LoadWebp(const char* filename, Fl_Widget *canvas=nullptr)
     WebPFree((void*)data);
     return ours;
 }
-
+#ifndef _MSC_VER
 #pragma clang diagnostic pop
+#endif

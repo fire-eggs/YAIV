@@ -1,5 +1,7 @@
+#ifndef _MSC_VER
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "modernize-use-auto"
+#endif
 //
 // Created by kevin on 6/15/21.
 //
@@ -78,4 +80,6 @@ OverlayMode nextOverlay(OverlayMode val)
     OverlayMode res = (OverlayMode)((int) val + 1);
     return res >= OverlayModeMAX ? OverlayNone : res;
 }
+#ifndef _MSC_VER
 #pragma clang diagnostic pop
+#endif
