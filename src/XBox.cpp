@@ -205,6 +205,7 @@ int XBox::handle(int msg) {
             // THERE MAY BE MORE THAN ONE URL! taking only the first
             // TODO confirm that windows DND includes the "file://" prefix!
             const char *urls = Fl::event_text();
+#ifndef _WINDOWS
             if (strncmp(urls, "file://", 7) != 0)
                 return 1; // not a local file, do nothing
 
@@ -217,7 +218,9 @@ int XBox::handle(int msg) {
             fl_decode_uri(fpath);
             load_file(fpath);
             delete[] fpath;
-
+#else
+            load_file(urls); // TODO multiple drag sources
+#endif
             take_focus();
             return 1;
         }
