@@ -184,8 +184,7 @@ void Fl_Anim_GIF_Image::FrameInfo::clear() {
         if (frames[frames_size].scalable)
             delete frames[frames_size].scalable;
 #endif
-        //delete frames[frames_size].rgb; // this crashes
-        free(frames[frames_size].rgb);
+        delete frames[frames_size].rgb; // valgrind
     }
     delete[] offscreen;
     offscreen = 0;
@@ -492,8 +491,7 @@ void Fl_Anim_GIF_Image::FrameInfo::scale_frame(int frame_) {
   frames[frame_].scalable->scale(new_w, new_h, 0, 1);
 #else
     Fl_RGB_Image *copied = (Fl_RGB_Image *)frames[frame_].rgb->copy(new_w, new_h);
-    //delete frames[frame_].rgb; // this crashes - invalid free()
-    free(frames[frame_].rgb);
+    delete frames[frame_].rgb; // valgrind
     frames[frame_].rgb = copied;
 #endif
     Fl_Image::RGB_scaling(old_scaling); // restore scaling method

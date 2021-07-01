@@ -1,3 +1,8 @@
+#ifndef _MSC_VER
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "modernize-use-auto"
+#endif
+
 //
 // Created by kevin on 6/21/21.
 //
@@ -7,8 +12,6 @@
 #include "FL/Fl_File_Chooser.H"
 
 void XBox::load_request() {
-    char filecb_name[FL_PATH_MAX];
-    filecb_name[0] = '\0'; // valgrind: uninit data
 
     Fl_File_Chooser::sort = fl_numericsort;
     const char *fname =
@@ -19,7 +22,7 @@ void XBox::load_request() {
                                           ",svgz"
                                           #endif // HAVE_LIBZ
                                           #endif // FLTK_USE_SVG
-                                          "}", filecb_name);
+                                          "}", nullptr);
 
     if (!fname)
         return;
@@ -155,3 +158,6 @@ void XBox::do_menu() {
     delete totoss;
     delete [] dyn_menu;
 }
+#ifndef _MSC_VER
+#pragma clang diagnostic pop
+#endif
