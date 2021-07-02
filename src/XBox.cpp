@@ -632,14 +632,13 @@ void XBox::updateImage() {
 
         case ScaleMode::High:
             {
-                int new_h = h();
-                int new_w = (int)((double)_showImg->w() * h() / (double)_showImg->h());
+                int new_w = (int)lround((double)_showImg->w() * h() / (double)_showImg->h());
                 if (_anim) {
-                    _anim->scale(new_w, new_h, 1, 1);
+                    _anim->scale(new_w, h(), 1, 1);
                     basezoom = (double)_anim->h() / _anim->data_h();
                 }
                 else {
-                    _showImg->scale(new_w, new_h, 1, 1);
+                    _showImg->scale(new_w, h(), 1, 1);
                     basezoom = (double)_showImg->h() / _showImg->data_h();
                 }
             }
