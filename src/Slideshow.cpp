@@ -19,7 +19,7 @@ void Slideshow::start(int current) {
 
     _window->load_current();
     if (_prefs)
-        _prefs->get(SLIDESHOW_DELAY, _slideDelay, 10);
+        _prefs->get(SLIDESHOW_DELAY, _slideDelay, 10); // TODO see forceDelay for issue
     setTimer();
 
     // TODO options from prefs
@@ -27,6 +27,14 @@ void Slideshow::start(int current) {
 
 void Slideshow::stop() {
     clearTimer();
+}
+
+// command line override
+void Slideshow::forceDelay(int val)
+{
+    stop();
+    _slideDelay = val;
+    setTimer();        // TODO this is just wrong
 }
 
 static void secondsCallback(void* who) {

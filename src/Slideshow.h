@@ -13,7 +13,7 @@ class Slideshow
 public:
     Slideshow();
 
-    void forceDelay(int val) { _slideDelay = val; } // command line override
+    void forceDelay(int val);
 
     void setPrefs(Prefs * prefs) {_prefs = prefs;}
     void setWindow(XBox *win) {_window = win;}
