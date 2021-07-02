@@ -7,6 +7,7 @@
 // Created by kevin on 5/12/21.
 //
 #include <cstring>
+#include <cmath> // lround
 
 #include <FL/filename.H>
 #include <FL/Fl_Image_Surface.H>
@@ -617,14 +618,13 @@ void XBox::updateImage() {
 
         case ScaleMode::Wide:
             {
-                int new_w = w();
-                int new_h = (int)((double)_showImg->h() * w() / (double)_showImg->w());
+                int new_h = (int)lround((double)_showImg->h() * w() / (double)_showImg->w());
                 if (_anim) {
-                    _anim->scale(new_w, new_h, 1, 1);
+                    _anim->scale(w(), new_h, 1, 1);
                     basezoom = (double)_anim->w() / _anim->data_w();
                 }
                 else {
-                    _showImg->scale(new_w, new_h, 1, 1);
+                    _showImg->scale(w(), new_h, 1, 1);
                     basezoom = (double)_showImg->w() / _showImg->data_w();
                 }
             }
