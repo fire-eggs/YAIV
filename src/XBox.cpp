@@ -674,7 +674,7 @@ void XBox::updateImage() {
                 }
                 else {
                     _showImg->scale(w(),h());
-                    if (_showImg->w() <= w() && _showImg->h() <= h()) {
+                    if (_showImg->data_w() <= w() && _showImg->data_h() <= h()) {
                         noscale = true;
                         basezoom = 1.0;
                     }
