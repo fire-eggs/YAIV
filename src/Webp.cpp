@@ -150,34 +150,22 @@ static int CheckSizeForOverflow(uint64_t size) { return (size == (size_t)size); 
 
 static int AllocateFrames(AnimatedImage* const image, uint32_t num_frames)
 {
-    uint32_t i;
-    uint8_t* mem = nullptr;
-    DecodedFrame* frames = nullptr;
     const uint64_t rgba_size  =	(uint64_t)image->canvas_width * 4 * image->canvas_height;
-    const uint64_t total_size = (uint64_t)num_frames * rgba_size * sizeof(*mem);
-    const uint64_t total_frame_size = (uint64_t)num_frames * sizeof(*frames);
-    if (!CheckSizeForOverflow(total_size) ||
-        !CheckSizeForOverflow(total_frame_size)) {
+    const uint64_t total_size = (uint64_t)num_frames * rgba_size;
+    if (!CheckSizeForOverflow(total_size))
         return 0;
-    }
 
-    mem = (uint8_t*)malloc((size_t)total_size);
-    frames = (DecodedFrame*)malloc((size_t)total_frame_size);
+    DecodedFrame *frames = new (std::nothrow) DecodedFrame [num_frames];
 
-    if (!mem || !frames) {
-        free(mem);
-        free(frames);
-        return 0;
-    }
     WebPFree(image->raw_mem);
     image->num_frames = num_frames;
     image->frames = frames;
-    for (i = 0; i < num_frames; ++i) {
-        frames[i].rgba = mem + i * rgba_size;
+    for (int i = 0; i < num_frames; ++i) {
+        frames[i].rgba = (uint8_t*) :: operator new (rgba_size);
         frames[i].duration = 0;
         frames[i].is_key_frame = 0;
     }
-    image->raw_mem = mem;
+    image->raw_mem = nullptr;
     return 1;
 }
 
@@ -199,11 +187,10 @@ AnimatedImage* ReadAnimatedImage(const uint8_t* const data, size_t data_size)
     {
         WebPAnimDecoderDelete(dec);
         return nullptr;
-        //fprintf(stderr, "Error getting global info about the animation\n");
     }
 
     // TODO these go into some sort of 'animated image' object - Fl_Anim_GIF_Image ?
-    auto* image = new AnimatedImage();
+    AnimatedImage * image = new AnimatedImage();
     memset(image, 0, sizeof(*image));
 
     // Animation properties.
@@ -283,18 +270,17 @@ Fl_Image* LoadWebp(const char* filename, Fl_Widget *canvas=nullptr)
         if (image == nullptr)
             return nullptr;
 
-        // TODO 4009.gif doesn't have transparent background, 4009.webp does
-        // TODO is 4009.webp actually a playback issue?
         // 4009.webp is an instance of an animated webp with only one frame. When treating it as a
         // Fl_Animate_GIF_Image file, nothing would appear. This may be a flaw in animated GIF
         // playback, but rather than address that now, treat the file as a static image.
         if (image->num_frames == 1)
         {
-            DecodedFrame frame = image->frames[0];
-            Webp_Image* ours = new Webp_Image(frame.rgba,
+            DecodedFrame *frame = &(image->frames[0]);
+            Webp_Image* ours = new Webp_Image(frame->rgba,
                                               image->canvas_width, image->canvas_height,
                                               bitstream->has_alpha ? 4 : 3);
             WebPFree((void*)data);
+            delete image;
             return ours;
         }
         else
@@ -305,14 +291,16 @@ Fl_Image* LoadWebp(const char* filename, Fl_Widget *canvas=nullptr)
             auto* gif = new Fl_Anim_GIF_Image(filename, (int)image->loop_count, W, H);
             for (unsigned int i = 0; i < image->num_frames; i++)
             {
-                DecodedFrame frame = image->frames[i];
-                gif->add_frame(frame.rgba, frame.duration, W, H, true);
+                DecodedFrame* frame = &(image->frames[i]);
+                gif->add_frame(frame->rgba, frame->duration, W, H, true);
             }
             gif->start();
             gif->canvas(canvas, Fl_Anim_GIF_Image::Flags::DontResizeCanvas |
                                 Fl_Anim_GIF_Image::Flags::DontSetAsImage);
 
             WebPFree((void*)data); // valgrind mem leak
+            delete image->frames;
+            delete image;
             return gif;
         }
     }

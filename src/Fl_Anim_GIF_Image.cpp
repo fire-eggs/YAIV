@@ -24,10 +24,12 @@
 #include <cerrno>
 #include <cmath> // lround()
 #include <new> // std::nothrow
+#include <vector> // std::vector
 
 #include <FL/Fl.H>
 #include <FL/Fl_GIF_Image.H>
 #include <FL/Fl_Group.H>
+#include <algorithm>
 
 #if (FL_MINOR_VERSION<4)
     #error "Error, required FLTK 1.4 or later"
@@ -126,7 +128,7 @@ private:
     Fl_Anim_GIF_Image *_anim;         // a pointer to the Image (only needed for name())
     bool valid;                       // flag ig valid data
     int frames_size;                  // number of frames stored in 'frames'
-    GifFrame *frames;                 // "vector" for frames
+    std::vector<GifFrame>frames;                 // "vector" for frames
     int loop_count;                   // loop count from file
     int loop;                         // current loop count
     int background_color_index;       // needed for dispose()
@@ -188,8 +190,12 @@ void Fl_Anim_GIF_Image::FrameInfo::clear() {
     }
     delete[] offscreen;
     offscreen = 0;
-    free(frames); // allocated with realloc delete[] frames;
-    frames = 0;
+
+    //free(frames); // allocated with realloc delete[] frames;
+    //frames = 0;
+//    for (int i=0; i < frames_size; i++)
+//        delete frames[i];
+    frames.clear();
     frames_size = 0;
 }
 
@@ -440,12 +446,7 @@ void Fl_Anim_GIF_Image::FrameInfo::onExtensionLoaded(GIF_WHDR &whdr_) {
 
 
 bool Fl_Anim_GIF_Image::FrameInfo::push_back_frame(const GifFrame &frame_) {
-    void *tmp = realloc(frames, sizeof(GifFrame) * (frames_size + 1));
-    if (!tmp) {
-        return false;
-    }
-    frames = (GifFrame *)tmp;
-    memcpy(&frames[frames_size], &frame_, sizeof(GifFrame));
+    frames.push_back(frame_);
     frames_size++;
     return true;
 }

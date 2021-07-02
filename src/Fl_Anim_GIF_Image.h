@@ -239,13 +239,14 @@ public:
     int frame_y(int frame_) const;
     /**
      Return the frame dimensions of frame 'frame_'.
-     Usefull only if loaded with 'optimize_mem' and
+     Useful only if loaded with 'optimize_mem' and
      the animation also has size optimized frames.
      */
     int frame_w(int frame_) const;
     int frame_h(int frame_) const;
 
-    bool add_frame(unsigned char *frameRGBA, int duration, int cw, int ch, bool alloc=false);  // KBR webp
+    /* add a decoded frame from a non-GIF source */
+    bool add_frame(unsigned char *frameRGBA, int duration, int cw, int ch, bool alloc=false);  // KBR apng, webp
 
     /** Sets the drawing size of the image. See Fl_Image::scale() for details.
      */
