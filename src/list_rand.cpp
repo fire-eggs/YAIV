@@ -4,6 +4,7 @@
 
 #include <cstdlib> // srand, rand
 #include <ctime> // time
+
 #include <FL/Fl_File_Chooser.H>  // dirent
 #ifdef FLTK_USE_SVG
 #include <FL/Fl_SVG_Image.H>
@@ -100,9 +101,15 @@ fl_check_images(const char *name,               // I - Filename
     }
   }
 #  endif // HAVE_LIBZ
-  if ( (headerlen > 5 && memcmp(header, "<?xml", 5) == 0) ||
-      memcmp(header, "<svg", 4) == 0)
+
+// KBR handle BOM
+if (memcmp(header, "<svg", 4) == 0 ||
+    memcmp(&(header[3]), "<svg", 4) == 0 ||
+    memcmp(header, "<?xml", 5) == 0 ||
+    memcmp(&(header[3]), "<?xml", 5) == 0 )
+{
     return new Fl_SVG_Image(name);
+}
 #endif // FLTK_USE_SVG
 
     return 0;
