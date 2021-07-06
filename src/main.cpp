@@ -8,6 +8,8 @@
 #include "yaiv_win.h"
 #include "Fl_TransBox.h"
 #include "XBoxDisplayInfoEvent.h"
+#include "buttonBar.h"
+#include "textbar.h"
 
 void cmdline(int argc, char **argv, XBox *box)
 {
@@ -40,27 +42,33 @@ int main(int argc, char **argv) {
     setlocale(LC_ALL, "C");
     makeChecker(); // TODO move to more appropriate location
 
-    Fl_Image::RGB_scaling(FL_RGB_SCALING_BILINEAR); // TODO use a fl_imgtk scaler by default
+    Fl_Image::RGB_scaling(FL_RGB_SCALING_NEAREST); // TODO use a fl_imgtk scaler by default
 
-    // TODO rework to add options, filename, etc
 
+    // TODO tb : mediator needs to know about main, XBox
     YaivWin* _w = makeMainWindow();
     XBox *b2 = new XBox(0,0,_w->w(),_w->h(), _w->prefs());
     _w->child(b2);
     b2->parent(_w);
     _w->resizable(static_cast<Fl_Widget *>(b2));
 
+    // TODO tb : mediator needs to know about transbox
     // TODO transbox location, size from prefs
     int TB_HIGH=35;
     Fl_TransBox *tb = new Fl_TransBox(0, _w->h()-TB_HIGH, _w->w(), TB_HIGH);
     _w->end();
 
+    // TODO tb : replaced by mediator
     XBoxDspInfoEI* xbdiei = new XBoxDspInfoEI(tb);
     b2->displayEventHandler(xbdiei);
     xbdiei->OnActivate(false); // TODO tie to initial state from options
 
+    // TODO tb : replaced by mediator
     XBoxDisplayInfoTitle* xbdit = new XBoxDisplayInfoTitle(_w);
     b2->displayEventHandler(xbdit);
+
+    add_btn_bar(nullptr, nullptr); // TODO tb main window now needs to be derived from dropwin
+    add_text_bar(nullptr, nullptr); // TODO tb currently for danbooru
 
     _w->show();
     cmdline(argc, argv, b2); // do this _after_ show() for label etc to be correct
