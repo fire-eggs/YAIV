@@ -8,8 +8,10 @@
 #include "yaiv_win.h"
 #include "Fl_TransBox.h"
 #include "XBoxDisplayInfoEvent.h"
+#include "toolbar/toolgrp.h"
 #include "buttonBar.h"
 #include "textbar.h"
+#include "mediator.h"
 
 void cmdline(int argc, char **argv, XBox *box)
 {
@@ -30,9 +32,13 @@ void cmdline(int argc, char **argv, XBox *box)
     }
 }
 
+static dockgroup* dock;
+XBox *b2;
+
+#define TB_HEIGHT 38 // TODO tb hack
+
 int main(int argc, char **argv) {
 
-   Fl::lock(); /// thread lock must be called in this time for init.
 #if (FLTK_EXT_VERSION>0)
     Fl::scheme("flat");
 #else
@@ -47,30 +53,56 @@ int main(int argc, char **argv) {
 
     // TODO tb : mediator needs to know about main, XBox
     YaivWin* _w = makeMainWindow();
-    XBox *b2 = new XBox(0,0,_w->w(),_w->h(), _w->prefs());
+
+    dock = new dockgroup(1, 1,  _w->w() - 2, TB_HEIGHT + 2);
+    dock->box(FL_THIN_DOWN_BOX);
+    dock->end();
+    dock->set_window(_w);
+
+    add_btn_bar(dock, 0);
+    dock->redraw();
+
+    _w->set_dock(dock);
+
+    _w->begin();
+
+    _w->workspace = new Fl_Group(2,TB_HEIGHT+2,_w->w()-4, _w->h()-4-TB_HEIGHT-2);
+    _w->workspace->box(FL_THIN_DOWN_BOX);
+
+    //XBox *b2 = new XBox(2,TB_HEIGHT + 2,_w->w(),_w->h(), _w->prefs());
+    b2 = new XBox(2,TB_HEIGHT+3,_w->workspace->w()-2,_w->workspace->h(), _w->prefs());
+
     _w->child(b2);
-    b2->parent(_w);
-    _w->resizable(static_cast<Fl_Widget *>(b2));
+    _w->workspace->resizable(static_cast<Fl_Widget *>(b2));
+
+    //b2->parent(_w);
+    //_w->resizable(static_cast<Fl_Widget *>(b2));
 
     // TODO tb : mediator needs to know about transbox
     // TODO transbox location, size from prefs
     int TB_HIGH=35;
     Fl_TransBox *tb = new Fl_TransBox(0, _w->h()-TB_HIGH, _w->w(), TB_HIGH);
-    _w->end();
 
-    // TODO tb : replaced by mediator
+    _w->workspace->end();
+    _w->end();
+    _w->resizable(_w->workspace);
+
+
+    Fl::lock(); /// thread lock must be called in this time for init.
+
+    // TODO tb : replace by mediator
     XBoxDspInfoEI* xbdiei = new XBoxDspInfoEI(tb);
     b2->displayEventHandler(xbdiei);
     xbdiei->OnActivate(false); // TODO tie to initial state from options
 
-    // TODO tb : replaced by mediator
+    // TODO tb : replace by mediator
     XBoxDisplayInfoTitle* xbdit = new XBoxDisplayInfoTitle(_w);
     b2->displayEventHandler(xbdit);
 
-    add_btn_bar(nullptr, nullptr); // TODO tb main window now needs to be derived from dropwin
-    add_text_bar(nullptr, nullptr); // TODO tb currently for danbooru
+    //add_text_bar(_w, nullptr); // TODO tb currently for danbooru
 
     _w->show();
+    toolgrp::show_all();
     cmdline(argc, argv, b2); // do this _after_ show() for label etc to be correct
 
     return Fl::run();

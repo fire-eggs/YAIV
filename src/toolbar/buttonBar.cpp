@@ -5,8 +5,8 @@
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 
 #include "buttonBar.h"
-
 #include "toolgrp.h"
+#include "mediator.h"
 
 #define BTNSIZE 30
 #define HANDWID 18
@@ -29,13 +29,23 @@ static void setImage(Fl_Widget *btn, char *imgn, int sz=25)
     btn->visible_focus(0);
 }
 
+Mediator::ACTIONS acts[] = {
+        Mediator::ACT_PREV,
+        Mediator::ACT_NEXT,
+        Mediator::ACT_ZMI,
+        Mediator::ACT_ZMO,
+        Mediator::ACT_SLID,
+        Mediator::ACT_ROTR,
+        Mediator::ACT_OPEN,
+        Mediator::ACT_GOTO,
+        Mediator::ACT_CHK,
+};
 
 static void btnCb(Fl_Widget *w, void *data)
 {
-    size_t val = (size_t)data; // TODO hack
-    printf("Btn: %zu\n", val);
-    // TODO tb : mediator
-    //send_message(MSGS::TB, (int)data);
+    int val = (int)(size_t)data; // TODO hack
+    //printf("Btn: %zu\n", val);
+    send_message(Mediator::MSG_TB, acts[val]);
 }
 
 static void makeBtn(toolgrp* tg, int i, char *name)
@@ -48,19 +58,19 @@ static void makeBtn(toolgrp* tg, int i, char *name)
     tg->add(btn1);
 }
 
-void add_btn_bar(Fl_Widget *, void*)
+void add_btn_bar(dockgroup *dock, int floating)
 {
     // Create a docked toolgroup
-    //toolgrp *tgroup = new toolgrp(dock, 0, 350, TB_HEIGHT); // TODO width from # of buttons
-    toolgrp *tgroup = new toolgrp(nullptr, 1, 350, TB_HEIGHT); // TODO width from # of buttons
+    toolgrp *tgroup = new toolgrp(dock, floating, 350, TB_HEIGHT); // TODO width from # of buttons
     tgroup->box(FL_BORDER_BOX);
     tgroup->in_group()->box(FL_NO_BOX);
     tgroup->color(FL_BLACK);
-    tgroup->end();
 
     char *btns [] = {"ViewPreviousImage","ViewNextImage","ZoomIn",
                      "ZoomOut","Slideshow","RotateRight",
                      "OpenFile", "GoToImage","Checkerboard"};
     for (int i=0; i < 9; i++)
         makeBtn(tgroup, i, btns[i]);
+
+    tgroup->end();
 }

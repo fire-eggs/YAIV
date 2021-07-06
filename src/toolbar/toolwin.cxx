@@ -8,7 +8,7 @@
 #  define FX_DROP_EVENT	(FL_DND_RELEASE + 100)  // TODO tb hack
 #  define DROP_REGION_HEIGHT 42 //39
 
-//#include "mediator.h" // TODO tb mediator
+#include "mediator.h"
 
 #define NTW (toolwin*)0  // Null Tool Window
 
@@ -103,15 +103,21 @@ void toolwin::hide_all(void)
 	}
 }
 
+#include <FL/names.h>
 int toolwin::handle(int event)
 {
   int res = Fl_Double_Window::handle(event);
+
   if (event == FL_KEYDOWN)
   {
-    printf("TW: key %d (%d)\n", Fl::event_key(), res);
-    // handle_key();  // TODO tb mediator
+//    printf("TW: key %d (%d)\n", Fl::event_key(), res);
+    Mediator::handle_key();
     return 1;
   }
+
+  //if (event) printf("TW:%s (%d)\n", fl_eventnames[event], event);
+  if (event == FL_FOCUS)
+      return 0;
 
   if (event == FL_SHOW)
   {

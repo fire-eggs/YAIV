@@ -193,9 +193,16 @@ void toolgrp::hide_all(void)
 	toolwin::hide_all();
 }
 
+/*
+#include <FL/names.h>
 int toolgrp::handle(int evt)
 {
-  int res = Fl_Group::handle(evt);
+    if (evt) printf("TG: %s (%d)\n", fl_eventnames[evt], evt);
+    return Fl_Group::handle(evt);
+
+    if (evt == FL_FOCUS || evt == FL_UNFOCUS) return 0;
+
+    int res = Fl_Group::handle(evt);
   if (evt == FL_KEYDOWN)
   {
     printf("TG:key %d (%d)\n", Fl::event_key(), res);
@@ -205,5 +212,5 @@ int toolgrp::handle(int evt)
   }  
   return res;
 }
-
+*/
 // end of file

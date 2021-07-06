@@ -69,7 +69,7 @@ public:
 	inline void remove( Fl_Widget *w ) { inner_group->remove( w ); }
 //	inline void add_resizable( Fl_Widget &box ) { inner_group->add_resizable( box ); }
 
-  int handle(int evt) override;
+  //int handle(int evt) override;
 };
 
 #endif // _HAVE_TOOL_GROUP_HDR_

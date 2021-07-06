@@ -14,6 +14,7 @@
 
 #include "prefs.h"
 #include "XBox.h"
+#include "toolbar/dropwin.h"
 
 #if (FL_MINOR_VERSION<4)
 #error "Error, required FLTK 1.4 or later"
@@ -25,7 +26,7 @@
 
 class XBoxDisplayInfoTitle;
 
-class YaivWin : public Fl_Double_Window {
+class YaivWin : public dropwin {
 private:
     bool _border;
     XBox* _child;

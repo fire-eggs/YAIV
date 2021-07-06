@@ -5,7 +5,7 @@
 #ifndef YAIV_BUTTONBAR_H
 #define YAIV_BUTTONBAR_H
 
-#include <FL/Fl.H>
-void add_btn_bar(Fl_Widget *, void *);
+#include "dock_gp.h"
+void add_btn_bar(dockgroup *dock, int floating);
 
 #endif //YAIV_BUTTONBAR_H

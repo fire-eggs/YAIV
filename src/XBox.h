@@ -63,6 +63,7 @@ private:
         MI_LOAD,
         MI_COPYPATH,
         MI_GOTO,
+        MI_TEXTBAR,
         MI_OPTIONS,
 
         MI_FAVS, // Must be last before MI_FAVx
@@ -78,11 +79,12 @@ private:
         MI_FAV9,
     };
 
-    Fl_Menu_Item right_click_menu[7] =
+    Fl_Menu_Item right_click_menu[8] =
     {
         {"Load",            0, nullptr, (void *)MI_LOAD},
         {"Copy image path", 0, nullptr, (void *)MI_COPYPATH},
-        {"Goto Image",      0, nullptr, (void *)MI_GOTO, FL_MENU_DIVIDER},
+        {"Goto Image",      0, nullptr, (void *)MI_GOTO},
+        {"Show textbar",    0, nullptr, (void *)MI_TEXTBAR, FL_MENU_DIVIDER},
         {"Options",         0, nullptr, (void *)MI_OPTIONS, FL_MENU_DIVIDER},
 
         {"Last Used",       0, nullptr, nullptr, FL_SUBMENU},
@@ -113,6 +115,9 @@ public:
 
     void load_file(const char *n); // exposed for argv processing
 
+    int key(int val); // keydown from someplace
+    void action(int val); // action from someplace (e.g. toolbar button)
+
 private:
 
     bool _quitAtEnd {false};
@@ -120,6 +125,7 @@ private:
     void load_filelist(const char *);
     int find_file(const char *n);
     void load_request(); // 'load' processing
+    void goto_request(); // 'goto' processing
 
     void prev_image();
     void next_scale();

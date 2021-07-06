@@ -17,6 +17,7 @@
 #include "fl_imgtk.h"
 #include "Slideshow.h"
 #include "XBoxDisplayInfoEvent.h"
+#include "mediator.h" // TODO define messages elsewhere?
 
 #ifdef DANBOORU
 #include "danbooru.h"
@@ -184,12 +185,217 @@ void XBox::prev_image() {
     load_current();
 }
 
-int XBox::handle(int msg) {
+void XBox::action(int act)
+{
+    switch (act)
+    {
+        case Mediator::ACT_NEXT:
+            deltax = deltay = 0;
+            next_image();
+            break;
+        case Mediator::ACT_PREV:
+            deltax = deltay = 0;
+            prev_image();
+            break;
+        case Mediator::ACT_CHK:
+            draw_check = !draw_check;
+            updateImage();
+            redraw();
+            break;
+        case Mediator::ACT_ZMI:
+            change_zoom(+1);
+            redraw();
+            break;
+        case Mediator::ACT_ZMO:
+            change_zoom(-1);
+            redraw();
+            break;
+        case Mediator::ACT_ROTR:
+            nextRotation();
+            break;
+        case Mediator::ACT_OPEN:
+            load_request();
+            this->take_focus();
+            break;
+        case Mediator::ACT_GOTO:
+            goto_request();
+            break;
+        default:
+            return;
+    }
+}
 
+int XBox::key(int fullkey)
+{
+    // TODO this moves to mediator to lookup key customization
+
+    int key = fullkey & FL_KEY_MASK;
+    int ctrl = fullkey & FL_CTRL;
+#ifdef __APPLE_
+    ctrl = fullkey & FL_COMMAND;
+#endif
+
+    switch (key)
+    {
+        case 'q':
+            exit(0);
+
+        case 'c':
+            action(Mediator::ACT_CHK);
+            return 1;
+
+        case 's':
+            next_scale();
+            return 1;
+
+        case 'n':
+            draw_center = !draw_center;
+            if (!draw_center)
+                deltax = deltay = 0;
+            redraw();
+            return 1;
+
+        case 'r':
+        {
+            if (!file_list || file_count<=1)
+                break;
+
+            struct dirent **newlist = list_randomize(file_list, file_count);
+
+            for (int i=0; i<file_count; i++)
+                file_list[i] = newlist[i];
+
+            free(newlist);
+            load_current();
+        }
+            return 1;
+
+        case FL_Right:
+            if (ctrl)
+            {
+                deltax -= _scroll_speed; // direction matches FEH
+                redraw();
+            }
+            else
+            {
+                action(Mediator::ACT_NEXT);
+            }
+            return 1;
+
+        case FL_Left: // TODO consider for pan
+            if (ctrl)
+            {
+                deltax += _scroll_speed; // direction matches FEH
+                redraw();
+            }
+            else
+            {
+                action(Mediator::ACT_PREV);
+            }
+            return 1;
+
+        case FL_Up:
+            if (ctrl)
+            {
+                deltay += _scroll_speed; // direction matches FEH
+                redraw();
+            }
+            else
+            {
+                action(Mediator::ACT_ZMI);
+            }
+            return 1;
+
+        case FL_Down:
+            if (ctrl)
+            {
+                deltay -= _scroll_speed; // direction matches FEH
+                redraw();
+            }
+            else
+            {
+                action(Mediator::ACT_ZMO);
+            }
+            return 1;
+
+        case FL_Page_Down:
+        case ' ':
+            action(Mediator::ACT_NEXT);
+            return 1;
+
+        case FL_Page_Up:
+        case FL_BackSpace:
+            action(Mediator::ACT_PREV);
+            return 1;
+
+        case FL_Home:
+            current_index = INT_MIN + 1;
+            prev_image();
+            return 1;
+
+        case FL_End:
+            current_index = INT_MAX - 1;
+            next_image();
+            return 1;
+
+        case 't':
+            action(Mediator::ACT_ROTR);
+            return 1;
+
+        case 'z':
+            nextTkScale();
+            return 1;
+
+        case FL_Escape: // escape to NOT close app
+            return 1;
+
+        case 'b':
+            notifyBorder();
+            return 1;
+
+        case 'w':
+            toggleSlideshow();
+            return 1;
+
+        case 'm':
+            toggleMinimap();
+            return 1;
+
+        case 'o':
+            toggleOverlay();
+            return 1;
+
+        case 'p':
+            _pan_with_mouse = !_pan_with_mouse;
+            _prefs->set2(MOUSE_PAN, _pan_with_mouse);
+            return 1;
+            break;
+
+#ifdef DANBOORU
+            case 'd':
+                if (!file_list || file_count<=1)
+                    break;
+
+                if (Fl::event_state() & CTRL_P_KEY)
+                {
+                    view_danbooru(_prefs);
+                    update_danbooru(file_list[current_index]->d_name);
+                }
+                break;
+#endif
+    }
+    return 0;
+
+}
+
+int XBox::handle(int msg) {
+/*
     if (msg == FL_FOCUS || msg == FL_UNFOCUS) // TODO _must_ this go before Fl_Group::handle?
     {
         return 1;
     }
+*/
+    //if (msg == FL_FOCUS || msg == FL_UNFOCUS) return 0;
 
     int ret = Fl_Group::handle(msg);
 
@@ -243,158 +449,7 @@ int XBox::handle(int msg) {
     }
 
     if (msg == FL_KEYDOWN) {
-
-        switch (Fl::event_key())
-        {
-            case 'q':
-                exit(0);
-
-            case 'c':
-                draw_check = !draw_check;
-                updateImage();
-                redraw();
-                return 1;
-
-            case 's':
-                next_scale();
-                return 1;
-
-            case 'n':
-                draw_center = !draw_center;
-                if (!draw_center)
-                    deltax = deltay = 0;
-                redraw();
-                return 1;
-
-            case 'r':
-            {
-                if (!file_list || file_count<=1)
-                    break;
-
-                struct dirent **newlist = list_randomize(file_list, file_count);
-
-                for (int i=0; i<file_count; i++)
-                    file_list[i] = newlist[i];
-
-                free(newlist);
-                load_current();
-            }
-            return 1;
-
-            case FL_Right:
-                if (Fl::event_state() & CTRL_P_KEY)
-                {
-                    deltax -= _scroll_speed; // direction matches FEH
-                }
-                else
-                {
-                    next_image();
-                    deltax = deltay = 0; // TODO allow unchanged?
-                }
-                redraw();
-                return 1;
-
-            case FL_Left: // TODO consider for pan
-                if (Fl::event_state() & CTRL_P_KEY)
-                {
-                    deltax += _scroll_speed; // direction matches FEH
-                }
-                else
-                {
-                    prev_image();
-                    deltax = deltay = 0; // TODO allow unchanged? [lock position]
-                }
-                redraw();
-                return 1;
-
-            case FL_Up:
-                if (Fl::event_state() & CTRL_P_KEY)
-                {
-                    deltay += _scroll_speed; // direction matches FEH
-                }
-                else
-                {
-                    change_zoom(+1);
-                }
-                redraw();
-                return 1;
-
-            case FL_Down:
-                if (Fl::event_state() & CTRL_P_KEY)
-                {
-                    deltay -= _scroll_speed; // direction matches FEH
-                }
-                else
-                {
-                    change_zoom(-1);
-                }
-                redraw();
-                return 1;
-
-            case FL_Page_Down:
-            case ' ':
-                next_image();
-                return 1;
-
-            case FL_Page_Up:
-            case FL_BackSpace:
-                prev_image();
-                return 1;
-
-            case FL_Home:
-                current_index = INT_MIN + 1;
-                prev_image();
-                return 1;
-
-            case FL_End:
-                current_index = INT_MAX - 1;
-                next_image();
-                return 1;
-
-            case 't':
-                nextRotation();
-                return 1;
-
-            case 'z':
-                nextTkScale();
-                return 1;
-
-            case FL_Escape: // escape to NOT close app
-                return 1;
-
-            case 'b':
-                notifyBorder();
-                return 1;
-
-            case 'w':
-                toggleSlideshow();
-                return 1;
-
-            case 'm':
-                toggleMinimap();
-                return 1;
-
-            case 'o':
-                toggleOverlay();
-                return 1;
-
-            case 'p':
-                _pan_with_mouse = !_pan_with_mouse;
-                _prefs->set2(MOUSE_PAN, _pan_with_mouse);
-                return 1;
-#ifdef DANBOORU
-            case 'd':
-                if (!file_list || file_count<=1)
-                    break;
-
-                if (Fl::event_state() & CTRL_P_KEY)
-                {
-                    view_danbooru(_prefs);
-                    update_danbooru(file_list[current_index]->d_name);
-                }
-                break;
-#endif
-        }
+        return key(Fl::event_key());
     }
 
     return ret;

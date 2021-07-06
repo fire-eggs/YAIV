@@ -41,20 +41,26 @@ void dropwin::dock_resize(int delta_h)
 	redraw();
 }
 
-int dropwin::handle(int evt)
+#include <FL/names.h>
+int dropwin::handle(int event)
 {
-	int res = Fl_Double_Window::handle(evt);
-	
-  if (evt == FL_KEYDOWN)
+    //if (event) printf("DW:%s (%d)\n", fl_eventnames[event], event);
+
+    if (event == FL_FOCUS) return 0;
+
+    int res = Fl_Double_Window::handle(event);
+
+/*
+  if (event == FL_KEYDOWN)
   {
     printf("DW:key %d\n", Fl::event_key());
     //handle_key(); // TODO tb mediator
     //send_message(MSGS::KEY, Fl::event_key());
     return 1;
   }
-  
+*/
 	// Is this a dock_drop event?
-	if((evt == FX_DROP_EVENT) && (dock))
+	if((event == FX_DROP_EVENT) && (dock))
 	{
 		printf("Got Drop Event - ");
 		// Did the drop happen on us?

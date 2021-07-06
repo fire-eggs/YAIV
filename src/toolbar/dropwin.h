@@ -25,6 +25,7 @@ public:
 
 	// assign a dock widget to this window
 	void set_dock(dockgroup *d) {dock = d;}
+    dockgroup *get_dock() { return dock; }
 
 	// Resize the workspace area if the dock closes/opens
 	void dock_resize(int h);

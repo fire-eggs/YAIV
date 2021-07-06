@@ -11,6 +11,8 @@
 #include "FL/fl_ask.H"
 #include "FL/Fl_File_Chooser.H"
 
+#include "toolbar/textbar.h"
+
 void XBox::load_request() {
 
     Fl_File_Chooser::sort = fl_numericsort;
@@ -29,6 +31,27 @@ void XBox::load_request() {
     load_file(fname);
 }
 
+void XBox::goto_request() {
+
+    int dex = current_index + 1;
+    char def[256];
+    sprintf(def, "%d", dex);
+    const char* res = fl_input("Goto image:", def);
+    if (res)
+    {
+        try
+        {
+            int val = std::stoi(res);
+            current_index = val - 1;
+            load_current();
+            //dynamic_cast<XBox *>(window_p)->load_current(); // TODO hack
+        }
+        catch (std::exception& e)
+        {
+        }
+    }
+}
+
 struct menucall {XBox *who; int menu;};
 static void xbox_menucb(Fl_Widget *window_p, void *userdata) {
 
@@ -43,7 +66,7 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
 
     switch( ndata )
     {
-        case MI_LOAD:
+        case MI_LOAD: // TODO ACT_OPEN
             load_request();
             this->take_focus();
             break;
@@ -59,28 +82,15 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
         }
             break;
 
-        case MI_GOTO:
-        {
-            int dex = current_index + 1;
-            char def[256];
-            sprintf(def, "%d", dex);
-            const char* res = fl_input("Goto image:", def);
-            if (res)
-            {
-                try
-                {
-                    int val = std::stoi(res);
-                    current_index = val - 1;
-                    dynamic_cast<XBox *>(window_p)->load_current(); // TODO hack
-                }
-                catch (std::exception& e)
-                {
-                }
-            }
-        }
+        case MI_GOTO: // TODO ACT_GOTO
+            goto_request();
             break;
 
         case MI_OPTIONS:		    // TODO nyi
+            break;
+
+        case MI_TEXTBAR:
+            add_text_bar(nullptr, nullptr);
             break;
 
         case MI_FAV0: case MI_FAV1: case MI_FAV2:
