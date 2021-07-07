@@ -22,6 +22,9 @@ namespace Mediator {
         if (!msg2)
             printf("Invalid msg\n");
         else {
+            if (msg2->msg == MSG_TB && msg2->data == ACT_EXIT)
+                exit(0);
+
             //printf("Msg: %d - %d\n", msg2->msg, msg2->data);
             if (msg2->msg == MSG_KEY) {
                 b2->key(msg2->data); // TODO key handling right here : lookup & send

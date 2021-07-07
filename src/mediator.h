@@ -22,6 +22,7 @@ namespace Mediator {
         ACT_ZMI  = 6,
         ACT_ZMO  = 7,
         ACT_OPEN = 8,
+        ACT_EXIT = 9,
     };
     void send_message(int msg, int data);
 
