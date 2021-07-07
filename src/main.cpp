@@ -56,6 +56,7 @@ int main(int argc, char **argv) {
 
     dock = new dockgroup(1, 1,  _w->w() - 2, TB_HEIGHT + 2);
     dock->box(FL_THIN_DOWN_BOX);
+    dock->color(FL_BLACK); // TODO from prefs/theme
     dock->end();
     dock->set_window(_w);
 
