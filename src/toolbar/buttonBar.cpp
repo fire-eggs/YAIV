@@ -39,12 +39,12 @@ Mediator::ACTIONS acts[] = {
         Mediator::ACT_OPEN,
         Mediator::ACT_GOTO,
         Mediator::ACT_CHK,
+        Mediator::ACT_EXIT,
 };
 
 static void btnCb(Fl_Widget *w, void *data)
 {
     int val = (int)(size_t)data; // TODO hack
-    //printf("Btn: %zu\n", val);
     send_message(Mediator::MSG_TB, acts[val]);
 }
 
@@ -68,8 +68,10 @@ void add_btn_bar(dockgroup *dock, int floating)
 
     char *btns [] = {"ViewPreviousImage","ViewNextImage","ZoomIn",
                      "ZoomOut","Slideshow","RotateRight",
-                     "OpenFile", "GoToImage","Checkerboard"};
-    for (int i=0; i < 9; i++)
+                     "OpenFile", "GoToImage","Checkerboard",
+                     "exit_white"};
+    int count = sizeof(btns) / sizeof(char*);
+    for (int i=0; i < count; i++)
         makeBtn(tgroup, i, btns[i]);
 
     tgroup->end();
