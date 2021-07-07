@@ -1,4 +1,7 @@
-#include <stdio.h>
+#ifndef _MSC_VER
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "modernize-use-auto"
+#endif
 
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
@@ -7,6 +10,8 @@
 #include "drag_btn.h"
 
 #  define FX_DROP_EVENT	(FL_DND_RELEASE + 100)  // TODO tb hack
+#  define FX_DRAG_EVENT	(FL_DND_DRAG + 100)  // TODO tb hack
+
 #  define DROP_REGION_HEIGHT 42 //39
 
 #include "toolgrp.h"
@@ -17,6 +22,7 @@ drag_btn::drag_btn(int x, int y, int w, int h, const char *l)
  : Fl_Box(x, y, w, h, l) 
 {
 	was_docked = 0; // Assume we have NOT just undocked...
+	x1 = y1 = xoff = yoff = 0;
 }
 
 void drag_btn::draw()
@@ -37,6 +43,31 @@ void drag_btn::draw()
 
 	fl_pop_clip();
 } // draw
+
+#define DRAG_MIN 10
+
+int win_event(int event, int cx, int cy)
+{
+    for(Fl_Window *win = Fl::first_window(); win; win = Fl::next_window(win))
+    {
+        // Get the co-ordinates of each window
+        int ex = win->x_root();
+        int ey = win->y_root();
+        int ew = win->w();
+        int eh = win->h();
+
+        // Are we inside the boundary of the window?
+        if(win->visible() && (cx > ex) && (cy > ey)
+           && (cx < (ew + ex)) && (cy < (eh + ey)))
+        {	// Send the found window a message that we want to dock with it.
+            if(Fl::handle(event, win))
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 int drag_btn::handle(int event) 
 {
@@ -73,6 +104,20 @@ int drag_btn::handle(int event)
 				xoff = tw->x() - x1;
 				yoff = tw->y() - y1;
 			}
+			else
+            {
+			    // Let the window we're dragging over know, in case it wants to react
+                cx = Fl::event_x_root();
+                cy = Fl::event_y_root();
+                x2 = x1 - cx;
+                y2 = y1 - cy;
+                x2 = (x2 > 0) ? x2 : (-x2);
+                y2 = (y2 > 0) ? y2 : (-y2);
+                if ((x2 > DRAG_MIN) || (y2 > DRAG_MIN))
+                {
+                    win_event(FX_DRAG_EVENT, cx, cy);
+                }
+            }
 			tw->position(xoff + Fl::event_x_root(), yoff + Fl::event_y_root());
 			tw->redraw();
 			ret = 1;
@@ -85,32 +130,15 @@ int drag_btn::handle(int event)
 			y2 = y1 - cy;
 			x2 = (x2 > 0) ? x2 : (-x2);
 			y2 = (y2 > 0) ? y2 : (-y2);
-			if ((x2 > 10) || (y2 > 10))
+			if ((x2 > DRAG_MIN) || (y2 > DRAG_MIN))
 			{	// test for a docking event
-				// See if anyone is able to accept a dock with this widget
-				// How to find the dock window? Search 'em all for now...
-				for(Fl_Window *win = Fl::first_window(); win; win = Fl::next_window(win))
-				{
-					// Get the co-ordinates of each window
-					int ex = win->x_root();
-					int ey = win->y_root();
-					int ew = win->w();
-					int eh = win->h();
-					
-					// Are we inside the boundary of the window?
-					if(win->visible() && (cx > ex) && (cy > ey)
-					&& (cx < (ew + ex)) && (cy < (eh + ey)))
-					{	// Send the found window a message that we want to dock with it.
-						if(Fl::handle(FX_DROP_EVENT, win))
-						{
-							printf ("Got Dock ACK\n"); fflush(stdout);
-							tg->dock_grp(tg);
-							break;
-						}
-					}
-				}
+			    if (win_event(FX_DROP_EVENT, cx, cy))
+                {
+                    printf ("Got Dock ACK\n"); fflush(stdout);
+                    tg->dock_grp(tg);
+                    return 1;
+                }
 			}
-			//show();
 			ret = 1;
 			break;
 			
@@ -136,7 +164,7 @@ int drag_btn::handle(int event)
 		y2 = Fl::event_y_root() - y1;
 		x2 = (x2 > 0) ? x2 : (-x2);
 		y2 = (y2 > 0) ? y2 : (-y2);
-		if ((x2 > 10) || (y2 > 10))
+		if ((x2 > DRAG_MIN) || (y2 > DRAG_MIN))
 		{
 			tg->undock_grp((void *)tg); // undock the window
 			was_docked = -1; // note that we *just now* undocked
@@ -150,4 +178,6 @@ int drag_btn::handle(int event)
 	return ret;
 } // handle
 
-/* End of File */
+#ifndef _MSC_VER
+#pragma clang diagnostic pop
+#endif

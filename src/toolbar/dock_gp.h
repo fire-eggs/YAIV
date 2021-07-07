@@ -22,9 +22,9 @@ public:
 	// methods for adding or removing toolgroups from the dock
 	void add(Fl_Widget *w);
 	void remove(Fl_Widget *w);
-	
-	// dock diagnostic
-	void dock_check(void);
+
+	void openDock();
+	void closeDock();
 };
 
 #endif // _HAVE_DOCK_GRP_HDR_

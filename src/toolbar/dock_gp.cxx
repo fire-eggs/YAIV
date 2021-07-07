@@ -1,6 +1,7 @@
-#include <stdio.h>
-
-#include <FL/Fl.H>
+#ifndef _MSC_VER
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "modernize-use-auto"
+#endif
 
 #include "dock_gp.h"
 #include "dropwin.h"
@@ -13,6 +14,33 @@ dockgroup::dockgroup(int x, int y, int w, int h, const char *l)
 	pack->type(Fl_Pack::HORIZONTAL);
 	children = 0;
 	vis_h = h;
+	win = nullptr;
+}
+
+void dockgroup::openDock()
+{
+    int ht = h();
+    printf("OD: %d, %d\n", ht, vis_h);
+    if (ht < vis_h)
+    {
+        dropwin *dw = (dropwin *)win;
+        size(w(), vis_h);
+        pack->size(w(), vis_h);
+        dw->dock_resize(ht - vis_h);
+        redraw();
+        Fl::wait();
+    }
+}
+
+void dockgroup::closeDock()
+{
+    if (children <= 0 && h() >= vis_h ) {
+        dropwin *dw = (dropwin *) win;
+        size(w(), 3);
+        dw->dock_resize(vis_h - 3);
+        redraw();
+        Fl::wait();
+    }
 }
 
 void dockgroup::add(Fl_Widget *grp)
@@ -47,10 +75,6 @@ void dockgroup::remove(Fl_Widget *grp)
 	}
 }
 
-void dockgroup::dock_check(void)
-{
-	printf("DG: %d - %dx%d (%dx%d)\n", children, pack->w(), pack->h(), w(), h());
-	fflush(stdout);
-}
-
-// end of file
+#ifndef _MSC_VER
+#pragma clang diagnostic pop
+#endif

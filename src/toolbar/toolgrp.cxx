@@ -1,13 +1,14 @@
-#include <stdio.h>
+#ifndef _MSC_VER
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "modernize-use-auto"
+#endif
 
 /* fltk includes */
 #include <FL/Fl.H>
 
 #include "toolgrp.h"
 #include "toolwin.h"
-#include "dropwin.h"
 #include "dock_gp.h"
-//#include "mediator.h"  // TODO tb mediator
 
 // function to handle the dock actions
 void toolgrp::dock_grp(void* v) 
@@ -173,7 +174,6 @@ void toolgrp::create_floating(dockgroup *dk, int full, int x, int y, int w, int 
 	Fl_Group::current(inner_group); // leave this group open when we leave the constructor...
 }
 
-
 // function for setting the docked state and checkbox
 void toolgrp::docked(short r)
 { 
@@ -182,35 +182,17 @@ void toolgrp::docked(short r)
 
 // methods for hiding/showing *all* the floating windows
 // show all the active floating windows
-void toolgrp::show_all(void)
+void toolgrp::show_all()
 {
 	toolwin::show_all();
 }
 
 // hide all the active floating windows
-void toolgrp::hide_all(void)
+void toolgrp::hide_all()
 {
 	toolwin::hide_all();
 }
 
-/*
-#include <FL/names.h>
-int toolgrp::handle(int evt)
-{
-    if (evt) printf("TG: %s (%d)\n", fl_eventnames[evt], evt);
-    return Fl_Group::handle(evt);
-
-    if (evt == FL_FOCUS || evt == FL_UNFOCUS) return 0;
-
-    int res = Fl_Group::handle(evt);
-  if (evt == FL_KEYDOWN)
-  {
-    printf("TG:key %d (%d)\n", Fl::event_key(), res);
-    //handle_key(); // TODO tb mediator
-    //send_message(MSGS::KEY, Fl::event_key());
-    return 1;
-  }  
-  return res;
-}
-*/
-// end of file
+#ifndef _MSC_VER
+#pragma clang diagnostic pop
+#endif

@@ -1,24 +1,20 @@
-#include <stdio.h>
 
 #include <FL/Fl_Button.H>
-
 #include "toolwin.h"
-#include "toolgrp.h"
+#include "mediator.h"
 
 #  define FX_DROP_EVENT	(FL_DND_RELEASE + 100)  // TODO tb hack
 #  define DROP_REGION_HEIGHT 42 //39
 
-#include "mediator.h"
-
 #define NTW (toolwin*)0  // Null Tool Window
 
-// HACK:: This just stores the toolwindows in a static array. I'm too lazy
+// TODO HACK:: This just stores the toolwindows in a static array. I'm too lazy
 //        to make a proper linked list to store these in...
 toolwin* toolwin::active_list[TW_MAX_FLOATERS]; // list of active toolwins
 short toolwin::active = 0; // count of active tool windows
 
 // Dummy close button callback
-static void cb_ignore(void)
+static void cb_ignore()
 {
 	// Just shrug off the close callback...
 }
@@ -36,7 +32,6 @@ toolwin::toolwin(int w, int h, const char *l)
 	create_dockable_window();
 }
 
-// destructor
 toolwin::~toolwin()
 {
 	active_list[idx] = NTW;
@@ -78,7 +73,7 @@ void toolwin::create_dockable_window()
 }
 
 // show all the active floating windows
-void toolwin::show_all(void)
+void toolwin::show_all()
 {
 	if (active)
 	{
@@ -91,7 +86,7 @@ void toolwin::show_all(void)
 }
 
 // hide all the active floating windows
-void toolwin::hide_all(void)
+void toolwin::hide_all()
 {
 	if (active)
 	{
@@ -103,19 +98,16 @@ void toolwin::hide_all(void)
 	}
 }
 
-#include <FL/names.h>
 int toolwin::handle(int event)
 {
   int res = Fl_Double_Window::handle(event);
 
   if (event == FL_KEYDOWN)
   {
-//    printf("TW: key %d (%d)\n", Fl::event_key(), res);
     Mediator::handle_key();
     return 1;
   }
 
-  //if (event) printf("TW:%s (%d)\n", fl_eventnames[event], event);
   if (event == FL_FOCUS)
       return 0;
 
