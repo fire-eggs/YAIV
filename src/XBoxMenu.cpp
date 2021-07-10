@@ -107,7 +107,7 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
     }
 }
 
-void XBox::do_menu() {
+void XBox::do_menu(int xloc, int yloc, bool title) {
 
     // 1. find the submenu in the "master" menu
     int submenuNdx;
@@ -148,7 +148,6 @@ void XBox::do_menu() {
     for (long j = 0; j < numfavs; j++)
     {
         dyn_menu[submenuNdx + 1 + j].label(favs[j]);
-        //dyn_menu[submenuNdx + 1 + j].label(u8"кошка 日本国");
         menucall *hold = new menucall;
         hold->who = this;
         hold->menu = MI_FAV0 + j;
@@ -157,8 +156,8 @@ void XBox::do_menu() {
     }
 
     // show the menu
-
-    const Fl_Menu_Item *m = dyn_menu->popup(Fl::event_x(), Fl::event_y(), "YAIV", nullptr, nullptr);
+    const Fl_Menu_Item *m = dyn_menu->popup(xloc, yloc, title ? "YAIV" : nullptr,
+                                            nullptr, nullptr);
     if (m && m->callback())
         m->do_callback(this, m->user_data());
 

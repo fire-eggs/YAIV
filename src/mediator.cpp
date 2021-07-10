@@ -32,6 +32,10 @@ namespace Mediator {
             if (msg2->msg == MSG_TB) {
                 b2->action(msg2->data);
             }
+            if (msg2->msg == MSG_TB && msg2->data == ACT_MENU) {
+                // TODO full menu, not popup menu
+                b2->do_menu(Fl::event_x(),Fl::event_y(), false);
+            }
             delete msg2;
         }
     }

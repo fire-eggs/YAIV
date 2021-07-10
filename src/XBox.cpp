@@ -435,7 +435,7 @@ int XBox::handle(int msg) {
 
         case FL_PUSH:
             if (Fl::event_button() == FL_RIGHT_MOUSE) {
-                do_menu();
+                do_menu(Fl::event_x(), Fl::event_y(), true);
                 return 1;
             }
             return mousePan(FL_PUSH);

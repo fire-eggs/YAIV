@@ -14,6 +14,7 @@
 #define BTNSTEP 33
 
 #define TB_HEIGHT 40
+#define TB_WIDTH HANDWID + (BTNSTEP * 11)
 
 #include <FL/Fl_SVG_Image.H>
 
@@ -21,12 +22,15 @@ static void setImage(Fl_Widget *btn, char *imgn, int sz=25)
 {
     char buff[500];
     sprintf(buff, "icons/%s.svg", imgn); // TODO find sub-folder? hard-coded in code?
-    Fl_SVG_Image *img = new Fl_SVG_Image(buff,0);
-    if (!img || img->ld() < 0) return;
-    btn->image(img->copy(sz,sz));
+
     btn->align(FL_ALIGN_CENTER);
     btn->color(8,FL_BLACK);
     btn->visible_focus(0);
+
+    Fl_SVG_Image *img = new Fl_SVG_Image(buff,0);
+    if (img->fail())
+        return;
+    btn->image(img->copy(sz,sz));
 }
 
 Mediator::ACTIONS acts[] = {
@@ -39,6 +43,7 @@ Mediator::ACTIONS acts[] = {
         Mediator::ACT_OPEN,
         Mediator::ACT_GOTO,
         Mediator::ACT_CHK,
+        Mediator::ACT_MENU,
         Mediator::ACT_EXIT,
 };
 
@@ -61,15 +66,15 @@ static void makeBtn(toolgrp* tg, int i, char *name)
 void add_btn_bar(dockgroup *dock, int floating)
 {
     // Create a docked toolgroup
-    toolgrp *tgroup = new toolgrp(dock, floating, 350, TB_HEIGHT); // TODO width from # of buttons
+    toolgrp *tgroup = new toolgrp(dock, floating, TB_WIDTH, TB_HEIGHT); // TODO width from # of buttons
     tgroup->box(FL_BORDER_BOX);
     tgroup->in_group()->box(FL_NO_BOX);
     tgroup->color(FL_BLACK);
 
-    char *btns [] = {"ViewPreviousImage","ViewNextImage","ZoomIn",
-                     "ZoomOut","Slideshow","RotateRight",
-                     "OpenFile", "GoToImage","Checkerboard",
-                     "exit_white"};
+    char *btns [] = {"ViewPreviousImage", "ViewNextImage", "ZoomIn",
+                     "ZoomOut", "Slideshow", "RotateRight",
+                     "OpenFile", "GoToImage", "Checkerboard",
+                     "Menu", "exit_white"};
     int count = sizeof(btns) / sizeof(char*);
     for (int i=0; i < count; i++)
         makeBtn(tgroup, i, btns[i]);

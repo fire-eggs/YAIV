@@ -107,7 +107,7 @@ public:
 
     void draw() override;
 
-    void do_menu();
+    void do_menu(int, int, bool);
     void image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg);
 
     void load_current(); // exposed for slideshow
