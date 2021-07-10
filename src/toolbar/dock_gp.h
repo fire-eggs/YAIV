@@ -25,6 +25,8 @@ public:
 
 	void openDock();
 	void closeDock();
+
+	bool contains(Fl_Widget*);
 };
 
 #endif // _HAVE_DOCK_GRP_HDR_

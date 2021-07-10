@@ -75,6 +75,12 @@ void dockgroup::remove(Fl_Widget *grp)
 	}
 }
 
+bool dockgroup::contains(Fl_Widget *grp)
+{
+    int res = find(grp);
+    return res < children;
+}
+
 #ifndef _MSC_VER
 #pragma clang diagnostic pop
 #endif
