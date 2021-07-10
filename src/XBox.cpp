@@ -111,6 +111,8 @@ void XBox::load_file(const char *n) {
     _mru->Save();
 }
 
+char *XBox::currentFilename() { return file_name; }
+
 void XBox::load_current() {
     if (!file_list || file_count < 1)
         return;
@@ -135,6 +137,8 @@ void XBox::load_current() {
         labelsize(64);
         labelcolor(FL_LIGHT2);
         image(nullptr,nullptr);
+
+        send_message(Mediator::MSGS::MSG_NEWFILE, -1);
     }
     else
     {
@@ -149,15 +153,15 @@ void XBox::load_current() {
             labelsize(64);
             labelcolor(FL_RED);
             image(nullptr,nullptr);
+
+            send_message(Mediator::MSGS::MSG_NEWFILE, -1);
         }
         else
         {
             Fl_Anim_GIF_Image::min_delay = 0.01;
             Fl_Anim_GIF_Image::animate = true;
 
-#ifdef DANBOORU
-            update_danbooru(file_name);
-#endif
+            send_message(Mediator::MSGS::MSG_NEWFILE, 0);
 
             label(nullptr); // wipe any previous folder/error-file
             Fl_Anim_GIF_Image* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(img);
@@ -378,8 +382,7 @@ int XBox::key(int fullkey)
 
                 if (Fl::event_state() & CTRL_P_KEY)
                 {
-                    view_danbooru(_prefs);
-                    update_danbooru(file_list[current_index]->d_name);
+                    Mediator::danbooru(_prefs);
                 }
                 break;
 #endif

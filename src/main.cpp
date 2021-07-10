@@ -32,7 +32,8 @@ void cmdline(int argc, char **argv, XBox *box)
     }
 }
 
-static dockgroup* dock;
+// TODO nasty globals for mediator
+dockgroup* dock;
 XBox *b2;
 
 #define TB_HEIGHT 38 // TODO tb hack

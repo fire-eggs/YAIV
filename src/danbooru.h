@@ -7,7 +7,7 @@
 
 #include "prefs.h"
 
-void view_danbooru(Prefs *prefs);
+void view_danbooru(Prefs *prefs, Fl_Group *container);
 void update_danbooru(char *filename);
 void shutdown_danbooru();
 

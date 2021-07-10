@@ -63,7 +63,7 @@ private:
         MI_LOAD,
         MI_COPYPATH,
         MI_GOTO,
-        MI_TEXTBAR,
+        MI_DANBOORU,
         MI_OPTIONS,
 
         MI_FAVS, // Must be last before MI_FAVx
@@ -79,12 +79,20 @@ private:
         MI_FAV9,
     };
 
-    Fl_Menu_Item right_click_menu[8] =
+// TODO consider building the menu in code
+#ifdef DANBOORU
+#define MNU_COUNT 8
+#else
+#define MNU_COUNT 7
+#endif
+    Fl_Menu_Item right_click_menu[MNU_COUNT] =
     {
         {"Load",            0, nullptr, (void *)MI_LOAD},
         {"Copy image path", 0, nullptr, (void *)MI_COPYPATH},
         {"Goto Image",      0, nullptr, (void *)MI_GOTO},
-        {"Show textbar",    0, nullptr, (void *)MI_TEXTBAR, FL_MENU_DIVIDER},
+#ifdef DANBOORU
+        {"Show Danbooru",    0, nullptr, (void *)MI_DANBOORU, FL_MENU_DIVIDER},
+#endif
         {"Options",         0, nullptr, (void *)MI_OPTIONS, FL_MENU_DIVIDER},
 
         {"Last Used",       0, nullptr, nullptr, FL_SUBMENU},
@@ -117,6 +125,8 @@ public:
 
     int key(int val); // keydown from someplace
     void action(int val); // action from someplace (e.g. toolbar button)
+
+    char *currentFilename();
 
 private:
 

@@ -12,6 +12,7 @@
 #include "FL/Fl_File_Chooser.H"
 
 #include "toolbar/textbar.h"
+#include "mediator.h"
 
 void XBox::load_request() {
 
@@ -89,9 +90,11 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
         case MI_OPTIONS:		    // TODO nyi
             break;
 
-        case MI_TEXTBAR:
-            add_text_bar(nullptr, nullptr);
+#ifdef DANBOORU
+        case MI_DANBOORU:
+            Mediator::danbooru(_prefs);
             break;
+#endif
 
         case MI_FAV0: case MI_FAV1: case MI_FAV2:
         case MI_FAV3: case MI_FAV4: case MI_FAV5:

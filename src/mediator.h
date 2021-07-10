@@ -5,11 +5,14 @@
 #ifndef YAIV_MEDIATOR_H
 #define YAIV_MEDIATOR_H
 
+#include "prefs.h"
+
 namespace Mediator {
 
     enum MSGS {
         MSG_KEY = 0,
         MSG_TB = 1,
+        MSG_NEWFILE=2,
     };
 
     enum ACTIONS {
@@ -28,6 +31,8 @@ namespace Mediator {
     void send_message(int msg, int data);
 
     void handle_key();
+
+    void danbooru(Prefs *);
 }
 
 #endif //YAIV_MEDIATOR_H

@@ -4,8 +4,17 @@
 #include <FL/Fl.H>
 #include "mediator.h"
 #include "XBox.h"
+#include "toolbar/toolgrp.h"
+#ifdef DANBOORU
+#include "danbooru.h"
+#endif
 
 extern XBox *b2;
+extern dockgroup* dock;
+
+#ifdef DANBOORU
+toolgrp *_danbooru;
+#endif
 
 namespace Mediator {
 
@@ -19,25 +28,37 @@ namespace Mediator {
         if (!msg) return;
 
         message *msg2 = static_cast<message *>(msg); // TODO how to use dynamic_cast?
-        if (!msg2)
+        if (!msg2) {
             printf("Invalid msg\n");
-        else {
-            if (msg2->msg == MSG_TB && msg2->data == ACT_EXIT)
-                exit(0);
-
-            //printf("Msg: %d - %d\n", msg2->msg, msg2->data);
-            if (msg2->msg == MSG_KEY) {
-                b2->key(msg2->data); // TODO key handling right here : lookup & send
-            }
-            if (msg2->msg == MSG_TB) {
-                b2->action(msg2->data);
-            }
-            if (msg2->msg == MSG_TB && msg2->data == ACT_MENU) {
-                // TODO full menu, not popup menu
-                b2->do_menu(Fl::event_x(),Fl::event_y(), false);
-            }
-            delete msg2;
+            return;
         }
+
+        switch (msg2->msg)
+        {
+            case MSG_TB:
+                if (msg2->data == ACT_EXIT)
+                    exit(0);
+                if (msg2->data == ACT_MENU)
+                    // TODO full menu, not popup menu
+                    b2->do_menu(Fl::event_x(),Fl::event_y(), false);
+                b2->action(msg2->data);
+                break;
+            case MSG_NEWFILE:
+#ifdef DANBOORU
+                // update for new file
+                if (_danbooru)
+                    update_danbooru(b2->currentFilename());
+#endif
+                // TODO if data is negative, no file
+                // TODO update b2 image
+                // TODO update toolbar state
+
+                break;
+            case MSG_KEY:
+                b2->key(msg2->data); // TODO do key handling in mediator: lookup & send
+                break;
+        }
+        delete msg2;
     }
 
     void send_message(int msg, int data) {
@@ -64,4 +85,14 @@ namespace Mediator {
 #endif
         send_message(MSGS::MSG_KEY, key | keyStateShift | keyStateAlt | keyStateCtrl | keyStateCmd);
     }
+
+#ifdef DANBOORU
+    // TODO should this be a message? action?
+    void danbooru(Prefs *prefs) {
+        if (!_danbooru || !dock->contains(_danbooru))
+            _danbooru = new toolgrp(nullptr, 1, 0, 0, 200, 500);
+        view_danbooru(prefs, _danbooru->in_group());
+        update_danbooru(b2->currentFilename());
+    }
+#endif
 }
