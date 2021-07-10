@@ -5,14 +5,12 @@
 #include "mediator.h"
 #include "XBox.h"
 #include "toolbar/toolgrp.h"
-#ifdef DANBOORU
-#include "danbooru.h"
-#endif
 
 extern XBox *b2;
 extern dockgroup* dock;
 
 #ifdef DANBOORU
+#include "danbooru.h"
 toolgrp *_danbooru;
 #endif
 

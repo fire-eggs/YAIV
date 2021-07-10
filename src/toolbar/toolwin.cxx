@@ -42,7 +42,7 @@ toolwin::~toolwin()
 void toolwin::create_dockable_window() 
 {
 	static int first_window = 1;
-	tool_group = (void *)0;
+	tool_group = nullptr; //(void *)0;
 	// window list intialisation...
 	// this is a nasty hack, should make a proper list
 	if(first_window)

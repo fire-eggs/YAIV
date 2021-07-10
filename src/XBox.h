@@ -87,7 +87,7 @@ private:
 #endif
     Fl_Menu_Item right_click_menu[MNU_COUNT] =
     {
-        {"Load",            0, nullptr, (void *)MI_LOAD},
+        {"Load",            0, nullptr, (void *)(fl_intptr_t) MI_LOAD},
         {"Copy image path", 0, nullptr, (void *)MI_COPYPATH},
         {"Goto Image",      0, nullptr, (void *)MI_GOTO},
 #ifdef DANBOORU

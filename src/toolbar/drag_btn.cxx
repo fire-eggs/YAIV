@@ -75,7 +75,6 @@ int drag_btn::handle(int event)
 	int docked = tg->docked();
 	int ret = 0;
 	int x2 = 0, y2 = 0;
-	int cx, cy;
 
 	// If we are not docked, deal with dragging the toolwin around
 	if (!docked)
@@ -107,8 +106,8 @@ int drag_btn::handle(int event)
 			else
             {
 			    // Let the window we're dragging over know, in case it wants to react
-                cx = Fl::event_x_root();
-                cy = Fl::event_y_root();
+                int cx = Fl::event_x_root();
+                int cy = Fl::event_y_root();
                 x2 = x1 - cx;
                 y2 = y1 - cy;
                 x2 = (x2 > 0) ? x2 : (-x2);
@@ -123,25 +122,24 @@ int drag_btn::handle(int event)
 			ret = 1;
 			break;
 		
-		case FL_RELEASE:
-			cx = Fl::event_x_root(); // Where did the release occur...
-			cy = Fl::event_y_root();
-			x2 = x1 - cx;
-			y2 = y1 - cy;
-			x2 = (x2 > 0) ? x2 : (-x2);
-			y2 = (y2 > 0) ? y2 : (-y2);
-			if ((x2 > DRAG_MIN) || (y2 > DRAG_MIN))
-			{	// test for a docking event
-			    if (win_event(FX_DROP_EVENT, cx, cy))
-                {
-                    printf ("Got Dock ACK\n"); fflush(stdout);
+		case FL_RELEASE: {
+            int cx = Fl::event_x_root(); // Where did the release occur...
+            int cy = Fl::event_y_root();
+            x2 = x1 - cx;
+            y2 = y1 - cy;
+            x2 = (x2 > 0) ? x2 : (-x2);
+            y2 = (y2 > 0) ? y2 : (-y2);
+            if ((x2 > DRAG_MIN) || (y2 > DRAG_MIN)) {    // test for a docking event
+                if (win_event(FX_DROP_EVENT, cx, cy)) {
+                    printf("Got Dock ACK\n");
+                    fflush(stdout);
                     tg->dock_grp(tg);
                     return 1;
                 }
-			}
-			ret = 1;
-			break;
-			
+            }
+            ret = 1;
+            break;
+        }
 		default:
 			break;
 		}
