@@ -56,7 +56,7 @@ static void btnCb(Fl_Widget *w, void *data)
 static void makeBtn(toolgrp* tg, int i, char *name)
 {
     Fl_Button *btn1 = new Fl_Button(HANDWID + (BTNSTEP * i), BTNDOWN, BTNSIZE, BTNSIZE);
-    btn1->callback(btnCb, (void *)i);
+    btn1->callback(btnCb, (void *)(size_t)i);
     btn1->box(FL_THIN_UP_BOX);
     btn1->tooltip(name);
     setImage(btn1, name);
