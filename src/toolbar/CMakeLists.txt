@@ -15,4 +15,6 @@ list(APPEND srcs
         ${CMAKE_CURRENT_LIST_DIR}/toolwin.cxx
         ${CMAKE_CURRENT_LIST_DIR}/toolwin.h
         ${CMAKE_CURRENT_LIST_DIR}/dock_grip_tile.xpm
+        ${CMAKE_CURRENT_LIST_DIR}/vtoolgrp.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/vtoolgrp.h
         )

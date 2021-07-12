@@ -47,6 +47,8 @@ void toolgrp::undock_grp(void* v)
 		dock->remove(gp);
 		new_parent->add(gp);// move the tool group into the floating window
 		new_parent->set_inner((void *)gp);
+		new_parent->resizable(gp); // KBR for a resizable toolbar
+
 		gp->position(1, 1); // align group in floating window
 		new_parent->show(); // show floating window
 		gp->docked(0);      // toolgroup is no longer docked
@@ -77,6 +79,8 @@ void toolgrp::cb_dismiss(Fl_Button*, void* v)
 		Fl::delete_widget(gp);
 	}
 }
+
+toolgrp::toolgrp(int w, int h, const char *lbl) : Fl_Group(1,1,w,h,lbl) {}
 
 // Constructors for docked/floating window
 // WITH x, y co-ordinates

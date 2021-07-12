@@ -29,6 +29,7 @@ public:
 
 	// Resize the workspace area if the dock closes/opens
 	void dock_resize(int h);
+    void dock_resizeV(int w);
 };
 
 #endif // _HAVE_DROP_WIN_HDR_

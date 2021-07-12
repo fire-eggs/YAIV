@@ -28,7 +28,7 @@ void dropwin::init_dropwin()
 
 void dropwin::dock_resize(int delta_h)
 {
-    printf("DW: dockrsz %d\n", delta_h);
+    //printf("DW: dockrsz %d\n", delta_h);
 	int xo = workspace->x();
 	int yo = workspace->y();
 	int wo = workspace->w();
@@ -39,6 +39,21 @@ void dropwin::dock_resize(int delta_h)
 	workspace->resize(xo, yo, wo, ho);
 	workspace->redraw();
 	redraw();
+}
+
+void dropwin::dock_resizeV(int delta_w)
+{
+    //printf("DW: dockrsz %d\n", delta_h);
+    int xo = workspace->x();
+    int yo = workspace->y();
+    int wo = workspace->w();
+    int ho = workspace->h();
+
+    xo = xo - delta_w;
+    wo = wo + delta_w;
+    workspace->resize(xo, yo, wo, ho);
+    workspace->redraw();
+    redraw();
 }
 
 int dropwin::handle(int event)
@@ -54,9 +69,12 @@ int dropwin::handle(int event)
             // Get our co-ordinates
             int ex = x_root() + dock->x();
             int ey = y_root() + dock->y();
-            int ew = dock->w();
+
+            int ew = dock->target_w();
+            int eh = dock->target_h();
+//            int ew = dock->w();
 //		int eh = dock->h(); // for non-resizing dock
-            int eh = DROP_REGION_HEIGHT; // fixed drop-zone for re-sizing dock
+//            int eh = DROP_REGION_HEIGHT; // fixed drop-zone for re-sizing dock
             // get the drop event co-ordinates
             int cx = Fl::event_x_root();
             int cy = Fl::event_y_root();

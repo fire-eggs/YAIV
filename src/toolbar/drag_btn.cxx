@@ -131,7 +131,7 @@ int drag_btn::handle(int event)
             y2 = (y2 > 0) ? y2 : (-y2);
             if ((x2 > DRAG_MIN) || (y2 > DRAG_MIN)) {    // test for a docking event
                 if (win_event(FX_DROP_EVENT, cx, cy)) {
-                    printf("Got Dock ACK\n");
+                    //printf("Got Dock ACK\n");
                     fflush(stdout);
                     tg->dock_grp(tg);
                     return 1;

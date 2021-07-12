@@ -10,13 +10,13 @@
 
 class toolgrp : public Fl_Group
 {
-private:
+protected:
 	// control variables
 	short _docked;
 	dockgroup *dock;
 
-	// constructor helper function
-	void create_dockable_group(void);
+    // constructor helper function
+	virtual void create_dockable_group();
 	void create_docked(dockgroup *d);
 	void create_floating(dockgroup *d, int state, int x, int y, int w, int h, const char *l);
 
@@ -32,22 +32,23 @@ protected:
 	// Defines which dock the group can dock into
 	void set_dock(dockgroup *w) {dock = w;}
 	// get the dock group ID
-	dockgroup *get_dock(void) {return dock;}
+	dockgroup *get_dock() {return dock;}
 
 	// generic callback function for the dismiss button
 	static void cb_dismiss(Fl_Button*, void* v);
 
 public:
 	// Constructors for docked/floating window
-	toolgrp(dockgroup *d, int f, int w, int h, const char *l = 0);
-	toolgrp(dockgroup *d, int f, int x, int y, int w, int h, const char *l = 0);
+	toolgrp(int w, int h, const char *l = nullptr);
+	toolgrp(dockgroup *d, int f, int w, int h, const char *l = nullptr);
+	toolgrp(dockgroup *d, int f, int x, int y, int w, int h, const char *l = nullptr);
 
 	// methods for hiding/showing *all* the floating windows
-	static void show_all(void);
-	static void hide_all(void);
+	static void show_all();
+	static void hide_all();
 
 	// Tests whether window is docked or not.
-	short docked() { return _docked; }
+	short docked() const { return _docked; }
 
 	// generic callback function for the dock/undock checkbox
 	void dock_grp(void* v);

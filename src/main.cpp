@@ -8,9 +8,7 @@
 #include "yaiv_win.h"
 #include "Fl_TransBox.h"
 #include "XBoxDisplayInfoEvent.h"
-#include "toolbar/toolgrp.h"
 #include "buttonBar.h"
-#include "textbar.h"
 #include "mediator.h"
 
 void cmdline(int argc, char **argv, XBox *box)
@@ -55,24 +53,42 @@ int main(int argc, char **argv) {
     // TODO tb : mediator needs to know about main, XBox
     YaivWin* _w = makeMainWindow();
 
-    dock = new dockgroup(1, 1,  _w->w() - 2, TB_HEIGHT + 2);
-    dock->box(FL_THIN_DOWN_BOX);
-    dock->color(FL_BLACK); // TODO from prefs/theme
-    dock->end();
-    dock->set_window(_w);
+    bool vertbar = true;
+    if (!vertbar) {
+        dock = new dockgroup(false, 1, 1,  _w->w() - 2, TB_HEIGHT + 2);
+        dock->box(FL_THIN_DOWN_BOX);
+        dock->color(FL_BLACK); // TODO from prefs/theme
+        dock->end();
+        dock->set_window(_w);
 
-    add_btn_bar(dock, 0);
+        add_btn_bar(dock, 0);
+    }
+    else {
+        dock = new dockgroup(true,1, 1,  TB_HEIGHT + 2, _w->h() - 2);
+        dock->box(FL_THIN_DOWN_BOX);
+        dock->color(FL_BLACK); // TODO from prefs/theme
+        dock->end();
+        dock->set_window(_w);
+        add_vert_btn_bar(dock, true);
+    }
+
     dock->redraw();
 
     _w->set_dock(dock);
 
     _w->begin();
 
-    _w->workspace = new Fl_Group(2,TB_HEIGHT+2,_w->w()-4, _w->h()-4-TB_HEIGHT-2);
-    _w->workspace->box(FL_THIN_DOWN_BOX);
+    int ws_x = 1;
+    int ws_y = TB_HEIGHT+1;
+    if (vertbar) {
+        ws_x = TB_HEIGHT+1;
+        ws_y = 1;
+    }
+    _w->workspace = new Fl_Group(ws_x,ws_y,_w->w()-1-ws_x, _w->h()-1-ws_y);
+    _w->workspace->box(FL_NO_BOX);
 
     //XBox *b2 = new XBox(2,TB_HEIGHT + 2,_w->w(),_w->h(), _w->prefs());
-    b2 = new XBox(2,TB_HEIGHT+3,_w->workspace->w()-2,_w->workspace->h(), _w->prefs());
+    b2 = new XBox(ws_x, ws_y,_w->workspace->w(),_w->workspace->h(), _w->prefs());
 
     _w->child(b2);
     _w->workspace->resizable(static_cast<Fl_Widget *>(b2));
