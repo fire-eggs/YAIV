@@ -46,9 +46,11 @@ static const std::string LOGFILE = "yaiv.log";
 void logit(const char *format, char *arg) // TODO varargs
 {
     FILE *f = fopen(LOGFILE.c_str(), "a+");
-    fprintf(f, format, arg);
-    fputs("\n", f);
-    fclose(f);
+    if (f) {
+        fprintf(f, format, arg);
+        fputs("\n", f);
+        fclose(f);
+    }
 }
 
 int filename_path(const char* buf, char *to) { // TODO hack pending adding to FLTK
