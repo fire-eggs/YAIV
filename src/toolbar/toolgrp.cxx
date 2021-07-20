@@ -11,7 +11,7 @@
 #include "dock_gp.h"
 
 // function to handle the dock actions
-void toolgrp::dock_grp(void* v) 
+void toolgrp::dock_grp(void* v)
 { // dock CB
 	toolgrp *gp = (toolgrp *)v;
 	dockgroup *dock = gp->get_dock();
@@ -20,8 +20,7 @@ void toolgrp::dock_grp(void* v)
 	// and only if a dock exists for it
 	if((!gp->docked()) && (dock))
 	{	//re-dock the group
-		puts("docking"); fflush(stdout);
-		toolwin *cur_parent = (toolwin *)gp->parent();
+		toolwin *cur_parent = static_cast<toolwin *>(gp->parent());
 		dock->add(gp); // move the toolgroup into the dock
 		dock->redraw();
 		gp->docked(-1);    // toolgroup is docked...
