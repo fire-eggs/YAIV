@@ -44,15 +44,7 @@ YaivWin::YaivWin(int x, int y, int _w, int h, Prefs* prefs) : dropwin(x,y,_w,h),
     _prefs->getHex(MAIN_LABEL_COLOR, fg, FL_FOREGROUND_COLOR);
     color(bg);
     labelcolor(fg);
-    _child = nullptr;
-/*
-    dock = new dockgroup(1, 1, _w - 2, TB_HEIGHT + 2);
-    dock->box(FL_THIN_DOWN_BOX);
-    dock->end();
-    dock->set_window(this);
-    dock->redraw();
-    set_dock(dock);
-*/
+
     callback((Fl_Callback*)cb_Exit);
     win_main = this;
 }

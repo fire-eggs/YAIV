@@ -29,7 +29,6 @@ class XBoxDisplayInfoTitle;
 class YaivWin : public dropwin {
 private:
     bool _border;
-    XBox* _child;
     Prefs *_prefs;
 
     // dragging borderless window w/mouse
@@ -38,8 +37,6 @@ private:
 
 public:
     YaivWin(int, int, int, int, Prefs*);
-
-    void child(XBox *canvas) {_child = canvas;}
 
     Prefs* prefs() {return _prefs;}
 

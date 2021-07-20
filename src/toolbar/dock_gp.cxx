@@ -28,8 +28,6 @@ void dockgroup::openDock()
             size(vis_w, h());
             holder->size(vis_w, h());
             dw->dock_resizeV(wi - vis_w);
-//            redraw();
-//            Fl::wait();
         }
     }
     else {
@@ -40,8 +38,6 @@ void dockgroup::openDock()
             size(w(), vis_h);
             holder->size(w(), vis_h);
             dw->dock_resize(ht - vis_h);
-//            redraw();
-//            Fl::wait();
         }
     }
 }
@@ -56,8 +52,6 @@ void dockgroup::closeDock()
             dropwin *dw = (dropwin *) win;
             size(3, h());
             dw->dock_resizeV(vis_w - 3);
-//            redraw();
-//            Fl::wait();
         }
     }
     else {
@@ -65,12 +59,8 @@ void dockgroup::closeDock()
             dropwin *dw = (dropwin *) win;
             size(w(), 3);
             dw->dock_resize(vis_h - 3);
-//            redraw();
-//            Fl::wait();
         }
-
     }
-
 }
 
 void dockgroup::add(Fl_Widget *grp)

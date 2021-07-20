@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
     // TODO tb : mediator needs to know about main, XBox
     YaivWin* _w = makeMainWindow();
 
-    bool vertbar = true;
+    bool vertbar = true; // TODO as an option
     if (!vertbar) {
         dock = new dockgroup(false, 1, 1,  _w->w() - 2, TB_HEIGHT + 2);
         dock->box(FL_THIN_DOWN_BOX);
@@ -87,14 +87,9 @@ int main(int argc, char **argv) {
     _w->workspace = new Fl_Group(ws_x,ws_y,_w->w()-1-ws_x, _w->h()-1-ws_y);
     _w->workspace->box(FL_NO_BOX);
 
-    //XBox *b2 = new XBox(2,TB_HEIGHT + 2,_w->w(),_w->h(), _w->prefs());
     b2 = new XBox(ws_x, ws_y,_w->workspace->w(),_w->workspace->h(), _w->prefs());
 
-    _w->child(b2);
     _w->workspace->resizable(static_cast<Fl_Widget *>(b2));
-
-    //b2->parent(_w);
-    //_w->resizable(static_cast<Fl_Widget *>(b2));
 
     // TODO tb : mediator needs to know about transbox
     // TODO transbox location, size from prefs

@@ -62,7 +62,7 @@ int win_event(int event, int cx, int cy, Fl_Window **outwin)
         {	// Send the found window a message that we want to dock with it.
             if(Fl::handle(event, win))
             {
-                *outwin = win;
+                *outwin = win; // provide the destination window
                 return true;
             }
         }
@@ -134,10 +134,10 @@ int drag_btn::handle(int event)
             if ((x2 > DRAG_MIN) || (y2 > DRAG_MIN)) {    // test for a docking event
                 Fl_Window *win = nullptr;
                 if (win_event(FX_DROP_EVENT, cx, cy, &win)) {
-                    //printf("Got Dock ACK\n");
-                    //fflush(stdout);
                     tg->dock_grp(tg);
-                    tg->position(1, cy - win->y_root());
+
+                    // Position the toolbar within the dockgroup
+                    tg->position(1, cy - win->y_root()); // TODO currently vertical only!
                     return 1;
                 }
             }
