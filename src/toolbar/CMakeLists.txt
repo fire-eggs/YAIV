@@ -8,8 +8,6 @@ list(APPEND srcs
         ${CMAKE_CURRENT_LIST_DIR}/drag_btn.h
         ${CMAKE_CURRENT_LIST_DIR}/dropwin.cxx
         ${CMAKE_CURRENT_LIST_DIR}/dropwin.h
-        ${CMAKE_CURRENT_LIST_DIR}/textbar.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/textbar.h
         ${CMAKE_CURRENT_LIST_DIR}/toolgrp.cxx
         ${CMAKE_CURRENT_LIST_DIR}/toolgrp.h
         ${CMAKE_CURRENT_LIST_DIR}/toolwin.cxx

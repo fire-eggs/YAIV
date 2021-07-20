@@ -11,7 +11,7 @@
 #include "vtoolgrp.h"
 
 #define BTNSIZE 30
-#define HANDWID 18
+#define HANDWID 17
 #define BTNDOWN  7 // inner_group down 3
 #define BTNSTEP 33
 

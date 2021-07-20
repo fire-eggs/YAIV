@@ -10,8 +10,6 @@
 #include "XBox.h"
 #include "FL/fl_ask.H"
 #include "FL/Fl_File_Chooser.H"
-
-#include "toolbar/textbar.h"
 #include "mediator.h"
 
 void XBox::load_request() {

@@ -55,8 +55,8 @@ void view_danbooru(Prefs *prefs, Fl_Group *container) {
     textbuf = new Fl_Text_Buffer;
     stylebuf = new Fl_Text_Buffer;
 
-    txtout = new Fl_Text_Editor(container->x() + 3,container->y() + 3,
-                                container->w()-5,container->h()-5);
+    txtout = new Fl_Text_Editor(container->x() + 1,container->y() + 1,
+                                container->w()-1,container->h()-1);
     txtout->textfont(FL_TIMES); // TODO options
     txtout->textsize(TS);       // TODO options
     txtout->buffer(textbuf);

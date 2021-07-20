@@ -24,19 +24,19 @@ vtoolgrp::vtoolgrp(dockgroup *dk, int floater, int w, int h, const char *lbl)
 
 void vtoolgrp::create_dockable_group()
 {
-    dismiss = new Fl_Button(3, 3, 11, 11, "@-31+");
+    dismiss = new Fl_Button(2, 2, 11, 11, "@-31+");
     dismiss->box(FL_BORDER_BOX);
     dismiss->tooltip("Dismiss");
     dismiss->clear_visible_focus();
     dismiss->callback((Fl_Callback*)cb_dismiss, (void *)this);
 
-    dragger = new drag_btn(17, 3, w()-20, 11);
+    dragger = new drag_btn(15, 2, w()-17, 11);
     dragger->type(FL_TOGGLE_BUTTON);
     dragger->box(FL_ENGRAVED_BOX);
     dragger->tooltip("Drag Box");
     dragger->clear_visible_focus();
     dragger->when(FL_WHEN_CHANGED);
 
-    inner_group = new Fl_Group(3, 17, w() - 6, h() - 20);
-    inner_group->box(FL_ENGRAVED_FRAME);
+    inner_group = new Fl_Group(2, 15, w() - 4, h() - 17);
+    inner_group->box(FL_NO_BOX);
 }

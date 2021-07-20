@@ -132,7 +132,7 @@ void toolgrp::create_dockable_group()
 	dismiss->clear_visible_focus();
 	dismiss->callback((Fl_Callback*)cb_dismiss, (void *)this);
 
-	dragger = new drag_btn(3, 17, 11, h() - 20);
+	dragger = new drag_btn(3, 16, 11, h() - 15);
 	dragger->type(FL_TOGGLE_BUTTON);
 	dragger->box(FL_ENGRAVED_BOX);
 //	dragger->box(FL_BORDER_BOX);
@@ -140,8 +140,9 @@ void toolgrp::create_dockable_group()
 	dragger->clear_visible_focus();
 	dragger->when(FL_WHEN_CHANGED);
 	
-	inner_group = new Fl_Group(17, 3, w() - 20, h() - 6);
-	inner_group->box(FL_ENGRAVED_FRAME);
+	inner_group = new Fl_Group(17, 3, w() - 17, h() - 3);
+	inner_group->box(FL_NO_BOX);
+	//inner_group->box(FL_ENGRAVED_FRAME);
 }
 
 void toolgrp::create_docked(dockgroup *dk)
