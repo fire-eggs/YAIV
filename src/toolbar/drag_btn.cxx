@@ -46,7 +46,7 @@ void drag_btn::draw()
 
 #define DRAG_MIN 10
 
-int win_event(int event, int cx, int cy)
+int win_event(int event, int cx, int cy, Fl_Window **outwin)
 {
     for(Fl_Window *win = Fl::first_window(); win; win = Fl::next_window(win))
     {
@@ -62,6 +62,7 @@ int win_event(int event, int cx, int cy)
         {	// Send the found window a message that we want to dock with it.
             if(Fl::handle(event, win))
             {
+                *outwin = win;
                 return true;
             }
         }
@@ -114,7 +115,8 @@ int drag_btn::handle(int event)
                 y2 = (y2 > 0) ? y2 : (-y2);
                 if ((x2 > DRAG_MIN) || (y2 > DRAG_MIN))
                 {
-                    win_event(FX_DRAG_EVENT, cx, cy);
+                    Fl_Window *outwin = nullptr;
+                    win_event(FX_DRAG_EVENT, cx, cy, &outwin);
                 }
             }
 			tw->position(xoff + Fl::event_x_root(), yoff + Fl::event_y_root());
@@ -130,10 +132,12 @@ int drag_btn::handle(int event)
             x2 = (x2 > 0) ? x2 : (-x2);
             y2 = (y2 > 0) ? y2 : (-y2);
             if ((x2 > DRAG_MIN) || (y2 > DRAG_MIN)) {    // test for a docking event
-                if (win_event(FX_DROP_EVENT, cx, cy)) {
+                Fl_Window *win = nullptr;
+                if (win_event(FX_DROP_EVENT, cx, cy, &win)) {
                     //printf("Got Dock ACK\n");
-                    fflush(stdout);
+                    //fflush(stdout);
                     tg->dock_grp(tg);
+                    tg->position(1, cy - win->y_root());
                     return 1;
                 }
             }
