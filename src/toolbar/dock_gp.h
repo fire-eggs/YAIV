@@ -8,7 +8,7 @@ class dockgroup : public Fl_Group
 {
 protected:
 	Fl_Window *win;
-	Fl_Pack *pack;
+	Fl_Group *holder;
 	int children;
 	int vis_h;
 	int vis_w;

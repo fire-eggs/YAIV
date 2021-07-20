@@ -10,8 +10,7 @@
 dockgroup::dockgroup(bool vertical, int x, int y, int w, int h, const char *l)
   : Fl_Group(x, y, w, h, l) 
 {
-	pack = new Fl_Pack(x, y, w, h);
-	pack->type( vertical ? Fl_Pack::VERTICAL : Fl_Pack::HORIZONTAL);
+    holder = new Fl_Group(x, y, w, h);
 	children = 0;
 	vis_h = h;
 	vis_w = w;
@@ -27,7 +26,7 @@ void dockgroup::openDock()
         {
             dropwin *dw = (dropwin *)win;
             size(vis_w, h());
-            pack->size( vis_w, h());
+            holder->size(vis_w, h());
             dw->dock_resizeV(wi - vis_w);
 //            redraw();
 //            Fl::wait();
@@ -39,7 +38,7 @@ void dockgroup::openDock()
         {
             dropwin *dw = (dropwin *)win;
             size(w(), vis_h);
-            pack->size(w(), vis_h);
+            holder->size(w(), vis_h);
             dw->dock_resize(ht - vis_h);
 //            redraw();
 //            Fl::wait();
@@ -86,17 +85,17 @@ void dockgroup::add(Fl_Widget *grp)
 	{
 		dropwin *dw = (dropwin *)win;
 		size(wd, vis_h);
-		pack->size(wd, vis_h);
+		holder->size(wd, vis_h);
 		dw->dock_resize(ht - vis_h);
 	}
 #endif
-	pack->add(grp); 
+	holder->add(grp);
 	children++;
 }
 
 void dockgroup::remove(Fl_Widget *grp)
 {
-	pack->remove(grp);
+	holder->remove(grp);
 	children--;
 #if true
 	closeDock();
