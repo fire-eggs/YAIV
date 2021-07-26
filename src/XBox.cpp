@@ -226,6 +226,9 @@ void XBox::action(int act)
         case Mediator::ACT_GOTO:
             goto_request();
             break;
+        case Mediator::ACT_SLID:
+            toggleSlideshow();
+            break;
         default:
             return;
     }
@@ -247,7 +250,8 @@ int XBox::key(int fullkey)
             exit(0);
 
         case 'c':
-            action(Mediator::ACT_CHK);
+            send_message(Mediator::MSG_TB, Mediator::ACT_CHK);
+            //action(Mediator::ACT_CHK);
             return 1;
 
         case 's':
@@ -360,7 +364,8 @@ int XBox::key(int fullkey)
             return 1;
 
         case 'w':
-            toggleSlideshow();
+            send_message(Mediator::MSG_TB, Mediator::ACT_SLID);
+            //toggleSlideshow();
             return 1;
 
         case 'm':

@@ -7,8 +7,21 @@
 
 #include "dock_gp.h"
 #include "toolgrp.h"
+#include "mediator.h"
 
-void add_btn_bar(dockgroup *dock, int floating);
-void add_vert_btn_bar(dockgroup *dock, bool floating);
+class ButtonBar
+{
+private:
+    ButtonBar();
+    toolgrp* _tgroup;
+    Mediator::ACTIONS* _acts;
+
+    void setActions(Mediator::ACTIONS*acts) {_acts = acts;}
+
+public:
+    void setState(Mediator::ACTIONS, int val);
+    static ButtonBar* add_btn_bar(dockgroup *dock, int floating);
+    static ButtonBar* add_vert_btn_bar(dockgroup *dock, bool floating);
+};
 
 #endif //YAIV_BUTTONBAR_H

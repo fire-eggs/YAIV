@@ -189,6 +189,8 @@ private:
     void notifyDisplayLabel(const char *);
 
 public:
+    bool getCheck() const { return draw_check; }
+    bool inSlide() const {return _inSlideshow; }
     void displayEventHandler(XBoxDisplayInfoEvent *hand)
     {
         if (!_dispevents)

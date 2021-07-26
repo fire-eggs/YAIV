@@ -5,9 +5,11 @@
 #include "mediator.h"
 #include "XBox.h"
 #include "toolbar/toolgrp.h"
+#include "toolbar/buttonBar.h"
 
 extern XBox *b2;
 extern dockgroup* dock;
+extern ButtonBar* tb;
 
 #ifdef DANBOORU
 #include "danbooru.h"
@@ -39,6 +41,11 @@ namespace Mediator {
                 if (msg2->data == ACT_MENU)
                     // TODO full menu, not popup menu
                     b2->do_menu(Fl::event_x(),Fl::event_y(), false);
+// TODO refactor state management: 1. mediator holds state; 2. mediator inits state; 3. mediator sends state update to targets; 4. keyboard handling not in xbox
+                if (msg2->data == ACT_CHK)
+                    tb->setState(ACT_CHK, !b2->getCheck());
+                if (msg2->data == ACT_SLID)
+                    tb->setState(ACT_SLID, !b2->inSlide());
                 b2->action(msg2->data);
                 break;
             case MSG_NEWFILE:

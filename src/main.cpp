@@ -33,6 +33,7 @@ void cmdline(int argc, char **argv, XBox *box)
 // TODO nasty globals for mediator
 dockgroup* dock;
 XBox *b2;
+ButtonBar* tb;
 
 #define TB_HEIGHT 38 // TODO tb hack
 
@@ -61,7 +62,7 @@ int main(int argc, char **argv) {
         dock->end();
         dock->set_window(_w);
 
-        add_btn_bar(dock, 0);
+        tb = ButtonBar::add_btn_bar(dock, 0);
     }
     else {
         dock = new dockgroup(true,1, 1,  TB_HEIGHT + 2, _w->h() - 2);
@@ -69,7 +70,7 @@ int main(int argc, char **argv) {
         dock->color(FL_BLACK); // TODO from prefs/theme
         dock->end();
         dock->set_window(_w);
-        add_vert_btn_bar(dock, true);
+        tb = ButtonBar::add_vert_btn_bar(dock, true);
     }
 
     dock->redraw();
@@ -94,7 +95,7 @@ int main(int argc, char **argv) {
     // TODO tb : mediator needs to know about transbox
     // TODO transbox location, size from prefs
     int TB_HIGH=35;
-    Fl_TransBox *tb = new Fl_TransBox(0, _w->h()-TB_HIGH, _w->w(), TB_HIGH);
+    Fl_TransBox *overlay = new Fl_TransBox(0, _w->h()-TB_HIGH, _w->w(), TB_HIGH);
 
     _w->workspace->end();
     _w->end();
@@ -104,15 +105,13 @@ int main(int argc, char **argv) {
     Fl::lock(); /// thread lock must be called in this time for init.
 
     // TODO tb : replace by mediator
-    XBoxDspInfoEI* xbdiei = new XBoxDspInfoEI(tb);
+    XBoxDspInfoEI* xbdiei = new XBoxDspInfoEI(overlay);
     b2->displayEventHandler(xbdiei);
     xbdiei->OnActivate(false); // TODO tie to initial state from options
 
     // TODO tb : replace by mediator
     XBoxDisplayInfoTitle* xbdit = new XBoxDisplayInfoTitle(_w);
     b2->displayEventHandler(xbdit);
-
-    //add_text_bar(_w, nullptr); // TODO tb currently for danbooru
 
     _w->show();
     toolgrp::show_all();

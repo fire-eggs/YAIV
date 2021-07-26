@@ -9,6 +9,7 @@
 #include "toolgrp.h"
 #include "mediator.h"
 #include "vtoolgrp.h"
+#include <FL/Fl_Toggle_Button.H>
 
 #define BTNSIZE 30
 #define HANDWID 17
@@ -56,7 +57,7 @@ static void btnCb(Fl_Widget *w, void *data)
     send_message(Mediator::MSG_TB, acts[val]);
 }
 
-static void makeBtn(toolgrp* tg, int i, char *name, bool vert)
+static void makeBtn(toolgrp* tg, int i, char *name, bool vert, bool toggle)
 {
     int x = HANDWID + (BTNSTEP * i);
     int y = BTNDOWN;
@@ -64,7 +65,8 @@ static void makeBtn(toolgrp* tg, int i, char *name, bool vert)
         x = BTNDOWN;
         y = HANDWID + (BTNSTEP * i);
     }
-    Fl_Button *btn1 = new Fl_Button(x, y, BTNSIZE, BTNSIZE);
+    Fl_Button *btn1 = toggle ? new Fl_Toggle_Button(x,y,BTNSIZE,BTNSIZE) :
+                               new Fl_Button(x, y, BTNSIZE, BTNSIZE);
     btn1->callback(btnCb, (void *)(fl_intptr_t)i);
     btn1->box(FL_THIN_UP_BOX);
     btn1->tooltip(name);
@@ -82,23 +84,44 @@ void btn_bar_common(toolgrp* tgroup, bool vert)
                      "ZoomOut", "Slideshow", "RotateRight",
                      "OpenFile", "GoToImage", "Checkerboard",
                      "Menu", "exit_white"};
+    // whether the button is a toggle
+    bool btntype [] = {false,false,false,
+                       false,true,false,
+                       false,false,true,
+                       false,false};
     int count = sizeof(btns) / sizeof(char*);
     for (int i=0; i < count; i++)
-        makeBtn(tgroup, i, btns[i], vert);
+        makeBtn(tgroup, i, btns[i], vert, btntype[i]);
 
     tgroup->end();
 }
 
-void add_btn_bar(dockgroup *dock, int floating)
-{
-    // Create a docked toolgroup
-    toolgrp *tgroup = new toolgrp(dock, floating, TB_WIDTH, TB_HEIGHT); // TODO width from # of buttons
-    btn_bar_common(tgroup, false);
+void ButtonBar::setState(Mediator::ACTIONS act, int val) {
+    Fl_Group* inner = _tgroup->in_group();
+    for (int i= 0; i < inner->children(); i++) {
+        Fl_Widget *ch = inner->child(i);
+        Fl_Toggle_Button* ch2 = dynamic_cast<Fl_Toggle_Button*>(ch);
+        if (ch2 && _acts[i] == act) {
+            ch2->value(val);
+            break;
+        }
+    }
 }
 
-void add_vert_btn_bar(dockgroup* dock, bool floating)
+ButtonBar* ButtonBar::add_vert_btn_bar(dockgroup* dock, bool floating)
 {
-    // create the toolgroup
-    toolgrp *tgroup = new vtoolgrp(dock, floating, TB_HEIGHT, TB_WIDTH);
-    btn_bar_common(tgroup, true);
+    ButtonBar *bbar = new ButtonBar();
+    bbar->setActions(acts);
+    bbar->_tgroup = new vtoolgrp(dock, floating, TB_HEIGHT, TB_WIDTH);
+    btn_bar_common(bbar->_tgroup, true);
+    return bbar;
 }
+ButtonBar* ButtonBar::add_btn_bar(dockgroup *dock, int floating) {
+    ButtonBar *bbar = new ButtonBar();
+    bbar->setActions(acts);
+    bbar->_tgroup = new toolgrp(dock, floating, TB_WIDTH, TB_HEIGHT); // TODO width from # of buttons
+    btn_bar_common(bbar->_tgroup, false);
+    return bbar;
+}
+
+ButtonBar::ButtonBar() { }
