@@ -10,6 +10,8 @@
 #include "mediator.h"
 #include "vtoolgrp.h"
 #include <FL/Fl_Toggle_Button.H>
+#include <FL/Fl_Menu_Item.H>
+#include <FL/Fl_SVG_Image.H>
 
 #define BTNSIZE 30
 #define HANDWID 17
@@ -17,9 +19,7 @@
 #define BTNSTEP 33
 
 #define TB_HEIGHT 40
-#define TB_WIDTH HANDWID + (BTNSTEP * 11)
-
-#include <FL/Fl_SVG_Image.H>
+#define TB_WIDTH HANDWID + (BTNSTEP * 12)
 
 static void setImage(Fl_Widget *btn, char *imgn, int sz=25)
 {
@@ -34,6 +34,9 @@ static void setImage(Fl_Widget *btn, char *imgn, int sz=25)
     if (img->fail())
         return;
     btn->image(img->copy(sz,sz));
+    delete img;
+
+    btn->tooltip(imgn);
 }
 
 // TODO must match button order
@@ -47,14 +50,46 @@ Mediator::ACTIONS acts[] = {
         Mediator::ACT_OPEN,
         Mediator::ACT_GOTO,
         Mediator::ACT_CHK,
+        Mediator::ACT_SCALE,
         Mediator::ACT_MENU,
         Mediator::ACT_EXIT,
 };
 
+Fl_Menu_Item scale_menu[6] =
+        {
+                {"No scale",        0, nullptr, (void *)(fl_intptr_t) Mediator::ACT_SCALE_NONE},
+                {"Auto scale",      0, nullptr, (void *)(fl_intptr_t) Mediator::ACT_SCALE_AUTO},
+                {"Scale to Fit",    0, nullptr, (void *)(fl_intptr_t) Mediator::ACT_SCALE_FIT},
+                {"Scale to Width",  0, nullptr, (void *)(fl_intptr_t) Mediator::ACT_SCALE_WIDE},
+                {"Scale to Height", 0, nullptr, (void *)(fl_intptr_t) Mediator::ACT_SCALE_HIGH},
+                {nullptr} // end of menu
+        };
+
+Mediator::ACTIONS scaleMenu()
+{
+    int xloc = Fl::event_x();
+    int yloc = Fl::event_y();
+    const Fl_Menu_Item *m = scale_menu->popup(xloc, yloc, nullptr, nullptr, nullptr);
+    if (m)
+        return (Mediator::ACTIONS)(fl_intptr_t)m->user_data();
+    return Mediator::ACTIONS::ACT_INVALID;
+}
 static void btnCb(Fl_Widget *w, void *data)
 {
     int val = (int)(fl_intptr_t)data;
-    send_message(Mediator::MSG_TB, acts[val]);
+    switch (acts[val])
+    {
+        case Mediator::ACT_SCALE:
+            {
+            Mediator::ACTIONS newscale = scaleMenu();
+            if (newscale != Mediator::ACT_INVALID)
+                send_message(Mediator::MSG_TB, newscale);
+            }
+            break;
+        default:
+            send_message(Mediator::MSG_TB, acts[val]);
+            break;
+    }
 }
 
 static void makeBtn(toolgrp* tg, int i, char *name, bool vert, bool toggle)
@@ -69,7 +104,6 @@ static void makeBtn(toolgrp* tg, int i, char *name, bool vert, bool toggle)
                                new Fl_Button(x, y, BTNSIZE, BTNSIZE);
     btn1->callback(btnCb, (void *)(fl_intptr_t)i);
     btn1->box(FL_THIN_UP_BOX);
-    btn1->tooltip(name);
     setImage(btn1, name);
     tg->add(btn1);
 }
@@ -83,12 +117,12 @@ void btn_bar_common(toolgrp* tgroup, bool vert)
     char *btns [] = {"ViewPreviousImage", "ViewNextImage", "ZoomIn",
                      "ZoomOut", "Slideshow", "RotateRight",
                      "OpenFile", "GoToImage", "Checkerboard",
-                     "Menu", "exit_white"};
+                     "scaletofit", "Menu", "exit_white"};
     // whether the button is a toggle
     bool btntype [] = {false,false,false,
                        false,true,false,
                        false,false,true,
-                       false,false};
+                       false,false,false};
     int count = sizeof(btns) / sizeof(char*);
     for (int i=0; i < count; i++)
         makeBtn(tgroup, i, btns[i], vert, btntype[i]);
@@ -112,7 +146,7 @@ ButtonBar* ButtonBar::add_vert_btn_bar(dockgroup* dock, bool floating)
 {
     ButtonBar *bbar = new ButtonBar();
     bbar->setActions(acts);
-    bbar->_tgroup = new vtoolgrp(dock, floating, TB_HEIGHT, TB_WIDTH);
+    bbar->_tgroup = new vtoolgrp(dock, floating, TB_HEIGHT, TB_WIDTH);  // TODO height from # of buttons
     btn_bar_common(bbar->_tgroup, true);
     return bbar;
 }
@@ -125,3 +159,37 @@ ButtonBar* ButtonBar::add_btn_bar(dockgroup *dock, int floating) {
 }
 
 ButtonBar::ButtonBar() { }
+
+void ButtonBar::setScaleImage(Mediator::ACTIONS who)
+{
+    Fl_Group* inner = _tgroup->in_group();
+    for (int i= 0; i < inner->children(); i++) {
+        Fl_Widget *ch = inner->child(i);
+        Fl_Button* ch2 = dynamic_cast<Fl_Button*>(ch);
+        if (ch2 && _acts[i] == Mediator::ACT_SCALE) {
+            // set button image/tooltip
+            switch (who)
+            {
+                // TODO copy-pasta
+                case Mediator::ACT_SCALE_NONE:
+                    setImage(ch,"scaletofit");
+                    break;
+                case Mediator::ACT_SCALE_AUTO:
+                    setImage(ch,"autozoom");
+                    break;
+                case Mediator::ACT_SCALE_FIT:
+                    setImage(ch,"zoomtofit");
+                    break;
+                case Mediator::ACT_SCALE_WIDE:
+                    setImage(ch,"scaletowidth");
+                    break;
+                case Mediator::ACT_SCALE_HIGH:
+                    setImage(ch,"scaletoheight");
+                    break;
+            }
+            ch2->redraw();
+            break;
+        }
+    }
+
+}

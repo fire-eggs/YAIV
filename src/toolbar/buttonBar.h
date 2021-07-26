@@ -20,6 +20,8 @@ private:
 
 public:
     void setState(Mediator::ACTIONS, int val);
+    void setScaleImage(Mediator::ACTIONS who);
+
     static ButtonBar* add_btn_bar(dockgroup *dock, int floating);
     static ButtonBar* add_vert_btn_bar(dockgroup *dock, bool floating);
 };

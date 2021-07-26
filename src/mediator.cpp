@@ -13,7 +13,7 @@ extern ButtonBar* tb;
 
 #ifdef DANBOORU
 #include "danbooru.h"
-toolgrp *_danbooru;
+toolgrp* _danbooru;
 #endif
 
 namespace Mediator {
@@ -24,6 +24,34 @@ namespace Mediator {
         int data;
     };
 
+    void toolbarMsg(Mediator::ACTIONS val)
+    {
+        switch (val)
+        {
+            case ACT_EXIT:
+                exit(0);
+            case ACT_MENU:
+                // TODO show the full menu, not the popup menu
+                b2->do_menu(Fl::event_x(),Fl::event_y(), false);
+                break;
+// TODO refactor state management: 1. mediator holds state; 2. mediator inits state; 3. mediator sends state update to targets; 4. keyboard handling not in xbox
+            case ACT_CHK:
+                tb->setState(ACT_CHK, !b2->getCheck());
+                break;
+            case ACT_SLID:
+                tb->setState(ACT_SLID, !b2->inSlide());
+                break;
+            case ACT_SCALE_HIGH:
+            case ACT_SCALE_FIT:
+            case ACT_SCALE_AUTO:
+            case ACT_SCALE_NONE:
+            case ACT_SCALE_WIDE:
+                // TODO tell the toolbar to set the scale image
+                tb->setScaleImage(val);
+                break;
+        }
+        b2->action(val);
+    }
     void mediator(void *msg) {
         if (!msg) return;
 
@@ -36,17 +64,7 @@ namespace Mediator {
         switch (msg2->msg)
         {
             case MSG_TB:
-                if (msg2->data == ACT_EXIT)
-                    exit(0);
-                if (msg2->data == ACT_MENU)
-                    // TODO full menu, not popup menu
-                    b2->do_menu(Fl::event_x(),Fl::event_y(), false);
-// TODO refactor state management: 1. mediator holds state; 2. mediator inits state; 3. mediator sends state update to targets; 4. keyboard handling not in xbox
-                if (msg2->data == ACT_CHK)
-                    tb->setState(ACT_CHK, !b2->getCheck());
-                if (msg2->data == ACT_SLID)
-                    tb->setState(ACT_SLID, !b2->inSlide());
-                b2->action(msg2->data);
+                toolbarMsg(static_cast<ACTIONS>(msg2->data));
                 break;
             case MSG_NEWFILE:
 #ifdef DANBOORU

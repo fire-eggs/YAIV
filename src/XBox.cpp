@@ -229,6 +229,17 @@ void XBox::action(int act)
         case Mediator::ACT_SLID:
             toggleSlideshow();
             break;
+        case Mediator::ACT_SCALE_NONE:
+        case Mediator::ACT_SCALE_AUTO:
+        case Mediator::ACT_SCALE_WIDE:
+        case Mediator::ACT_SCALE_HIGH:
+        case Mediator::ACT_SCALE_FIT:
+            draw_scale = (ScaleMode)((int)act - (int)Mediator::ACT_SCALE_NONE); // TODO super hack
+            _zoom_step = 0;
+            updateImage();
+            updateLabel();
+            redraw();
+            break;
         default:
             return;
     }
@@ -537,6 +548,12 @@ char * XBox::getLabel(bool include_filename, char *buff, int buffsize)
 }
 
 void XBox::next_scale() {
+    int next_scale = (ScaleMode)((int)draw_scale + 1);
+    if (next_scale >= ScaleModeMAX)
+        next_scale = ScaleMode::Noscale;
+    Mediator::ACTIONS act = static_cast<Mediator::ACTIONS>((int)next_scale + (int)Mediator::ACTIONS::ACT_SCALE_NONE);
+    send_message(Mediator::MSG_TB, act);
+/*
     draw_scale = (ScaleMode)((int)draw_scale + 1);
     if (draw_scale >= ScaleModeMAX)
         draw_scale = ScaleMode::Noscale;
@@ -545,6 +562,7 @@ void XBox::next_scale() {
     updateImage();
     updateLabel();
     redraw();
+*/
 }
 
 void XBox::nextTkScale() {

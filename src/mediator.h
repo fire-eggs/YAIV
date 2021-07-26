@@ -16,6 +16,7 @@ namespace Mediator {
     };
 
     enum ACTIONS {
+        ACT_INVALID = -1,
         ACT_PREV = 0,
         ACT_NEXT = 1,
         ACT_ROTR = 2,
@@ -27,6 +28,12 @@ namespace Mediator {
         ACT_OPEN = 8,
         ACT_EXIT = 9,
         ACT_MENU = 10,
+        ACT_SCALE = 11,
+        ACT_SCALE_NONE = 12,
+        ACT_SCALE_AUTO = 13,
+        ACT_SCALE_FIT = 14,
+        ACT_SCALE_WIDE = 15,
+        ACT_SCALE_HIGH = 16,
     };
     void send_message(int msg, int data);
 
