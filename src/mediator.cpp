@@ -52,6 +52,7 @@ namespace Mediator {
         }
         b2->action(val);
     }
+
     void mediator(void *msg) {
         if (!msg) return;
 
@@ -66,6 +67,7 @@ namespace Mediator {
             case MSG_TB:
                 toolbarMsg(static_cast<ACTIONS>(msg2->data));
                 break;
+
             case MSG_NEWFILE:
 #ifdef DANBOORU
                 // update for new file
@@ -110,10 +112,16 @@ namespace Mediator {
     }
 
 #ifdef DANBOORU
+Fl_Widget_Tracker *db_track = nullptr;
+
     // TODO should this be a message? action?
     void danbooru(Prefs *prefs) {
-        if (!_danbooru || !dock->contains(_danbooru))
+
+        if (!db_track || db_track->deleted()) {
+            delete db_track;
             _danbooru = new toolgrp(nullptr, 1, 0, 0, 200, 500);
+            db_track = new Fl_Widget_Tracker(_danbooru);
+        }
         view_danbooru(prefs, _danbooru->in_group());
         update_danbooru(b2->currentFilename());
     }

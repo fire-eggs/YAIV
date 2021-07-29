@@ -31,7 +31,6 @@ void cmdline(int argc, char **argv, XBox *box)
 }
 
 // TODO nasty globals for mediator
-dockgroup* dock;
 XBox *b2;
 ButtonBar* tb;
 
@@ -54,6 +53,7 @@ int main(int argc, char **argv) {
     // TODO tb : mediator needs to know about main, XBox
     YaivWin* _w = makeMainWindow();
 
+    dockgroup* dock;
     bool vertbar = true; // TODO as an option
     if (!vertbar) {
         dock = new dockgroup(false, 1, 1,  _w->w() - 2, TB_HEIGHT + 2);
