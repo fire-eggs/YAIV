@@ -7,6 +7,7 @@
 
 #include "dock_gp.h"
 #include "toolgrp.h"
+#include "dropwin.h"
 #include "mediator.h"
 
 class ButtonBar
@@ -15,6 +16,7 @@ private:
     ButtonBar();
     toolgrp* _tgroup;
     Mediator::ACTIONS* _acts;
+    bool _vert;
 
     void setActions(Mediator::ACTIONS*acts) {_acts = acts;}
 
@@ -22,8 +24,12 @@ public:
     void setState(Mediator::ACTIONS, int val);
     void setScaleImage(Mediator::ACTIONS who);
 
-    static ButtonBar* add_btn_bar(dockgroup *dock, int floating);
-    static ButtonBar* add_vert_btn_bar(dockgroup *dock, bool floating);
+    static ButtonBar* add_btn_bar(dockgroup *dock, bool vertical, bool floating);
+
+    int getXoffset() {return _vert ? _tgroup->w() : 1 ;}
+    int getYoffset() {return _vert ? 1 : _tgroup->h() ;}
 };
+
+ButtonBar* makeToolbar(dropwin* win); // TODO static method
 
 #endif //YAIV_BUTTONBAR_H

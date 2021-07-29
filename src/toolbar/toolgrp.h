@@ -17,8 +17,13 @@ protected:
 
     // constructor helper function
 	virtual void create_dockable_group();
+	virtual void create_fixed_group();
+
 	void create_docked(dockgroup *d);
 	void create_floating(dockgroup *d, int state, int x, int y, int w, int h, const char *l);
+    void create_fixed_docked(dockgroup *d);
+
+    void initialize(dockgroup *dk, bool floater, bool draggable, int w, int h, const char *lbl);
 
 protected:
 	// Widgets used by the toolbar
@@ -31,16 +36,14 @@ protected:
 	
 	// Defines which dock the group can dock into
 	void set_dock(dockgroup *w) {dock = w;}
-	// get the dock group ID
-	dockgroup *get_dock() {return dock;}
 
-	// generic callback function for the dismiss button
+    // generic callback function for the dismiss button
 	static void cb_dismiss(Fl_Button*, void* v);
 
 public:
 	// Constructors for docked/floating window
 	toolgrp(int w, int h, const char *l = nullptr);
-	toolgrp(dockgroup *d, int f, int w, int h, const char *l = nullptr);
+	toolgrp(dockgroup *d, bool floating, bool draggable, int w, int h, const char *l = nullptr);
 	toolgrp(dockgroup *d, int f, int x, int y, int w, int h, const char *l = nullptr);
 
 	// methods for hiding/showing *all* the floating windows
@@ -71,6 +74,8 @@ public:
 //	inline void add_resizable( Fl_Widget &box ) { inner_group->add_resizable( box ); }
 
   //int handle(int evt) override;
+// get the dock group ID
+dockgroup *get_dock() {return dock;}
 };
 
 #endif // _HAVE_TOOL_GROUP_HDR_

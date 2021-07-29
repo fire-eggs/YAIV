@@ -4,22 +4,10 @@
 
 #include "vtoolgrp.h"
 
-vtoolgrp::vtoolgrp(dockgroup *dk, int floater, int w, int h, const char *lbl)
-        : toolgrp(w, h, lbl)
-{
-    if (floater && !dk)
-    {
-        create_floating(nullptr,0,0,0,w,h,lbl); // floating and not dockable
-    }
-    else if (floater && dk) // create floating
-    {
-        create_floating(dk, 0, 0, 0, w, h, lbl);
-    }
-    else if (dk) // create docked
-    {
-        create_docked(dk);
-    }
+vtoolgrp::vtoolgrp(dockgroup *d, bool floating, bool draggable, int w, int h, const char *l)
+    : toolgrp(w, h, l) {
 
+    initialize(d, floating, draggable, w, h, l);
 }
 
 void vtoolgrp::create_dockable_group()
@@ -37,6 +25,11 @@ void vtoolgrp::create_dockable_group()
     dragger->clear_visible_focus();
     dragger->when(FL_WHEN_CHANGED);
 
+    inner_group = new Fl_Group(2, 15, w() - 4, h() - 17);
+    inner_group->box(FL_NO_BOX);
+}
+
+void vtoolgrp::create_fixed_group() {
     inner_group = new Fl_Group(2, 15, w() - 4, h() - 17);
     inner_group->box(FL_NO_BOX);
 }

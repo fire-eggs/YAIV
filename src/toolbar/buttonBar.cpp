@@ -13,13 +13,13 @@
 #include <FL/Fl_Menu_Item.H>
 #include <FL/Fl_SVG_Image.H>
 
-#define BTNSIZE 30
+#define BTNSIZE 40 // TODO from options
 #define HANDWID 17
-#define BTNDOWN  7 // inner_group down 3
-#define BTNSTEP 33
+#define NOHANDWID 7
+#define BTNDOWN  5 // inner_group down 3
+#define BTNSTEP (BTNSIZE + 3)
 
-#define TB_HEIGHT 40
-#define TB_WIDTH HANDWID + (BTNSTEP * 12)
+#define TB_HEIGHT (BTNSIZE + BTNDOWN + 2)
 
 static void setImage(Fl_Widget *btn, char *imgn, int sz=25)
 {
@@ -92,13 +92,13 @@ static void btnCb(Fl_Widget *w, void *data)
     }
 }
 
-static void makeBtn(toolgrp* tg, int i, char *name, bool vert, bool toggle)
+static void makeBtn(bool draggable, toolgrp* tg, int i, char *name, bool vert, bool toggle)
 {
-    int x = HANDWID + (BTNSTEP * i);
+    int x = (draggable ? HANDWID : NOHANDWID) + (BTNSTEP * i);
     int y = BTNDOWN;
     if (vert) {
         x = BTNDOWN;
-        y = HANDWID + (BTNSTEP * i);
+        y = (draggable ? HANDWID : NOHANDWID) + (BTNSTEP * i);
     }
     Fl_Button *btn1 = toggle ? new Fl_Toggle_Button(x,y,BTNSIZE,BTNSIZE) :
                                new Fl_Button(x, y, BTNSIZE, BTNSIZE);
@@ -108,7 +108,7 @@ static void makeBtn(toolgrp* tg, int i, char *name, bool vert, bool toggle)
     tg->add(btn1);
 }
 
-void btn_bar_common(toolgrp* tgroup, bool vert)
+void btn_bar_common(toolgrp* tgroup, bool vert, bool draggable)
 {
     tgroup->box(FL_BORDER_BOX);
     tgroup->in_group()->box(FL_NO_BOX);
@@ -125,7 +125,7 @@ void btn_bar_common(toolgrp* tgroup, bool vert)
                        false,false,false};
     int count = sizeof(btns) / sizeof(char*);
     for (int i=0; i < count; i++)
-        makeBtn(tgroup, i, btns[i], vert, btntype[i]);
+        makeBtn(draggable, tgroup, i, btns[i], vert, btntype[i]);
 
     tgroup->end();
 }
@@ -142,26 +142,22 @@ void ButtonBar::setState(Mediator::ACTIONS act, int val) {
     }
 }
 
-ButtonBar* ButtonBar::add_vert_btn_bar(dockgroup* dock, bool floating)
-{
+ButtonBar* ButtonBar::add_btn_bar(dockgroup *dock, bool vert, bool floating) {
     ButtonBar *bbar = new ButtonBar();
     bbar->setActions(acts);
-    bbar->_tgroup = new vtoolgrp(dock, floating, TB_HEIGHT, TB_WIDTH);  // TODO height from # of buttons
-    btn_bar_common(bbar->_tgroup, true);
-    return bbar;
-}
-ButtonBar* ButtonBar::add_btn_bar(dockgroup *dock, int floating) {
-    ButtonBar *bbar = new ButtonBar();
-    bbar->setActions(acts);
-    bbar->_tgroup = new toolgrp(dock, floating, TB_WIDTH, TB_HEIGHT); // TODO width from # of buttons
-    btn_bar_common(bbar->_tgroup, false);
+    int btncount = sizeof(acts) / sizeof(Mediator::ACTIONS);
+    bool draggable = false;
+    int tbwide = (draggable ? HANDWID : NOHANDWID) + (btncount * BTNSTEP) + 3;
+    bbar->_tgroup = vert ? new vtoolgrp(dock, floating, false, TB_HEIGHT, tbwide) :
+                           new  toolgrp(dock, floating, false, tbwide, TB_HEIGHT);
+    btn_bar_common(bbar->_tgroup, vert, draggable);
+    bbar->_vert = vert;
     return bbar;
 }
 
 ButtonBar::ButtonBar() { }
 
-void ButtonBar::setScaleImage(Mediator::ACTIONS who)
-{
+void ButtonBar::setScaleImage(Mediator::ACTIONS who) {
     Fl_Group* inner = _tgroup->in_group();
     for (int i= 0; i < inner->children(); i++) {
         Fl_Widget *ch = inner->child(i);
@@ -192,4 +188,32 @@ void ButtonBar::setScaleImage(Mediator::ACTIONS who)
         }
     }
 
+}
+
+ButtonBar* makeToolbar(dropwin* win) {
+
+    dockgroup* dock;
+    ButtonBar *tb;
+
+    bool vertbar = true; // TODO as an option
+    if (!vertbar) {
+        dock = new dockgroup(false, 1, 1,  win->w() - 2, TB_HEIGHT + 2);
+    }
+    else {
+        dock = new dockgroup(true,1, 1,  TB_HEIGHT + 2, win->h() - 2);
+    }
+    dock->box(FL_THIN_DOWN_BOX);
+    dock->resizable(nullptr); // prevent buttons from resizing
+
+    #ifndef THEME
+        dock->color(FL_BLACK); // TODO from prefs/theme
+    #endif
+    dock->end();
+    dock->set_window(win);
+
+    tb = ButtonBar::add_btn_bar(dock, vertbar, false);
+
+    dock->redraw();
+    win->set_dock(dock);
+    return tb;
 }

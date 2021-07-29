@@ -84,40 +84,24 @@ toolgrp::toolgrp(int w, int h, const char *lbl) : Fl_Group(1,1,w,h,lbl) {}
 // Constructors for docked/floating window
 // WITH x, y co-ordinates
 toolgrp::toolgrp(dockgroup *dk, int floater, int x, int y, int w, int h, const char *lbl)
-  : Fl_Group(1, 1, w, h, lbl)
-{
-  if (floater && !dk)
-  {
-    create_floating(nullptr,0,0,0,w,h,lbl); // floating and not dockable
-  }
-	else if((floater) && (dk)) // create floating
-	{
-		create_floating(dk, 1, x, y, w, h, lbl);
-	}
-	else if(dk) // create docked
-	{
-		create_docked(dk);
-	}
-//	else //do nothing...
+  : Fl_Group(1, 1, w, h, lbl) {
+    initialize(dk, floater, true, w, h, lbl);
 }
 
 // WITHOUT x, y co-ordinates
-toolgrp::toolgrp(dockgroup *dk, int floater, int w, int h, const char *lbl)
-  : Fl_Group(1, 1, w, h, lbl)
-{
-  if (floater && !dk)
-  {
-    create_floating(nullptr,0,0,0,w,h,lbl); // floating and not dockable
-  }
-	else if((floater) && (dk)) // create floating
-	{
-		create_floating(dk, 0, 0, 0, w, h, lbl);
-	}
-	else if(dk) // create docked
-	{
-		create_docked(dk);
-	}
-//	else //do nothing...
+toolgrp::toolgrp(dockgroup *dk, bool floater, bool draggable, int w, int h, const char *lbl)
+  : Fl_Group(1, 1, w, h, lbl) {
+    initialize(dk, floater, draggable, w, h, lbl);
+}
+
+void toolgrp::initialize(dockgroup *dk, bool floater, bool draggable, int w, int h, const char *lbl) {
+    if (!draggable)
+        create_fixed_docked(dk);
+    else if (floater) // set dk to nullptr for floating and not dockable
+        create_floating(dk, 0, 0, 0, w, h, lbl);
+    else if(dk) // create docked
+        create_docked(dk);
+    //	else //do nothing...
 }
 
 // construction function
@@ -176,6 +160,19 @@ void toolgrp::create_floating(dockgroup *dk, int full, int x, int y, int w, int 
 	tw->resizable(this); // TODO tb
 	tw->show();
 	Fl_Group::current(inner_group); // leave this group open when we leave the constructor...
+}
+
+void toolgrp::create_fixed_group() {
+    inner_group = new Fl_Group(17, 3, w() - 17, h() - 3);
+    inner_group->box(FL_NO_BOX);
+}
+
+void toolgrp::create_fixed_docked(dockgroup *dk) {
+    create_fixed_group();
+    dk->add(this);
+    set_dock(dk); // define where the toolgroup is allowed to dock
+    docked(1);	// docked
+    dk->redraw();
 }
 
 // function for setting the docked state and checkbox

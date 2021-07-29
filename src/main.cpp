@@ -34,8 +34,6 @@ void cmdline(int argc, char **argv, XBox *box)
 XBox *b2;
 ButtonBar* tb;
 
-#define TB_HEIGHT 38 // TODO tb hack
-
 int main(int argc, char **argv) {
 
 #if (FLTK_EXT_VERSION>0)
@@ -53,38 +51,12 @@ int main(int argc, char **argv) {
     // TODO tb : mediator needs to know about main, XBox
     YaivWin* _w = makeMainWindow();
 
-    dockgroup* dock;
-    bool vertbar = true; // TODO as an option
-    if (!vertbar) {
-        dock = new dockgroup(false, 1, 1,  _w->w() - 2, TB_HEIGHT + 2);
-        dock->box(FL_THIN_DOWN_BOX);
-        dock->color(FL_BLACK); // TODO from prefs/theme
-        dock->end();
-        dock->set_window(_w);
-
-        tb = ButtonBar::add_btn_bar(dock, 0);
-    }
-    else {
-        dock = new dockgroup(true,1, 1,  TB_HEIGHT + 2, _w->h() - 2);
-        dock->box(FL_THIN_DOWN_BOX);
-        dock->color(FL_BLACK); // TODO from prefs/theme
-        dock->end();
-        dock->set_window(_w);
-        tb = ButtonBar::add_vert_btn_bar(dock, true);
-    }
-
-    dock->redraw();
-
-    _w->set_dock(dock);
+    tb = makeToolbar(_w);
 
     _w->begin();
 
-    int ws_x = 1;
-    int ws_y = TB_HEIGHT+1;
-    if (vertbar) {
-        ws_x = TB_HEIGHT+1;
-        ws_y = 1;
-    }
+    int ws_x = tb->getXoffset();
+    int ws_y = tb->getYoffset();
     _w->workspace = new Fl_Group(ws_x,ws_y,_w->w()-1-ws_x, _w->h()-1-ws_y);
     _w->workspace->box(FL_NO_BOX);
 
