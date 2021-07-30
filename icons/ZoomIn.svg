@@ -1,0 +1,8 @@
+<svg width="20px" height="20px" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <ellipse stroke="#fff" ry="7.9" rx="7.9" cy="8.25" cx="8.25" stroke-width="0.7" fill="none"/>
+  <line stroke="#fff" y2="19.699652" x2="19.722484" y1="13.835621" x1="13.858454" stroke-width="2" fill="none"/>
+  <line y2="8.310499" x2="11.897815" y1="8.310499" x1="4.540535" stroke-width="0.7" stroke="#fff" fill="none"/>
+  <line transform="rotate(90 8.219175338745117,8.310499191284181)" y2="8.310499" x2="11.897815" y1="8.310499" x1="4.540535" stroke-width="0.7" stroke="#fff" fill="none"/>
+ </g>
+</svg>

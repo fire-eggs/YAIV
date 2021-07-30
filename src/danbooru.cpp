@@ -40,10 +40,8 @@ Fl_Text_Display::Style_Table_Entry  styletable[] = {	// Style table
 void style_unfinished_cb(int, void*) {
 }
 
-// connect to db; open window to view tags
-void view_danbooru(Prefs *prefs)
-{
-    // TODO browse mechanism for prefs editor
+void view_danbooru(Prefs *prefs, Fl_Group *container) {
+
     char dbpath[1000];
     prefs->get("DanbooruDB", dbpath, "", 1000);
 
@@ -54,12 +52,11 @@ void view_danbooru(Prefs *prefs)
         return;
     }
 
-    dbwin = new Fl_Window(200,500,"Danbooru Data");
-
     textbuf = new Fl_Text_Buffer;
     stylebuf = new Fl_Text_Buffer;
 
-    txtout = new Fl_Text_Editor(5,5,190,490);
+    txtout = new Fl_Text_Editor(container->x() + 1,container->y() + 1,
+                                container->w()-1,container->h()-1);
     txtout->textfont(FL_TIMES); // TODO options
     txtout->textsize(TS);       // TODO options
     txtout->buffer(textbuf);
@@ -67,9 +64,8 @@ void view_danbooru(Prefs *prefs)
                            sizeof(styletable) / sizeof(styletable[0]),
                            'A', style_unfinished_cb, 0);
 
-    dbwin->resizable(txtout);
-    dbwin->end();
-    dbwin->show();
+    container->add(txtout);
+    container->resizable(txtout);
 }
 
 void shutdown_danbooru()
@@ -150,7 +146,7 @@ void update_danbooru(char *filename) // TODO class member?
     if (inError || posEnd < strlen(name)) {
         textbuf->text("Not a danbooru file!");
         stylebuf->text("BBBBBBBBBBBBBBBBBBBB");
-        dbwin->redraw();
+        //dbwin->redraw();
         return;
     }
 
@@ -194,7 +190,7 @@ void update_danbooru(char *filename) // TODO class member?
     delete[] tmptxt;
     delete[] tmpsty;
 
-    dbwin->redraw();
+    //dbwin->redraw();
 }
 
 #endif

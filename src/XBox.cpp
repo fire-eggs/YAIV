@@ -17,6 +17,7 @@
 #include "fl_imgtk.h"
 #include "Slideshow.h"
 #include "XBoxDisplayInfoEvent.h"
+#include "mediator.h" // TODO define messages elsewhere?
 
 #ifdef DANBOORU
 #include "danbooru.h"
@@ -45,9 +46,11 @@ static const std::string LOGFILE = "yaiv.log";
 void logit(const char *format, char *arg) // TODO varargs
 {
     FILE *f = fopen(LOGFILE.c_str(), "a+");
-    fprintf(f, format, arg);
-    fputs("\n", f);
-    fclose(f);
+    if (f) {
+        fprintf(f, format, arg);
+        fputs("\n", f);
+        fclose(f);
+    }
 }
 
 int filename_path(const char* buf, char *to) { // TODO hack pending adding to FLTK
@@ -110,6 +113,8 @@ void XBox::load_file(const char *n) {
     _mru->Save();
 }
 
+char *XBox::currentFilename() { return file_name; }
+
 void XBox::load_current() {
     if (!file_list || file_count < 1)
         return;
@@ -134,6 +139,8 @@ void XBox::load_current() {
         labelsize(64);
         labelcolor(FL_LIGHT2);
         image(nullptr,nullptr);
+
+        send_message(Mediator::MSGS::MSG_NEWFILE, -1);
     }
     else
     {
@@ -148,15 +155,15 @@ void XBox::load_current() {
             labelsize(64);
             labelcolor(FL_RED);
             image(nullptr,nullptr);
+
+            send_message(Mediator::MSGS::MSG_NEWFILE, -1);
         }
         else
         {
             Fl_Anim_GIF_Image::min_delay = 0.01;
             Fl_Anim_GIF_Image::animate = true;
 
-#ifdef DANBOORU
-            update_danbooru(file_name);
-#endif
+            send_message(Mediator::MSGS::MSG_NEWFILE, 0);
 
             label(nullptr); // wipe any previous folder/error-file
             Fl_Anim_GIF_Image* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(img);
@@ -184,12 +191,232 @@ void XBox::prev_image() {
     load_current();
 }
 
-int XBox::handle(int msg) {
+void XBox::action(int act)
+{
+    switch (act)
+    {
+        case Mediator::ACT_NEXT:
+            deltax = deltay = 0;
+            next_image();
+            break;
+        case Mediator::ACT_PREV:
+            deltax = deltay = 0;
+            prev_image();
+            break;
+        case Mediator::ACT_CHK:
+            draw_check = !draw_check;
+            updateImage();
+            redraw();
+            break;
+        case Mediator::ACT_ZMI:
+            change_zoom(+1);
+            redraw();
+            break;
+        case Mediator::ACT_ZMO:
+            change_zoom(-1);
+            redraw();
+            break;
+        case Mediator::ACT_ROTR:
+            nextRotation();
+            break;
+        case Mediator::ACT_OPEN:
+            load_request();
+            this->take_focus();
+            break;
+        case Mediator::ACT_GOTO:
+            goto_request();
+            break;
+        case Mediator::ACT_SLID:
+            toggleSlideshow();
+            break;
+        case Mediator::ACT_SCALE_NONE:
+        case Mediator::ACT_SCALE_AUTO:
+        case Mediator::ACT_SCALE_WIDE:
+        case Mediator::ACT_SCALE_HIGH:
+        case Mediator::ACT_SCALE_FIT:
+            draw_scale = (ScaleMode)((int)act - (int)Mediator::ACT_SCALE_NONE); // TODO super hack
+            _zoom_step = 0;
+            updateImage();
+            updateLabel();
+            redraw();
+            break;
+        default:
+            return;
+    }
+}
 
+int XBox::key(int fullkey)
+{
+    // TODO this moves to mediator to lookup key customization
+
+    int key = fullkey & FL_KEY_MASK;
+    int ctrl = fullkey & FL_CTRL;
+#ifdef __APPLE_
+    ctrl = fullkey & FL_COMMAND;
+#endif
+
+    switch (key)
+    {
+        case 'q':
+            exit(0);
+
+        case 'c':
+            send_message(Mediator::MSG_TB, Mediator::ACT_CHK);
+            //action(Mediator::ACT_CHK);
+            return 1;
+
+        case 's':
+            next_scale();
+            return 1;
+
+        case 'n':
+            draw_center = !draw_center;
+            if (!draw_center)
+                deltax = deltay = 0;
+            redraw();
+            return 1;
+
+        case 'r':
+        {
+            if (!file_list || file_count<=1)
+                break;
+
+            struct dirent **newlist = list_randomize(file_list, file_count);
+
+            for (int i=0; i<file_count; i++)
+                file_list[i] = newlist[i];
+
+            free(newlist);
+            load_current();
+        }
+            return 1;
+
+        case FL_Right:
+            if (ctrl)
+            {
+                deltax -= _scroll_speed; // direction matches FEH
+                redraw();
+            }
+            else
+            {
+                action(Mediator::ACT_NEXT);
+            }
+            return 1;
+
+        case FL_Left: // TODO consider for pan
+            if (ctrl)
+            {
+                deltax += _scroll_speed; // direction matches FEH
+                redraw();
+            }
+            else
+            {
+                action(Mediator::ACT_PREV);
+            }
+            return 1;
+
+        case FL_Up:
+            if (ctrl)
+            {
+                deltay += _scroll_speed; // direction matches FEH
+                redraw();
+            }
+            else
+            {
+                action(Mediator::ACT_ZMI);
+            }
+            return 1;
+
+        case FL_Down:
+            if (ctrl)
+            {
+                deltay -= _scroll_speed; // direction matches FEH
+                redraw();
+            }
+            else
+            {
+                action(Mediator::ACT_ZMO);
+            }
+            return 1;
+
+        case FL_Page_Down:
+        case ' ':
+            action(Mediator::ACT_NEXT);
+            return 1;
+
+        case FL_Page_Up:
+        case FL_BackSpace:
+            action(Mediator::ACT_PREV);
+            return 1;
+
+        case FL_Home:
+            current_index = INT_MIN + 1;
+            prev_image();
+            return 1;
+
+        case FL_End:
+            current_index = INT_MAX - 1;
+            next_image();
+            return 1;
+
+        case 't':
+            action(Mediator::ACT_ROTR);
+            return 1;
+
+        case 'z':
+            nextTkScale();
+            return 1;
+
+        case FL_Escape: // escape to NOT close app
+            return 1;
+
+        case 'b':
+            notifyBorder();
+            return 1;
+
+        case 'w':
+            send_message(Mediator::MSG_TB, Mediator::ACT_SLID);
+            //toggleSlideshow();
+            return 1;
+
+        case 'm':
+            toggleMinimap();
+            return 1;
+
+        case 'o':
+            toggleOverlay();
+            return 1;
+
+        case 'p':
+            _pan_with_mouse = !_pan_with_mouse;
+            _prefs->set2(MOUSE_PAN, _pan_with_mouse);
+            return 1;
+            break;
+
+#ifdef DANBOORU
+            case 'd':
+                if (!file_list || file_count<=1)
+                    break;
+
+                if (Fl::event_state() & CTRL_P_KEY)
+                {
+                    Mediator::danbooru(_prefs);
+                }
+                break;
+#endif
+    }
+    return 0;
+
+}
+
+int XBox::handle(int msg) {
+/*
     if (msg == FL_FOCUS || msg == FL_UNFOCUS) // TODO _must_ this go before Fl_Group::handle?
     {
         return 1;
     }
+*/
+    //if (msg == FL_FOCUS || msg == FL_UNFOCUS) return 0;
 
     int ret = Fl_Group::handle(msg);
 
@@ -229,7 +456,7 @@ int XBox::handle(int msg) {
 
         case FL_PUSH:
             if (Fl::event_button() == FL_RIGHT_MOUSE) {
-                do_menu();
+                do_menu(Fl::event_x(), Fl::event_y(), true);
                 return 1;
             }
             return mousePan(FL_PUSH);
@@ -243,158 +470,7 @@ int XBox::handle(int msg) {
     }
 
     if (msg == FL_KEYDOWN) {
-
-        switch (Fl::event_key())
-        {
-            case 'q':
-                exit(0);
-
-            case 'c':
-                draw_check = !draw_check;
-                updateImage();
-                redraw();
-                return 1;
-
-            case 's':
-                next_scale();
-                return 1;
-
-            case 'n':
-                draw_center = !draw_center;
-                if (!draw_center)
-                    deltax = deltay = 0;
-                redraw();
-                return 1;
-
-            case 'r':
-            {
-                if (!file_list || file_count<=1)
-                    break;
-
-                struct dirent **newlist = list_randomize(file_list, file_count);
-
-                for (int i=0; i<file_count; i++)
-                    file_list[i] = newlist[i];
-
-                free(newlist);
-                load_current();
-            }
-            return 1;
-
-            case FL_Right:
-                if (Fl::event_state() & CTRL_P_KEY)
-                {
-                    deltax -= _scroll_speed; // direction matches FEH
-                }
-                else
-                {
-                    next_image();
-                    deltax = deltay = 0; // TODO allow unchanged?
-                }
-                redraw();
-                return 1;
-
-            case FL_Left: // TODO consider for pan
-                if (Fl::event_state() & CTRL_P_KEY)
-                {
-                    deltax += _scroll_speed; // direction matches FEH
-                }
-                else
-                {
-                    prev_image();
-                    deltax = deltay = 0; // TODO allow unchanged? [lock position]
-                }
-                redraw();
-                return 1;
-
-            case FL_Up:
-                if (Fl::event_state() & CTRL_P_KEY)
-                {
-                    deltay += _scroll_speed; // direction matches FEH
-                }
-                else
-                {
-                    change_zoom(+1);
-                }
-                redraw();
-                return 1;
-
-            case FL_Down:
-                if (Fl::event_state() & CTRL_P_KEY)
-                {
-                    deltay -= _scroll_speed; // direction matches FEH
-                }
-                else
-                {
-                    change_zoom(-1);
-                }
-                redraw();
-                return 1;
-
-            case FL_Page_Down:
-            case ' ':
-                next_image();
-                return 1;
-
-            case FL_Page_Up:
-            case FL_BackSpace:
-                prev_image();
-                return 1;
-
-            case FL_Home:
-                current_index = INT_MIN + 1;
-                prev_image();
-                return 1;
-
-            case FL_End:
-                current_index = INT_MAX - 1;
-                next_image();
-                return 1;
-
-            case 't':
-                nextRotation();
-                return 1;
-
-            case 'z':
-                nextTkScale();
-                return 1;
-
-            case FL_Escape: // escape to NOT close app
-                return 1;
-
-            case 'b':
-                notifyBorder();
-                return 1;
-
-            case 'w':
-                toggleSlideshow();
-                return 1;
-
-            case 'm':
-                toggleMinimap();
-                return 1;
-
-            case 'o':
-                toggleOverlay();
-                return 1;
-
-            case 'p':
-                _pan_with_mouse = !_pan_with_mouse;
-                _prefs->set2(MOUSE_PAN, _pan_with_mouse);
-                return 1;
-#ifdef DANBOORU
-            case 'd':
-                if (!file_list || file_count<=1)
-                    break;
-
-                if (Fl::event_state() & CTRL_P_KEY)
-                {
-                    view_danbooru(_prefs);
-                    update_danbooru(file_list[current_index]->d_name);
-                }
-                break;
-#endif
-        }
+        return key(Fl::event_key());
     }
 
     return ret;
@@ -472,6 +548,12 @@ char * XBox::getLabel(bool include_filename, char *buff, int buffsize)
 }
 
 void XBox::next_scale() {
+    int next_scale = (ScaleMode)((int)draw_scale + 1);
+    if (next_scale >= ScaleModeMAX)
+        next_scale = ScaleMode::Noscale;
+    Mediator::ACTIONS act = static_cast<Mediator::ACTIONS>((int)next_scale + (int)Mediator::ACTIONS::ACT_SCALE_NONE);
+    send_message(Mediator::MSG_TB, act);
+/*
     draw_scale = (ScaleMode)((int)draw_scale + 1);
     if (draw_scale >= ScaleModeMAX)
         draw_scale = ScaleMode::Noscale;
@@ -480,6 +562,7 @@ void XBox::next_scale() {
     updateImage();
     updateLabel();
     redraw();
+*/
 }
 
 void XBox::nextTkScale() {

@@ -63,6 +63,7 @@ private:
         MI_LOAD,
         MI_COPYPATH,
         MI_GOTO,
+        MI_DANBOORU,
         MI_OPTIONS,
 
         MI_FAVS, // Must be last before MI_FAVx
@@ -78,11 +79,20 @@ private:
         MI_FAV9,
     };
 
-    Fl_Menu_Item right_click_menu[7] =
+// TODO consider building the menu in code
+#ifdef DANBOORU
+#define MNU_COUNT 8
+#else
+#define MNU_COUNT 7
+#endif
+    Fl_Menu_Item right_click_menu[MNU_COUNT] =
     {
-        {"Load",            0, nullptr, (void *)MI_LOAD},
+        {"Load",            0, nullptr, (void *)(fl_intptr_t) MI_LOAD},
         {"Copy image path", 0, nullptr, (void *)MI_COPYPATH},
-        {"Goto Image",      0, nullptr, (void *)MI_GOTO, FL_MENU_DIVIDER},
+        {"Goto Image",      0, nullptr, (void *)MI_GOTO},
+#ifdef DANBOORU
+        {"Show Danbooru",    0, nullptr, (void *)MI_DANBOORU, FL_MENU_DIVIDER},
+#endif
         {"Options",         0, nullptr, (void *)MI_OPTIONS, FL_MENU_DIVIDER},
 
         {"Last Used",       0, nullptr, nullptr, FL_SUBMENU},
@@ -105,13 +115,18 @@ public:
 
     void draw() override;
 
-    void do_menu();
+    void do_menu(int, int, bool);
     void image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg);
 
     void load_current(); // exposed for slideshow
     void next_image();   // exposed for slideshow
 
     void load_file(const char *n); // exposed for argv processing
+
+    int key(int val); // keydown from someplace
+    void action(int val); // action from someplace (e.g. toolbar button)
+
+    char *currentFilename();
 
 private:
 
@@ -120,6 +135,7 @@ private:
     void load_filelist(const char *);
     int find_file(const char *n);
     void load_request(); // 'load' processing
+    void goto_request(); // 'goto' processing
 
     void prev_image();
     void next_scale();
@@ -173,6 +189,8 @@ private:
     void notifyDisplayLabel(const char *);
 
 public:
+    bool getCheck() const { return draw_check; }
+    bool inSlide() const {return _inSlideshow; }
     void displayEventHandler(XBoxDisplayInfoEvent *hand)
     {
         if (!_dispevents)

@@ -1,0 +1,219 @@
+//
+// Created by kevin on 7/4/21.
+//
+#ifndef _MSC_VER
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+#endif
+
+#include "buttonBar.h"
+#include "toolgrp.h"
+#include "mediator.h"
+#include "vtoolgrp.h"
+#include <FL/Fl_Toggle_Button.H>
+#include <FL/Fl_Menu_Item.H>
+#include <FL/Fl_SVG_Image.H>
+
+#define BTNSIZE 40 // TODO from options
+#define HANDWID 17
+#define NOHANDWID 7
+#define BTNDOWN  5 // inner_group down 3
+#define BTNSTEP (BTNSIZE + 3)
+
+#define TB_HEIGHT (BTNSIZE + BTNDOWN + 2)
+
+static void setImage(Fl_Widget *btn, char *imgn, int sz=25)
+{
+    char buff[500];
+    sprintf(buff, "icons/%s.svg", imgn); // TODO find sub-folder? hard-coded in code?
+
+    btn->align(FL_ALIGN_CENTER);
+    btn->color(8,FL_BLACK);
+    btn->visible_focus(0);
+
+    Fl_SVG_Image *img = new Fl_SVG_Image(buff,0);
+    if (img->fail())
+        return;
+    btn->image(img->copy(sz,sz));
+    delete img;
+
+    btn->tooltip(imgn);
+}
+
+// TODO must match button order
+Mediator::ACTIONS acts[] = {
+        Mediator::ACT_PREV,
+        Mediator::ACT_NEXT,
+        Mediator::ACT_ZMI,
+        Mediator::ACT_ZMO,
+        Mediator::ACT_SLID,
+        Mediator::ACT_ROTR,
+        Mediator::ACT_OPEN,
+        Mediator::ACT_GOTO,
+        Mediator::ACT_CHK,
+        Mediator::ACT_SCALE,
+        Mediator::ACT_MENU,
+        Mediator::ACT_EXIT,
+};
+
+Fl_Menu_Item scale_menu[6] =
+        {
+                {"No scale",        0, nullptr, (void *)(fl_intptr_t) Mediator::ACT_SCALE_NONE},
+                {"Auto scale",      0, nullptr, (void *)(fl_intptr_t) Mediator::ACT_SCALE_AUTO},
+                {"Scale to Fit",    0, nullptr, (void *)(fl_intptr_t) Mediator::ACT_SCALE_FIT},
+                {"Scale to Width",  0, nullptr, (void *)(fl_intptr_t) Mediator::ACT_SCALE_WIDE},
+                {"Scale to Height", 0, nullptr, (void *)(fl_intptr_t) Mediator::ACT_SCALE_HIGH},
+                {nullptr} // end of menu
+        };
+
+Mediator::ACTIONS scaleMenu()
+{
+    int xloc = Fl::event_x();
+    int yloc = Fl::event_y();
+    const Fl_Menu_Item *m = scale_menu->popup(xloc, yloc, nullptr, nullptr, nullptr);
+    if (m)
+        return (Mediator::ACTIONS)(fl_intptr_t)m->user_data();
+    return Mediator::ACTIONS::ACT_INVALID;
+}
+static void btnCb(Fl_Widget *w, void *data)
+{
+    int val = (int)(fl_intptr_t)data;
+    switch (acts[val])
+    {
+        case Mediator::ACT_SCALE:
+            {
+            Mediator::ACTIONS newscale = scaleMenu();
+            if (newscale != Mediator::ACT_INVALID)
+                send_message(Mediator::MSG_TB, newscale);
+            }
+            break;
+        default:
+            send_message(Mediator::MSG_TB, acts[val]);
+            break;
+    }
+}
+
+static void makeBtn(bool draggable, toolgrp* tg, int i, char *name, bool vert, bool toggle)
+{
+    int x = (draggable ? HANDWID : NOHANDWID) + (BTNSTEP * i);
+    int y = BTNDOWN;
+    if (vert) {
+        x = BTNDOWN;
+        y = (draggable ? HANDWID : NOHANDWID) + (BTNSTEP * i);
+    }
+    Fl_Button *btn1 = toggle ? new Fl_Toggle_Button(x,y,BTNSIZE,BTNSIZE) :
+                               new Fl_Button(x, y, BTNSIZE, BTNSIZE);
+    btn1->callback(btnCb, (void *)(fl_intptr_t)i);
+    btn1->box(FL_THIN_UP_BOX);
+    setImage(btn1, name);
+    tg->add(btn1);
+}
+
+void btn_bar_common(toolgrp* tgroup, bool vert, bool draggable)
+{
+    tgroup->box(FL_BORDER_BOX);
+    tgroup->in_group()->box(FL_NO_BOX);
+    tgroup->color(FL_BLACK);
+
+    char *btns [] = {"ViewPreviousImage", "ViewNextImage", "ZoomIn",
+                     "ZoomOut", "Slideshow", "RotateRight",
+                     "OpenFile", "GoToImage", "Checkerboard",
+                     "scaletofit", "Menu", "exit_white"};
+    // whether the button is a toggle
+    bool btntype [] = {false,false,false,
+                       false,true,false,
+                       false,false,true,
+                       false,false,false};
+    int count = sizeof(btns) / sizeof(char*);
+    for (int i=0; i < count; i++)
+        makeBtn(draggable, tgroup, i, btns[i], vert, btntype[i]);
+
+    tgroup->end();
+}
+
+void ButtonBar::setState(Mediator::ACTIONS act, int val) {
+    Fl_Group* inner = _tgroup->in_group();
+    for (int i= 0; i < inner->children(); i++) {
+        Fl_Widget *ch = inner->child(i);
+        Fl_Toggle_Button* ch2 = dynamic_cast<Fl_Toggle_Button*>(ch);
+        if (ch2 && _acts[i] == act) {
+            ch2->value(val);
+            break;
+        }
+    }
+}
+
+ButtonBar* ButtonBar::add_btn_bar(dockgroup *dock, bool vert, bool floating) {
+    ButtonBar *bbar = new ButtonBar();
+    bbar->setActions(acts);
+    int btncount = sizeof(acts) / sizeof(Mediator::ACTIONS);
+    bool draggable = false;
+    int tbwide = (draggable ? HANDWID : NOHANDWID) + (btncount * BTNSTEP) + 3;
+    bbar->_tgroup = vert ? new vtoolgrp(dock, floating, false, TB_HEIGHT, tbwide) :
+                           new  toolgrp(dock, floating, false, tbwide, TB_HEIGHT);
+    btn_bar_common(bbar->_tgroup, vert, draggable);
+    bbar->_vert = vert;
+    return bbar;
+}
+
+ButtonBar::ButtonBar() { }
+
+void ButtonBar::setScaleImage(Mediator::ACTIONS who) {
+    Fl_Group* inner = _tgroup->in_group();
+    for (int i= 0; i < inner->children(); i++) {
+        Fl_Widget *ch = inner->child(i);
+        Fl_Button* ch2 = dynamic_cast<Fl_Button*>(ch);
+        if (ch2 && _acts[i] == Mediator::ACT_SCALE) {
+            // set button image/tooltip
+            switch (who)
+            {
+                // TODO copy-pasta
+                case Mediator::ACT_SCALE_NONE:
+                    setImage(ch,"scaletofit");
+                    break;
+                case Mediator::ACT_SCALE_AUTO:
+                    setImage(ch,"autozoom");
+                    break;
+                case Mediator::ACT_SCALE_FIT:
+                    setImage(ch,"zoomtofit");
+                    break;
+                case Mediator::ACT_SCALE_WIDE:
+                    setImage(ch,"scaletowidth");
+                    break;
+                case Mediator::ACT_SCALE_HIGH:
+                    setImage(ch,"scaletoheight");
+                    break;
+            }
+            ch2->redraw();
+            break;
+        }
+    }
+
+}
+
+ButtonBar* makeToolbar(dropwin* win) {
+
+    dockgroup* dock;
+    ButtonBar *tb;
+
+    bool vertbar = true; // TODO as an option
+    if (!vertbar) {
+        dock = new dockgroup(false, 1, 1,  win->w() - 2, TB_HEIGHT + 2);
+    }
+    else {
+        dock = new dockgroup(true,1, 1,  TB_HEIGHT + 2, win->h() - 2);
+    }
+    dock->box(FL_THIN_DOWN_BOX);
+    dock->resizable(nullptr); // prevent buttons from resizing
+
+    #ifndef THEME
+        dock->color(FL_BLACK); // TODO from prefs/theme
+    #endif
+    dock->end();
+    dock->set_window(win);
+
+    tb = ButtonBar::add_btn_bar(dock, vertbar, false);
+
+    dock->redraw();
+    win->set_dock(dock);
+    return tb;
+}

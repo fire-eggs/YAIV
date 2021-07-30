@@ -10,6 +10,7 @@
 #include "XBox.h"
 #include "FL/fl_ask.H"
 #include "FL/Fl_File_Chooser.H"
+#include "mediator.h"
 
 void XBox::load_request() {
 
@@ -29,6 +30,27 @@ void XBox::load_request() {
     load_file(fname);
 }
 
+void XBox::goto_request() {
+
+    int dex = current_index + 1;
+    char def[256];
+    sprintf(def, "%d", dex);
+    const char* res = fl_input("Goto image:", def);
+    if (res)
+    {
+        try
+        {
+            int val = std::stoi(res);
+            current_index = val - 1;
+            load_current();
+            //dynamic_cast<XBox *>(window_p)->load_current(); // TODO hack
+        }
+        catch (std::exception& e)
+        {
+        }
+    }
+}
+
 struct menucall {XBox *who; int menu;};
 static void xbox_menucb(Fl_Widget *window_p, void *userdata) {
 
@@ -43,7 +65,7 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
 
     switch( ndata )
     {
-        case MI_LOAD:
+        case MI_LOAD: // TODO ACT_OPEN
             load_request();
             this->take_focus();
             break;
@@ -59,29 +81,18 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
         }
             break;
 
-        case MI_GOTO:
-        {
-            int dex = current_index + 1;
-            char def[256];
-            sprintf(def, "%d", dex);
-            const char* res = fl_input("Goto image:", def);
-            if (res)
-            {
-                try
-                {
-                    int val = std::stoi(res);
-                    current_index = val - 1;
-                    dynamic_cast<XBox *>(window_p)->load_current(); // TODO hack
-                }
-                catch (std::exception& e)
-                {
-                }
-            }
-        }
+        case MI_GOTO: // TODO ACT_GOTO
+            goto_request();
             break;
 
         case MI_OPTIONS:		    // TODO nyi
             break;
+
+#ifdef DANBOORU
+        case MI_DANBOORU:
+            Mediator::danbooru(_prefs);
+            break;
+#endif
 
         case MI_FAV0: case MI_FAV1: case MI_FAV2:
         case MI_FAV3: case MI_FAV4: case MI_FAV5:
@@ -97,12 +108,14 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
     }
 }
 
-void XBox::do_menu() {
+void XBox::do_menu(int xloc, int yloc, bool title) {
 
     // 1. find the submenu in the "master" menu
     int submenuNdx;
     for (submenuNdx = 0; submenuNdx < right_click_menu->size(); submenuNdx++)
     {
+        if (!right_click_menu[submenuNdx].text)
+            continue;
         if (strcmp(right_click_menu[submenuNdx].text, "Last Used") != 0)
             continue;
         break;
@@ -124,7 +137,8 @@ void XBox::do_menu() {
     for (size_t j = 0; j <= submenuNdx; j++)
     {
         dyn_menu[j] = right_click_menu[j];
-        size_t menuparam = (size_t)MI_LOAD + j;
+        size_t menuparam = (size_t)dyn_menu[j].user_data();
+        //size_t menuparam = (size_t)MI_LOAD + j; // TODO use actual value, not menu index?
         menucall *hold = new menucall;
         hold->who = this;
         hold->menu = static_cast<int>(menuparam);
@@ -138,7 +152,6 @@ void XBox::do_menu() {
     for (long j = 0; j < numfavs; j++)
     {
         dyn_menu[submenuNdx + 1 + j].label(favs[j]);
-        //dyn_menu[submenuNdx + 1 + j].label(u8"кошка 日本国");
         menucall *hold = new menucall;
         hold->who = this;
         hold->menu = MI_FAV0 + j;
@@ -147,8 +160,8 @@ void XBox::do_menu() {
     }
 
     // show the menu
-
-    const Fl_Menu_Item *m = dyn_menu->popup(Fl::event_x(), Fl::event_y(), "YAIV", nullptr, nullptr);
+    const Fl_Menu_Item *m = dyn_menu->popup(xloc, yloc, title ? "YAIV" : nullptr,
+                                            nullptr, nullptr);
     if (m && m->callback())
         m->do_callback(this, m->user_data());
 

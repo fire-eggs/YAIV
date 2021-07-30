@@ -1,4 +1,6 @@
 
+include(toolbar/CMakeLists.txt)
+
 add_compile_options( "-fexceptions" "-fopenmp" "-DFLTK_USE_SVG" )
 
 # optimize and strip appropriately
@@ -13,17 +15,18 @@ set(LINK_FLAGS -no-pie -fopenmp -lX11 -lXext -lm -ldl -lXinerama -lXcursor -lXi
                -lglib-2.0 -lharfbuzz -lpangoxft-1.0 -lpthread -lwebp -lwebpdemux)
 
 include_directories(. /home/kevin/proj/fltk/fltk /home/kevin/proj/YAIV/fl_imgtk/inc
-        ${PROJECT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR} toolbar
         )
 
 add_executable(yaiv main.cpp yaiv_win.cpp Fl_Anim_GIF_Image.cpp humansize.cpp list_rand.cpp
                Webp.cpp checker.cpp XBox.cpp MostRecentPaths.cpp Slideshow.cpp apng.cpp
-               Fl_TransBox.cpp modes.cpp XBoxMenu.cpp SmoothResizeGroup.cpp SmoothResizeGroup.h)
+               Fl_TransBox.cpp modes.cpp XBoxMenu.cpp SmoothResizeGroup.cpp SmoothResizeGroup.h ${srcs}
+        mediator.cpp mediator.h)
 
 add_executable(yaiv_db main.cpp Fl_Anim_GIF_Image.cpp humansize.cpp list_rand.cpp
                Webp.cpp checker.cpp XBox.cpp MostRecentPaths.cpp Slideshow.cpp apng.cpp
-               Fl_TransBox.cpp danbooru.cpp yaiv_win.cpp
-               ${PROJECT_SOURCE_DIR}/sqlite-amalgamation-3350500/sqlite3.c modes.cpp XBoxMenu.cpp SmoothResizeGroup.cpp SmoothResizeGroup.h)
+               Fl_TransBox.cpp danbooru.cpp yaiv_win.cpp ${srcs}
+               ${PROJECT_SOURCE_DIR}/sqlite-amalgamation-3350500/sqlite3.c modes.cpp XBoxMenu.cpp SmoothResizeGroup.cpp SmoothResizeGroup.h toolbar/buttonBar.cpp toolbar/buttonBar.h mediator.cpp mediator.h)
 
 target_compile_definitions(yaiv_db PUBLIC "-DDANBOORU")
 
