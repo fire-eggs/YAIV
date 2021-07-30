@@ -114,6 +114,8 @@ void XBox::do_menu(int xloc, int yloc, bool title) {
     int submenuNdx;
     for (submenuNdx = 0; submenuNdx < right_click_menu->size(); submenuNdx++)
     {
+        if (!right_click_menu[submenuNdx].text)
+            continue;
         if (strcmp(right_click_menu[submenuNdx].text, "Last Used") != 0)
             continue;
         break;
@@ -135,7 +137,8 @@ void XBox::do_menu(int xloc, int yloc, bool title) {
     for (size_t j = 0; j <= submenuNdx; j++)
     {
         dyn_menu[j] = right_click_menu[j];
-        size_t menuparam = (size_t)MI_LOAD + j;
+        size_t menuparam = (size_t)dyn_menu[j].user_data();
+        //size_t menuparam = (size_t)MI_LOAD + j; // TODO use actual value, not menu index?
         menucall *hold = new menucall;
         hold->who = this;
         hold->menu = static_cast<int>(menuparam);
