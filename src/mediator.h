@@ -40,6 +40,9 @@ namespace Mediator {
     void handle_key();
 
     void danbooru(Prefs *);
+
+    void setTheme(int);
+
 }
 
 #endif //YAIV_MEDIATOR_H

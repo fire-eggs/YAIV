@@ -28,6 +28,8 @@ public:
 
     int getXoffset() {return _vert ? _tgroup->w() : 1 ;}
     int getYoffset() {return _vert ? 1 : _tgroup->h() ;}
+
+    void updateColor(bool isDarkTheme);
 };
 
 ButtonBar* makeToolbar(dropwin* win); // TODO static method

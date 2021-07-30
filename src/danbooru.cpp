@@ -3,6 +3,9 @@
 //
 
 #ifdef DANBOORU
+
+#define THEME 1
+
 #include <FL/fl_ask.H>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Text_Editor.H>
@@ -13,6 +16,10 @@
 
 #include "danbooru.h"
 #include "sqlite-amalgamation-3350500/sqlite3.h"
+
+#ifdef THEME
+#include "themes.h"
+#endif
 
 sqlite3 *db = nullptr;
 Fl_Window *dbwin = nullptr;
@@ -60,6 +67,12 @@ void view_danbooru(Prefs *prefs, Fl_Group *container) {
     txtout->textfont(FL_TIMES); // TODO options
     txtout->textsize(TS);       // TODO options
     txtout->buffer(textbuf);
+
+    if (OS::is_dark_theme(OS::current_theme())) {
+        styletable[0].color = FL_WHITE;
+        styletable[5].color = FL_WHITE;
+    }
+
     txtout->highlight_data(stylebuf, styletable,
                            sizeof(styletable) / sizeof(styletable[0]),
                            'A', style_unfinished_cb, 0);

@@ -29,6 +29,7 @@
 #include "checker.h"
 
 #include "MostRecentPaths.h"
+#include "menuids.h"
 
 class Slideshow;
 class XBoxDisplayInfoEvent;
@@ -58,32 +59,12 @@ private:
     int rotation; // cycle through clockwise rotations of 90 degrees
     ZScaleMode imgtkScale{ZScaleMode::None}; // cycle through fl_imgtk scale values
 
-    enum
-    {
-        MI_LOAD,
-        MI_COPYPATH,
-        MI_GOTO,
-        MI_DANBOORU,
-        MI_OPTIONS,
-
-        MI_FAVS, // Must be last before MI_FAVx
-        MI_FAV0,
-        MI_FAV1,
-        MI_FAV2,
-        MI_FAV3,
-        MI_FAV4,
-        MI_FAV5,
-        MI_FAV6,
-        MI_FAV7,
-        MI_FAV8,
-        MI_FAV9,
-    };
 
 // TODO consider building the menu in code
 #ifdef DANBOORU
-#define MNU_COUNT 8
+#define MNU_COUNT 19
 #else
-#define MNU_COUNT 7
+#define MNU_COUNT 18
 #endif
     Fl_Menu_Item right_click_menu[MNU_COUNT] =
     {
@@ -93,6 +74,17 @@ private:
 #ifdef DANBOORU
         {"Show Danbooru",    0, nullptr, (void *)MI_DANBOORU, FL_MENU_DIVIDER},
 #endif
+        {"Theme", 0, nullptr, nullptr, FL_SUBMENU},
+            {"Blue", 0, nullptr, (void *)(fl_intptr_t)MI_THEME_BLUE},
+            {"Classic", 0, nullptr, (void *)(fl_intptr_t)MI_THEME_CLASSIC},
+            {"Dark", 0, nullptr, (void *)(fl_intptr_t)MI_THEME_DARK},
+            {"Grey Bird", 0, nullptr, (void *)(fl_intptr_t)MI_THEME_GREYBIRD},
+            {"High Contrast", 0, nullptr, (void *)(fl_intptr_t)MI_THEME_HIGHCONTRAST},
+            {"Native", 0, nullptr, (void *)(fl_intptr_t)MI_THEME_NATIVE},
+            {"Ocean", 0, nullptr, (void *)(fl_intptr_t)MI_THEME_OCEAN},
+            {"Olive", 0, nullptr, (void *)(fl_intptr_t)MI_THEME_OLIVE},
+            {"Rose Gold", 0, nullptr, (void *)(fl_intptr_t)MI_THEME_ROSEGOLD},
+            {nullptr}, // end of sub menu
         {"Options",         0, nullptr, (void *)MI_OPTIONS, FL_MENU_DIVIDER},
 
         {"Last Used",       0, nullptr, nullptr, FL_SUBMENU},
@@ -191,6 +183,7 @@ private:
 public:
     bool getCheck() const { return draw_check; }
     bool inSlide() const {return _inSlideshow; }
+
     void displayEventHandler(XBoxDisplayInfoEvent *hand)
     {
         if (!_dispevents)

@@ -11,6 +11,7 @@
 #include "FL/fl_ask.H"
 #include "FL/Fl_File_Chooser.H"
 #include "mediator.h"
+#include "menuids.h"
 
 void XBox::load_request() {
 
@@ -103,6 +104,20 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
             load_file(mru[path]);
         }
             break;
+
+        case MI_THEME_BLUE:
+        case MI_THEME_CLASSIC:
+        case MI_THEME_DARK:
+        case MI_THEME_GREYBIRD:
+        case MI_THEME_HIGHCONTRAST:
+        case MI_THEME_NATIVE:
+        case MI_THEME_OCEAN:
+        case MI_THEME_OLIVE:
+        case MI_THEME_ROSEGOLD:
+        case MI_THEME_TAN:
+            Mediator::setTheme(ndata);
+            break;
+
         default:
             break;
     }

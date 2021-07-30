@@ -16,6 +16,9 @@ extern ButtonBar* tb;
 toolgrp* _danbooru;
 #endif
 
+#include "menuids.h"
+#include "themes.h"
+
 namespace Mediator {
 
     class message {
@@ -126,4 +129,61 @@ Fl_Widget_Tracker *db_track = nullptr;
         update_danbooru(b2->currentFilename());
     }
 #endif
+
+void setTheme(int menuval) {
+    bool isdark = false;
+    switch (menuval) {
+        case MI_THEME_BLUE:
+            OS::use_blue_theme();
+            break;
+        case MI_THEME_CLASSIC:
+            OS::use_classic_theme();
+            break;
+        case MI_THEME_DARK:
+            OS::use_dark_theme();
+            isdark = true;
+            break;
+        case MI_THEME_GREYBIRD:
+            OS::use_greybird_theme();
+            break;
+        case MI_THEME_HIGHCONTRAST:
+            OS::use_high_contrast_theme();
+            isdark = true;
+            break;
+        case MI_THEME_NATIVE:
+            OS::use_native_theme();
+            break;
+        case MI_THEME_OCEAN:
+            OS::use_ocean_theme();
+            break;
+        case MI_THEME_OLIVE:
+            OS::use_olive_theme();
+            break;
+        case MI_THEME_ROSEGOLD:
+            OS::use_rose_gold_theme();
+            break;
+        case MI_THEME_TAN:
+            TanColormap_FLTKSUBS();
+            //irushTan();
+            break;
+    }
+
+    tb->updateColor(isdark);
 }
+    /*
+        static void use_classic_theme(void);
+        static void use_aero_theme(void);
+        static void use_metro_theme(void);
+        static void use_aqua_theme(void);
+        static void use_greybird_theme(void);
+        static void use_ocean_theme(void);
+        static void use_blue_theme(void);
+        static void use_olive_theme(void);
+        static void use_rose_gold_theme(void);
+        static void use_dark_theme(void);
+        static void use_high_contrast_theme(void);
+     */
+
+
+}
+
