@@ -49,6 +49,14 @@ namespace Mediator {
                 // TODO tell the toolbar to set the scale image
                 tb->setScaleImage(val);
                 break;
+            case ACT_NONEXT:
+            case ACT_NOPREV:
+                tb->deactivate(val);
+                break;
+            case ACT_ISNEXT:
+            case ACT_ISPREV:
+                tb->activate(val);
+                break;
         }
         b2->action(val);
     }

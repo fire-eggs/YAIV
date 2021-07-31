@@ -116,10 +116,18 @@ void XBox::load_file(const char *n) {
 char *XBox::currentFilename() { return file_name; }
 
 void XBox::load_current() {
-    if (!file_list || file_count < 1)
-        return;
 
     current_index = std::min(std::max(current_index,0), file_count-1);
+    bool canNext = file_list && current_index < (file_count-1);
+    bool canPrev = file_list && current_index > 0;
+
+    Mediator::send_message(Mediator::MSGS::MSG_TB,
+                           canPrev ? Mediator::ACT_ISPREV : Mediator::ACT_NOPREV);
+    Mediator::send_message(Mediator::MSGS::MSG_TB,
+                           canNext ? Mediator::ACT_ISNEXT : Mediator::ACT_NONEXT);
+
+    if (!file_list || file_count < 1)
+        return;
 
     if (folder_name[strlen(folder_name) - 1] == '/')
         folder_name[strlen(folder_name) - 1] = 0x0;

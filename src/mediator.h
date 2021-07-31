@@ -34,6 +34,11 @@ namespace Mediator {
         ACT_SCALE_FIT = 14,
         ACT_SCALE_WIDE = 15,
         ACT_SCALE_HIGH = 16,
+
+        ACT_NOPREV,
+        ACT_NONEXT,
+        ACT_ISPREV,
+        ACT_ISNEXT,
     };
     void send_message(int msg, int data);
 

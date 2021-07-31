@@ -217,3 +217,18 @@ ButtonBar* makeToolbar(dropwin* win) {
     win->set_dock(dock);
     return tb;
 }
+
+void ButtonBar::deactivate(Mediator::ACTIONS who) {
+    Fl_Group* inner = _tgroup->in_group();
+   if (who == Mediator::ACT_NONEXT)
+       inner->child(1)->deactivate(); // TODO hard-coded toolbar button location
+   if (who == Mediator::ACT_NOPREV)
+       inner->child(0)->deactivate(); // TODO hard-coded toolbar button location
+}
+void ButtonBar::activate(Mediator::ACTIONS who) {
+    Fl_Group* inner = _tgroup->in_group();
+    if (who == Mediator::ACT_ISNEXT)
+        inner->child(1)->activate(); // TODO hard-coded toolbar button location
+    if (who == Mediator::ACT_ISPREV)
+        inner->child(0)->activate(); // TODO hard-coded toolbar button location
+}

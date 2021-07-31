@@ -28,6 +28,9 @@ public:
 
     int getXoffset() {return _vert ? _tgroup->w() : 1 ;}
     int getYoffset() {return _vert ? 1 : _tgroup->h() ;}
+
+    void activate(Mediator::ACTIONS who);
+    void deactivate(Mediator::ACTIONS who);
 };
 
 ButtonBar* makeToolbar(dropwin* win); // TODO static method

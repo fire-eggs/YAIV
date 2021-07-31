@@ -87,6 +87,10 @@ int main(int argc, char **argv) {
 
     _w->show();
     toolgrp::show_all();
+
+    Mediator::send_message(Mediator::MSG_TB, Mediator::ACT_NOPREV);
+    Mediator::send_message(Mediator::MSG_TB, Mediator::ACT_NONEXT);
+
     cmdline(argc, argv, b2); // do this _after_ show() for label etc to be correct
 
     return Fl::run();
