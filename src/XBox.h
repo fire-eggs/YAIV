@@ -45,7 +45,8 @@ private:
 
     bool draw_check{true};
     ScaleMode draw_scale{Noscale};
-    bool draw_center{false};
+    bool draw_center{true};
+    bool panned{false};
     OverlayMode draw_overlay{OverlayNone};
     double _zoom{1.0};
     int _zoom_step = 0;

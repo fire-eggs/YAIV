@@ -197,10 +197,12 @@ void XBox::action(int act)
     {
         case Mediator::ACT_NEXT:
             deltax = deltay = 0;
+            panned = false;
             next_image();
             break;
         case Mediator::ACT_PREV:
             deltax = deltay = 0;
+            panned = false;
             prev_image();
             break;
         case Mediator::ACT_CHK:
@@ -269,12 +271,14 @@ int XBox::key(int fullkey)
             next_scale();
             return 1;
 
+#if 0       // 20210731 make 'center' the only mode
         case 'n':
             draw_center = !draw_center;
             if (!draw_center)
                 deltax = deltay = 0;
             redraw();
             return 1;
+#endif
 
         case 'r':
         {
@@ -504,6 +508,7 @@ int XBox::mousePan(int msg)
         case FL_RELEASE:
             fl_cursor(FL_CURSOR_ARROW);
             dragging = false;
+            panned = true;
             break;
     }
     return 1;
@@ -855,7 +860,8 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : SmoothResizeGroup(x,y,w,h
     _prefs->getS(OVERLAY, defaultScale, overlayModeToName(OverlayNone));
     draw_overlay = nameToOverlayMode(defaultScale);
 
-    draw_center = false;
+    draw_center = true;
+    panned = false;
 
     deltax = 0;
     deltay = 0;
@@ -936,7 +942,7 @@ void XBox::drawMinimap() {
 
     if (iw <= ww && ih <= wh) return; // image fits inside window, no map necessary
 
-    // Size the outer rectangle proportional to the image
+    // Size the 'image' rectangle proportional to the image
     int mmw = _miniMapSize;
     int mmh = _miniMapSize;
     if (iw < ih)
@@ -944,15 +950,19 @@ void XBox::drawMinimap() {
     else
         mmh = (int)(_miniMapSize * (double)ih / (double)iw);
 
-    int mmx = x() + ww - mmw - 2; // TODO options: where mmap is located
-    int mmy = y() + 2;
-    fl_rect(mmx, mmy, mmw, mmh, _mmoc); // minimap outer
+    int mmap_dy = 20; // 2 // TODO options: mmap location
+    int mmap_dx = ww - mmw - 20; //2;
 
-    // draw the inner rect. NOTE may be positioned outside the inner rect depending on scrolling!
+    int mmx = x() + mmap_dx;
+    int mmy = y() + mmap_dy;
+    fl_rect(mmx, mmy, mmw, mmh, _mmoc); // minimap 'image' rectangle
+
+    // draw the 'window' rect. NOTE may be positioned outside the 'image' rect
+    // depending on scrolling, zooming, center, etc.
     int mmix = (int)((double)-deltax / (double)iw * (double)mmw) + 1;
     int mmiy = (int)((double)-deltay / (double)ih * (double)mmh) + 1;
-    int mmiw = std::min((int)((double)w() / (double)iw * (double)mmw), mmw-2);
-    int mmih = std::min((int)((double)h() / (double)ih * (double)mmh), mmh-2);
+    int mmiw = (int)((double)w() / (double)iw * (double)mmw);
+    int mmih = (int)((double)h() / (double)ih * (double)mmh);
 
     fl_rect(mmx + mmix, mmy + mmiy, mmiw, mmih, _mmic); // minimap inner
 }
@@ -971,14 +981,15 @@ void XBox::draw() {
     int drawx = x()+1;
     int drawy = y()+1;
 
-    if (draw_center) {
+    // TODO remove panned and merely clear draw_center?
+    if (draw_center && !panned && !dragging) {
         int iw;
         int ih;
         if (_anim) {iw = _anim->w(); ih = _anim->h();}
         else {iw = _showImg->w(); ih = _showImg->h();}
 
-        deltax = std::max(1, (w() - iw) / 2);
-        deltay = std::max(1, (h() - ih) / 2);
+        deltax = (w() - iw) / 2;
+        deltay = (h() - ih) / 2;
     }
 
     if (_anim && draw_check)
