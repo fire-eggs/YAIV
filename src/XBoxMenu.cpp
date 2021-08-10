@@ -11,6 +11,10 @@
 #include "FL/fl_ask.H"
 #include "FL/Fl_File_Chooser.H"
 #include "mediator.h"
+#include "menuids.h"
+#include "filelist.h"
+
+extern filelist* box_filelist; // TODO member
 
 void XBox::load_request() {
 
@@ -32,7 +36,7 @@ void XBox::load_request() {
 
 void XBox::goto_request() {
 
-    int dex = current_index + 1;
+    int dex = box_filelist->currentIndex() + 1;
     char def[256];
     sprintf(def, "%d", dex);
     const char* res = fl_input("Goto image:", def);
@@ -41,7 +45,7 @@ void XBox::goto_request() {
         try
         {
             int val = std::stoi(res);
-            current_index = val - 1;
+            box_filelist->setCurrent(val - 1);
             load_current();
             //dynamic_cast<XBox *>(window_p)->load_current(); // TODO hack
         }
@@ -72,12 +76,11 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
 
         case MI_COPYPATH:
         {
-            if (!file_list || file_count < 1)
+            const char *fullpath = box_filelist->getCurrentFilePath();
+            if (!fullpath)
                 break;
 
-            char n[FL_PATH_MAX<<2];
-            sprintf(n, "%s/%s", folder_name, file_list[current_index]->d_name);
-            Fl::copy(n, (int)strlen(n), 1);
+            Fl::copy(fullpath, (int)strlen(fullpath), 1);
         }
             break;
 
@@ -170,6 +173,18 @@ void XBox::do_menu(int xloc, int yloc, bool title) {
         delete totoss->at(i);
     delete totoss;
     delete [] dyn_menu;
+}
+
+void XBox::hideCurrent() {
+
+    char buff[FL_PATH_MAX<<2];
+    char *currfilename = box_filelist->currentFilename();
+    sprintf(buff, "Are you sure you want to hide '%s'?", currfilename);
+    int res = fl_choice(buff, "No", "Yes", 0L, "continue");
+    if (!res) return;
+
+    box_filelist->hide();
+    load_current();
 }
 #ifndef _MSC_VER
 #pragma clang diagnostic pop

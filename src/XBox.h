@@ -110,7 +110,7 @@ public:
     void forceDither(const char *);
 
     int handle(int) override;
-    char * getLabel(bool include_filepath, char *buff, int buffsize);
+    const char * getLabel(bool include_filepath, char *buff, int buffsize);
 
     void change_zoom(int delta) {_zoom_step += delta; updateImage(); updateLabel();}
 
@@ -126,15 +126,12 @@ public:
 
     int key(int val); // keydown from someplace
     void action(int val); // action from someplace (e.g. toolbar button)
-
-    char *currentFilename();
+    void hideCurrent();
 
 private:
 
     bool _quitAtEnd {false};
 
-    void load_filelist(const char *);
-    int find_file(const char *n);
     void load_request(); // 'load' processing
     void goto_request(); // 'goto' processing
 
@@ -170,14 +167,6 @@ private:
 
     MostRecentPaths* _mru;
     Prefs* _prefs;
-
-    // TODO go into a separate 'loader' class
-    int current_index;
-    char folder_name[FL_PATH_MAX] {'\0'};
-    char file_name[FL_PATH_MAX] {'\0'};
-
-    dirent** file_list;
-    int file_count;
 
     void safe_resize();
 

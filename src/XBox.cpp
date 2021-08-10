@@ -13,11 +13,12 @@
 #include <FL/Fl_Image_Surface.H>
 #include <FL/Fl_SVG_Image.H>
 
-#include "list_rand.h"
+#include "list_rand.h" // TODO loadFile
 #include "fl_imgtk.h"
 #include "Slideshow.h"
 #include "XBoxDisplayInfoEvent.h"
 #include "mediator.h" // TODO define messages elsewhere?
+#include "filelist.h"
 
 #ifdef DANBOORU
 #include "danbooru.h"
@@ -53,58 +54,11 @@ void logit(const char *format, char *arg) // TODO varargs
     }
 }
 
-int filename_path(const char* buf, char *to) { // TODO hack pending adding to FLTK
-    const char *p = buf + strlen(buf) - 1;
-    for (; *p != '/' && p != buf; --p) // TODO slash is possible '\' under windows
-        ;
-    if (p == buf) return 0;
-    strncpy(to, buf, (p-buf)+1);
-    to[(p-buf)] = '\0';
-    return 1;
-}
-
-int XBox::find_file(const char *n) {
-    // determine the index in the file_list of the given filename
-    const char *outfn = fl_filename_name(n);
-    logit("file_file:|%s|", (char *)outfn);
-    for (int i=0; i < file_count; i++)
-        if (strcmp(file_list[i]->d_name, outfn) == 0)
-            return i;
-    return 0;
-}
-
-//TODO a file-filter callback is not in "vanilla" FLTK
-#if 0
-int removeFolders(struct dirent *entry) {
-    // TODO this is a hack, we're not provided the base path
-    const char * out = fl_filename_ext(entry->d_name);
-    bool val = out != nullptr && *out != 0 && (out[1] != 0);
-    return val;
-}
-#endif
-
-void XBox::load_filelist(const char *n) {
-
-    if (file_list)
-        fl_filename_free_list(&file_list, file_count);
-
-    if (!fl_filename_isdir(n))
-        filename_path(n, folder_name);
-    else
-        fl_filename_absolute(folder_name, FL_PATH_MAX, n);
-
-    // TODO how best to filter for images?
-    //TODO a file-filter callback is not in "vanilla" FLTK
-    //file_count = fl_filename_list(folder_name, &file_list, fl_numericsort, removeFolders);
-    file_count = fl_filename_list(folder_name, &file_list, fl_numericsort);
-}
+filelist *box_filelist; // TODO member
 
 void XBox::load_file(const char *n) {
 
-    load_filelist(n); // TODO background process
-    current_index = 0;
-    if (!fl_filename_isdir(n))
-        current_index = find_file(n);
+    box_filelist = filelist::initFilelist(n);
     load_current();
 
     // TODO don't add to MRU if unsuccessful load
@@ -113,30 +67,19 @@ void XBox::load_file(const char *n) {
     _mru->Save();
 }
 
-char *XBox::currentFilename() { return file_name; }
-
 void XBox::load_current() {
 
-    current_index = std::min(std::max(current_index,0), file_count-1);
-    bool canNext = file_list && current_index < (file_count-1);
-    bool canPrev = file_list && current_index > 0;
+    const char *fullpath = box_filelist->getCurrentFilePath();
 
     Mediator::send_message(Mediator::MSGS::MSG_TB,
-                           canPrev ? Mediator::ACT_ISPREV : Mediator::ACT_NOPREV);
+                           box_filelist->canPrev() ? Mediator::ACT_ISPREV
+                                                   : Mediator::ACT_NOPREV);
     Mediator::send_message(Mediator::MSGS::MSG_TB,
-                           canNext ? Mediator::ACT_ISNEXT : Mediator::ACT_NONEXT);
+                           box_filelist->canNext() ? Mediator::ACT_ISNEXT
+                                                   : Mediator::ACT_NONEXT);
+    if (!fullpath) return;
 
-    if (!file_list || file_count < 1)
-        return;
-
-    if (folder_name[strlen(folder_name) - 1] == '/')
-        folder_name[strlen(folder_name) - 1] = 0x0;
-    strncpy(file_name, file_list[current_index]->d_name, FL_PATH_MAX);
-
-    char fullpath[FL_PATH_MAX<<2];
-    sprintf(fullpath, "%s/%s", folder_name, file_list[current_index]->d_name);
-
-    logit("Load %s", fullpath);
+    logit("Load %s", (char *)fullpath);
 
     rotation = 0; // TODO anything else need resetting?
 
@@ -150,9 +93,19 @@ void XBox::load_current() {
 
         send_message(Mediator::MSGS::MSG_NEWFILE, -1);
     }
+    else if (box_filelist->ishidden())
+    {
+        align(FL_ALIGN_CENTER);
+        label("@filenew");
+        labelsize(64);
+        labelcolor(FL_BLACK);
+        image(nullptr,nullptr);
+
+        send_message(Mediator::MSGS::MSG_NEWFILE, 0);
+    }
     else
     {
-        Fl_Image *img = loadFile(fullpath, this);
+        Fl_Image *img = loadFile((char *)fullpath, this);
 
         // 590B-01.jpg failed to load and resulted in crash further on
         if (!img || img->fail() || img->w() == 0 || img->h() == 0)
@@ -184,18 +137,14 @@ void XBox::load_current() {
 }
 
 void XBox::next_image() {
-//    current_index = std::min(current_index+1, file_count-1);
-    current_index++;
-    if (current_index >= file_count) {
-        current_index = file_count-1;
-        if (_quitAtEnd) // command line option
+    box_filelist->next();
+    if (!box_filelist->canNext() && _quitAtEnd ) // command line option
             exit(0);
-    }
     load_current();
 }
 
 void XBox::prev_image() {
-    current_index = std::max(current_index-1, 0);
+    box_filelist->prev();
     load_current();
 }
 
@@ -289,18 +238,8 @@ int XBox::key(int fullkey)
 #endif
 
         case 'r':
-        {
-            if (!file_list || file_count<=1)
-                break;
-
-            struct dirent **newlist = list_randomize(file_list, file_count);
-
-            for (int i=0; i<file_count; i++)
-                file_list[i] = newlist[i];
-
-            free(newlist);
+            box_filelist->randomize();
             load_current();
-        }
             return 1;
 
         case FL_Right:
@@ -362,13 +301,13 @@ int XBox::key(int fullkey)
             return 1;
 
         case FL_Home:
-            current_index = INT_MIN + 1;
-            prev_image();
+            box_filelist->home();
+            load_current();
             return 1;
 
         case FL_End:
-            current_index = INT_MAX - 1;
-            next_image();
+            box_filelist->end();
+            load_current();
             return 1;
 
         case 't':
@@ -388,7 +327,6 @@ int XBox::key(int fullkey)
 
         case 'w':
             send_message(Mediator::MSG_TB, Mediator::ACT_SLID);
-            //toggleSlideshow();
             return 1;
 
         case 'm':
@@ -402,6 +340,11 @@ int XBox::key(int fullkey)
         case 'p':
             _pan_with_mouse = !_pan_with_mouse;
             _prefs->set2(MOUSE_PAN, _pan_with_mouse);
+            return 1;
+            break;
+
+        case 'h':
+            hideCurrent();
             return 1;
             break;
 
@@ -522,10 +465,20 @@ int XBox::mousePan(int msg)
     return 1;
 }
 
-char * XBox::getLabel(bool include_filename, char *buff, int buffsize)
+const char * XBox::getLabel(bool include_filename, char *buff, int buffsize)
 {
-    // TODO customize label : full path or just filename
-    std::string fullpath = folder_name + std::string("/") + file_name;
+    if (!box_filelist)
+        return "";
+
+    std::string fullpath;
+    bool filenameonly = true; // TODO customize label : full path or just filename
+    if (filenameonly)  // TODO driven by prefs
+        fullpath = box_filelist->currentFilename();
+    else
+        fullpath = box_filelist->getCurrentFilePath();
+
+    int current_index = box_filelist->currentIndex() + 1;
+    int file_count = box_filelist->fileCount();
 
     int outzoom = (int)(_zoom * 100.0 + 0.5);
     int w = _img ? _img->w() : 0;
@@ -538,7 +491,7 @@ char * XBox::getLabel(bool include_filename, char *buff, int buffsize)
     if (res == nullptr || _img == nullptr)
     {
         // for the image label currently don't have filename, don't display extra dashes
-        snprintf( buff, buffsize, "%d/%d%s%s", current_index+1,
+        snprintf( buff, buffsize, "%d/%d%s%s", current_index,
                   file_count, !include_filename ? "" : " - ",
                   include_filename ? fullpath.c_str() : "");
     }
@@ -552,7 +505,7 @@ char * XBox::getLabel(bool include_filename, char *buff, int buffsize)
 
         // for the image label currently don't have filename, don't display extra dashes
         snprintf_nowarn(buff, buffsize, "%d/%d - [%dx%dx%d%s%s] - (%d%%)[%s][%s]%s%s",
-                        current_index+1, file_count, w, h, depth,
+                        current_index, file_count, w, h, depth,
                         !include_filename ? "" : " - ",
                         nicesize, outzoom, scaletxt, Zscaletxt, !include_filename ? "" : " - ",
                         include_filename ? fullpath.c_str() : "");
@@ -882,9 +835,6 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : SmoothResizeGroup(x,y,w,h
     _miniMapSize = 150; // TODO preferences?
     _minimap = true;
 
-    file_count = 0;
-    current_index = 0;
-    file_list = nullptr;
 
     int mp;
     _prefs->get(MOUSE_PAN,mp,false); // TODO define 'bool' getter
@@ -907,7 +857,7 @@ void XBox::toggleSlideshow() {
         _slideShow = new Slideshow();
         _slideShow->setPrefs(_prefs);
         _slideShow->setWindow(this);
-        _slideShow->start(current_index);
+        _slideShow->start(box_filelist->currentIndex()); // TODO slideshow uses filelist
     }
     else {
         _slideShow->stop();
@@ -1030,11 +980,11 @@ void XBox::draw() {
 
 void XBox::drawOverlay() {
 
-    if (!file_count || !draw_overlay)
+    if (box_filelist && !box_filelist->fileCount() || !draw_overlay)
         return;
 
     char hack[501];
-    char *l = getLabel(false, hack, 500);
+    const char *l = getLabel(false, hack, 500);
 
     if (draw_overlay == OverlayText) {
         label(l);
