@@ -31,6 +31,7 @@ public:
 
     void activate(Mediator::ACTIONS who);
     void deactivate(Mediator::ACTIONS who);
+    void updateColor(bool isDarkTheme);
 };
 
 ButtonBar* makeToolbar(dropwin* win); // TODO static method

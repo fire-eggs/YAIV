@@ -5,6 +5,8 @@
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 #endif
 
+#define THEME 1
+
 #include "buttonBar.h"
 #include "toolgrp.h"
 #include "mediator.h"
@@ -12,6 +14,10 @@
 #include <FL/Fl_Toggle_Button.H>
 #include <FL/Fl_Menu_Item.H>
 #include <FL/Fl_SVG_Image.H>
+
+#ifdef THEME
+#include "themes.h"
+#endif
 
 #define BTNSIZE 40 // TODO from options
 #define HANDWID 17
@@ -27,16 +33,35 @@ static void setImage(Fl_Widget *btn, char *imgn, int sz=25)
     sprintf(buff, "icons/%s.svg", imgn); // TODO find sub-folder? hard-coded in code?
 
     btn->align(FL_ALIGN_CENTER);
+#ifndef THEME
     btn->color(8,FL_BLACK);
+#endif
     btn->visible_focus(0);
 
     Fl_SVG_Image *img = new Fl_SVG_Image(buff,0);
     if (img->fail())
         return;
+
+    if (!OS::is_dark_theme(OS::current_theme()))
+        img->color_average(FL_BLACK, 0.0); // TODO needs to be driven by theme
+
     btn->image(img->copy(sz,sz));
     delete img;
 
     btn->tooltip(imgn);
+}
+
+void ButtonBar::updateColor(bool isDark) {
+    int chils = _tgroup->in_group()->children();
+    for (int i=0; i< chils; i++) {
+        Fl_Button *btn = dynamic_cast<Fl_Button*>(_tgroup->in_group()->child(i));
+        if (btn) {
+            if (isDark)
+                btn->image()->color_average(FL_WHITE, 0.0);
+            else
+                btn->image()->color_average(FL_BLACK, 0.0);
+        }
+    }
 }
 
 // TODO must match button order
@@ -74,6 +99,7 @@ Mediator::ACTIONS scaleMenu()
         return (Mediator::ACTIONS)(fl_intptr_t)m->user_data();
     return Mediator::ACTIONS::ACT_INVALID;
 }
+
 static void btnCb(Fl_Widget *w, void *data)
 {
     int val = (int)(fl_intptr_t)data;
@@ -100,6 +126,7 @@ static void makeBtn(bool draggable, toolgrp* tg, int i, char *name, bool vert, b
         x = BTNDOWN;
         y = (draggable ? HANDWID : NOHANDWID) + (BTNSTEP * i);
     }
+
     Fl_Button *btn1 = toggle ? new Fl_Toggle_Button(x,y,BTNSIZE,BTNSIZE) :
                                new Fl_Button(x, y, BTNSIZE, BTNSIZE);
     btn1->callback(btnCb, (void *)(fl_intptr_t)i);
@@ -112,7 +139,9 @@ void btn_bar_common(toolgrp* tgroup, bool vert, bool draggable)
 {
     tgroup->box(FL_BORDER_BOX);
     tgroup->in_group()->box(FL_NO_BOX);
+#ifndef THEME
     tgroup->color(FL_BLACK);
+#endif
 
     char *btns [] = {"ViewPreviousImage", "ViewNextImage", "ZoomIn",
                      "ZoomOut", "Slideshow", "RotateRight",
