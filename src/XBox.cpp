@@ -3,8 +3,6 @@
 #pragma ide diagnostic ignored "modernize-use-auto"
 #endif
 
-#define THEME 1
-
 //
 // Created by kevin on 5/12/21.
 //
@@ -801,7 +799,7 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : SmoothResizeGroup(x,y,w,h
     align(FL_ALIGN_INSIDE|FL_ALIGN_TOP|FL_ALIGN_LEFT|FL_ALIGN_CLIP);
     box(FL_BORDER_BOX);
 
-#ifndef THEME
+#if false // TODO keep or toss?
     unsigned int bg, fg;
     _prefs->getHex(CANVAS_COLOR, bg, FL_BACKGROUND_COLOR);
     _prefs->getHex(CANVAS_LABEL_COLOR, fg, FL_FOREGROUND_COLOR);

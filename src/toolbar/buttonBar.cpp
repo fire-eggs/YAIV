@@ -5,7 +5,6 @@
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 #endif
 
-#define THEME 1
 
 #include "buttonBar.h"
 #include "toolgrp.h"
@@ -14,10 +13,7 @@
 #include <FL/Fl_Toggle_Button.H>
 #include <FL/Fl_Menu_Item.H>
 #include <FL/Fl_SVG_Image.H>
-
-#ifdef THEME
 #include "themes.h"
-#endif
 
 #define BTNSIZE 40 // TODO from options
 #define HANDWID 17
@@ -33,19 +29,21 @@ static void setImage(Fl_Widget *btn, char *imgn, int sz=25)
     sprintf(buff, "icons/%s.svg", imgn); // TODO find sub-folder? hard-coded in code?
 
     btn->align(FL_ALIGN_CENTER);
-#ifndef THEME
-    btn->color(8,FL_BLACK);
-#endif
     btn->visible_focus(0);
 
     Fl_SVG_Image *img = new Fl_SVG_Image(buff,0);
     if (img->fail())
         return;
 
-    if (!OS::is_dark_theme(OS::current_theme()))
-        img->color_average(FL_BLACK, 0.0); // TODO needs to be driven by theme
+    if (!OS::is_dark_theme(OS::current_theme())) // TODO use isdark
+        img->color_average(FL_BLACK, 0.0);
 
     btn->image(img->copy(sz,sz));
+    if (OS::is_dark_theme(OS::current_theme())) // TODO use isdark
+        img->color_average(FL_BLACK, 0.0);
+    else
+        img->color_average(FL_WHITE, 0.0);
+    btn->deimage(img->copy(sz,sz));
     delete img;
 
     btn->tooltip(imgn);
@@ -56,10 +54,14 @@ void ButtonBar::updateColor(bool isDark) {
     for (int i=0; i< chils; i++) {
         Fl_Button *btn = dynamic_cast<Fl_Button*>(_tgroup->in_group()->child(i));
         if (btn) {
-            if (isDark)
+            if (isDark) {
                 btn->image()->color_average(FL_WHITE, 0.0);
-            else
+                btn->deimage()->color_average(FL_BLACK, 0.0);
+            }
+            else {
                 btn->image()->color_average(FL_BLACK, 0.0);
+                btn->deimage()->color_average(FL_WHITE, 0.0);
+            }
         }
     }
 }
@@ -130,7 +132,8 @@ static void makeBtn(bool draggable, toolgrp* tg, int i, char *name, bool vert, b
     Fl_Button *btn1 = toggle ? new Fl_Toggle_Button(x,y,BTNSIZE,BTNSIZE) :
                                new Fl_Button(x, y, BTNSIZE, BTNSIZE);
     btn1->callback(btnCb, (void *)(fl_intptr_t)i);
-    btn1->box(FL_THIN_UP_BOX);
+    //btn1->box(FL_THIN_UP_BOX);
+    btn1->box(FL_UP_BOX);
     setImage(btn1, name);
     tg->add(btn1);
 }
@@ -139,9 +142,6 @@ void btn_bar_common(toolgrp* tgroup, bool vert, bool draggable)
 {
     tgroup->box(FL_BORDER_BOX);
     tgroup->in_group()->box(FL_NO_BOX);
-#ifndef THEME
-    tgroup->color(FL_BLACK);
-#endif
 
     char *btns [] = {"ViewPreviousImage", "ViewNextImage", "ZoomIn",
                      "ZoomOut", "Slideshow", "RotateRight",
@@ -234,9 +234,6 @@ ButtonBar* makeToolbar(dropwin* win) {
     dock->box(FL_THIN_DOWN_BOX);
     dock->resizable(nullptr); // prevent buttons from resizing
 
-    #ifndef THEME
-        dock->color(FL_BLACK); // TODO from prefs/theme
-    #endif
     dock->end();
     dock->set_window(win);
 

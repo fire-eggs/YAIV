@@ -3,8 +3,6 @@
 #pragma ide diagnostic ignored "modernize-use-auto"
 #endif
 
-#define THEME 1
-
 #include <clocale>     // setlocale()..
 
 #include "yaiv_win.h"
@@ -12,9 +10,7 @@
 #include "XBoxDisplayInfoEvent.h"
 #include "buttonBar.h"
 #include "mediator.h"
-#ifdef THEME
 #include "themes.h"
-#endif
 
 void cmdline(int argc, char **argv, XBox *box)
 {
@@ -48,12 +44,7 @@ int main(int argc, char **argv) {
     //Fl::scheme("plastic"); // TODO ability to change - see unittests
 #endif
 
-#ifdef THEME
-    TanColormap_FLTKSUBS();
-    //OS::use_blue_theme();
-    //OS::use_high_contrast_theme();
-    //Fl::reload_scheme(); // TODO is this necessary?
-#endif
+    TanColormap_FLTKSUBS(); // TODO from settings
 
     // set to system local to "C" default for mostly work.
     setlocale(LC_ALL, "C");
