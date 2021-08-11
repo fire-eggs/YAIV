@@ -32,6 +32,7 @@ public:
     const char *getCurrentFilePath();
     char *currentFilename();
 
+    bool any() { return file_list && file_count > 0; }
     bool canNext();
     bool canPrev();
     void next();

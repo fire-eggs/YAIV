@@ -57,7 +57,6 @@ void logit(const char *format, char *arg) // TODO varargs
 filelist *box_filelist; // TODO member
 
 void XBox::load_file(const char *n) {
-
     box_filelist = filelist::initFilelist(n);
     load_current();
 
@@ -70,7 +69,6 @@ void XBox::load_file(const char *n) {
 void XBox::load_current() {
 
     const char *fullpath = box_filelist->getCurrentFilePath();
-
     Mediator::send_message(Mediator::MSGS::MSG_TB,
                            box_filelist->canPrev() ? Mediator::ACT_ISPREV
                                                    : Mediator::ACT_NOPREV);
@@ -139,7 +137,7 @@ void XBox::load_current() {
 void XBox::next_image() {
     box_filelist->next();
     if (!box_filelist->canNext() && _quitAtEnd ) // command line option
-            exit(0);
+        exit(0);
     load_current();
 }
 
@@ -351,7 +349,7 @@ int XBox::key(int fullkey)
 
 #ifdef DANBOORU
             case 'd':
-                if (!file_list || file_count<=1)
+                if (!box_filelist || !box_filelist->any())
                     break;
 
                 if (Fl::event_state() & CTRL_P_KEY)
@@ -792,7 +790,6 @@ void XBox::updateImage() {
     }
 }
 
-
 XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : SmoothResizeGroup(x,y,w,h),
     _prefs(prefs)
 {
@@ -838,7 +835,6 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : SmoothResizeGroup(x,y,w,h
     _mmic = fl_lighter(_mmoc);    // TODO preferences
     _miniMapSize = 150; // TODO preferences?
     _minimap = true;
-
 
     int mp;
     _prefs->get(MOUSE_PAN,mp,false); // TODO define 'bool' getter
@@ -926,6 +922,7 @@ void XBox::drawMinimap() {
     int mmiw = (int)((double)w() / (double)iw * (double)mmw);
     int mmih = (int)((double)h() / (double)ih * (double)mmh);
 
+    _mmic = Fl_Color (FL_BLUE); //debugging
     fl_rect(mmx + mmix, mmy + mmiy, mmiw, mmih, _mmic); // minimap inner
 }
 

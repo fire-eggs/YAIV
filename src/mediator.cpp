@@ -6,6 +6,7 @@
 #include "XBox.h"
 #include "toolbar/toolgrp.h"
 #include "toolbar/buttonBar.h"
+#include "filelist.h"
 
 extern XBox *b2;
 extern dockgroup* dock;
@@ -18,6 +19,8 @@ toolgrp* _danbooru;
 
 #include "menuids.h"
 #include "themes.h"
+
+extern filelist* box_filelist; // TODO hack
 
 namespace Mediator {
 
@@ -83,7 +86,7 @@ namespace Mediator {
 #ifdef DANBOORU
                 // update for new file
                 if (_danbooru)
-                    update_danbooru(b2->currentFilename());
+                    update_danbooru(box_filelist->currentFilename());
 #endif
                 // TODO if data is negative, no file
                 // TODO update b2 image
@@ -134,7 +137,7 @@ Fl_Widget_Tracker *db_track = nullptr;
             db_track = new Fl_Widget_Tracker(_danbooru);
         }
         view_danbooru(prefs, _danbooru->in_group());
-        update_danbooru(b2->currentFilename());
+        update_danbooru(box_filelist->currentFilename());
     }
 #endif
 
