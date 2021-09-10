@@ -347,6 +347,11 @@ int XBox::key(int fullkey)
             return 1;
             break;
 
+        case 'v':
+            favCurrent();
+            return 1;
+            break;
+
 #ifdef DANBOORU
             case 'd':
                 if (!box_filelist || !box_filelist->any())
@@ -979,6 +984,19 @@ void XBox::draw() {
     fl_pop_clip();
 }
 
+Fl_Image *getImage(const char *imgn)
+{
+    char buff[500];
+    sprintf(buff, "icons/%s.svg", imgn); // TODO find sub-folder? hard-coded in code?
+
+    Fl_SVG_Image *img = new Fl_SVG_Image(buff,0);
+    if (img->fail()) {
+        img->release();
+        return nullptr;
+    }
+    return img;
+}
+
 void XBox::drawOverlay() {
 
     if (box_filelist && !box_filelist->fileCount() || !draw_overlay)
@@ -988,6 +1006,33 @@ void XBox::drawOverlay() {
     const char *l = getLabel(false, hack, 500);
 
     if (draw_overlay == OverlayText) {
+
+        Fl_Label *lbl = new Fl_Label();
+        lbl->value = l;
+        char imgnm[10];
+        Fl_Image *img = nullptr;
+        if (box_filelist->isFav())
+            img = getImage("heart");
+        else if (box_filelist->isHide())
+            img = getImage("hide");
+        if (img) {
+            lbl->image = img->copy(20, 20);
+            img->release();
+        }
+        lbl->size = 20;
+        lbl->color = FL_DARK_GREEN;
+        //lbl->type = FL_EMBOSSED_LABEL; // can't use with image
+        lbl->align_ = FL_ALIGN_CENTER|FL_ALIGN_IMAGE_NEXT_TO_TEXT;
+
+        {
+            int lw=0;
+            int lh=0;
+            lbl->measure(lw, lh);
+            lbl->draw(x() + w() - lw - 10, y()+h()-lh-5, lw, lh,
+                      FL_ALIGN_BOTTOM_RIGHT|FL_ALIGN_IMAGE_NEXT_TO_TEXT);
+        }
+        delete lbl;
+/*
         label(l);
         labelsize(20);
         labelcolor(FL_DARK_GREEN);    // TODO options
@@ -1003,6 +1048,7 @@ void XBox::drawOverlay() {
             draw_label(x() + w() - lw - 2, y() + h() - lh - 2, lw, lh, align()); // TODO options
         }
         label(""); // TODO prevent extra label draw?
+*/
     }
 
     if (draw_overlay == OverlayBox)

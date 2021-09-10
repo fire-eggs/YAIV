@@ -75,13 +75,12 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
             break;
 
         case MI_COPYPATH:
-        {
+            {
             const char *fullpath = box_filelist->getCurrentFilePath();
             if (!fullpath)
                 break;
-
             Fl::copy(fullpath, (int)strlen(fullpath), 1);
-        }
+            }
             break;
 
         case MI_GOTO: // TODO ACT_GOTO
@@ -200,6 +199,11 @@ void XBox::hideCurrent() {
     box_filelist->hide();
     load_current();
 }
+
+void XBox::favCurrent() {
+    box_filelist->addToFavs();
+}
+
 #ifndef _MSC_VER
 #pragma clang diagnostic pop
 #endif

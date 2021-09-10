@@ -118,7 +118,9 @@ public:
 
     int key(int val); // keydown from someplace
     void action(int val); // action from someplace (e.g. toolbar button)
+
     void hideCurrent();
+    void favCurrent();
 
 private:
 

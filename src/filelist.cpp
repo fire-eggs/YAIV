@@ -5,6 +5,10 @@
 #include <algorithm> // min,max
 #include <cstring> // strlen, strncpy
 #include <cstdio> // sprintf
+#include <iostream>
+#include <string>
+#include <fstream>
+
 #include "filelist.h"
 #include "list_rand.h"
 
@@ -90,7 +94,7 @@ bool filelist::skip() {
 #else
     bool ishide = false; // TODO windows hidden attribute
 #endif
-    return isdir || ishide; // TODO driven by prefs
+    return isdir || ishide; // || isHide(); // TODO driven by prefs
 }
 
 const char *filelist::getCurrentFilePath() {
@@ -167,6 +171,8 @@ void filelist::setCurrent(int val) {
 }
 
 void filelist::hide() {
+    addToHidden();
+/*
     const char *fullpath = getCurrentFilePath();
 
     // TODO test with utf-8 folder, filename
@@ -180,19 +186,71 @@ void filelist::hide() {
 #else
     // TODO Windows change hidden attribute
 #endif
+*/
     next(); // TODO probably a problem if hiding the only image in the list
 }
 
 bool filelist::ishidden() {
-    return file_list && file_name[0] == '.'; // TODO windows hidden attribute
+    return file_list && (file_name[0] == '.' || isHide()); // TODO windows hidden attribute
 }
 
 static filelist *_filelist;
 
 filelist* filelist::initFilelist(const char *n) {
-    if (_filelist)
-        delete _filelist;
+    delete _filelist;
     _filelist = new filelist();
     _filelist->load_file(n);
+    _filelist->loadFavs();
+    _filelist->loadHidden();
     return _filelist;
+}
+
+void filelist::loadHidden()
+{
+    std::ifstream input("hidden.yaiv");
+    std::string line;
+    while (std::getline(input, line)){
+        if (!line.empty())
+            _hidden.push_back(line);
+    }
+}
+
+void filelist::loadFavs()
+{
+    std::ifstream input("favs.yaiv");
+    std::string line;
+    while (std::getline(input, line)){
+        if (!line.empty())
+            _favs.push_back(line);
+    }
+}
+
+void filelist::addToHidden()
+{
+    _hidden.push_back(fullpath);
+    // TODO write out
+    FILE *fp = fl_fopen("hidden.yaiv", "a+");
+    fputs(fullpath,fp);
+    fputc('\n',fp);
+    fclose(fp);
+}
+
+void filelist::addToFavs()
+{
+    _favs.push_back(fullpath);
+    // TODO write out
+    FILE *fp = fl_fopen("favs.yaiv", "a+");
+    fputs(fullpath,fp);
+    fputc('\n',fp);
+    fclose(fp);
+}
+
+bool filelist::isFav()
+{
+    return file_list && std::find(_favs.begin(), _favs.end(), fullpath) != _favs.end();
+}
+
+bool filelist::isHide()
+{
+    return file_list && std::find(_hidden.begin(), _hidden.end(), fullpath) != _hidden.end();
 }

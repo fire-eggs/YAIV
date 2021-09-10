@@ -6,6 +6,7 @@
 #define YAIV_FILELIST_H
 
 #include <FL/filename.H>
+#include <vector>
 
 class filelist {
 
@@ -23,6 +24,12 @@ private:
     bool skip();
     int find_file(const char *n);
     static int filename_path(const char* buf, char *to);
+
+    std::vector<std::string> _hidden;
+    std::vector<std::string> _favs;
+
+    void loadHidden();
+    void loadFavs();
 
 public:
     filelist();
@@ -47,6 +54,10 @@ public:
     void randomize();
     void hide();
     bool ishidden();
+    bool isFav();
+    bool isHide();
+    void addToHidden();
+    void addToFavs();
 
     static filelist* initFilelist(const char *n);
 };
