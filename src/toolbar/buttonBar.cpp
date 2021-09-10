@@ -5,7 +5,6 @@
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 #endif
 
-
 #include "buttonBar.h"
 #include "toolgrp.h"
 #include "mediator.h"
@@ -32,21 +31,23 @@ static void setImage(Fl_Widget *btn, char *imgn, int sz=25)
     btn->visible_focus(0);
 
     Fl_SVG_Image *img = new Fl_SVG_Image(buff,0);
-    if (img->fail())
+    if (img->fail()) {
+        img->release();
         return;
+    }
 
     if (!OS::is_dark_theme(OS::current_theme())) // TODO use isdark
         img->color_average(FL_BLACK, 0.0);
 
     btn->image(img->copy(sz,sz));
+
     if (OS::is_dark_theme(OS::current_theme())) // TODO use isdark
         img->color_average(FL_BLACK, 0.0);
     else
         img->color_average(FL_WHITE, 0.0);
     btn->deimage(img->copy(sz,sz));
-    delete img;
 
-    btn->tooltip(imgn);
+    img->release();
 }
 
 void ButtonBar::updateColor(bool isDark) {
@@ -135,6 +136,7 @@ static void makeBtn(bool draggable, toolgrp* tg, int i, char *name, bool vert, b
     //btn1->box(FL_THIN_UP_BOX);
     btn1->box(FL_UP_BOX);
     setImage(btn1, name);
+    btn1->tooltip(name);
     tg->add(btn1);
 }
 
@@ -198,12 +200,15 @@ void ButtonBar::setScaleImage(Mediator::ACTIONS who) {
                 // TODO copy-pasta
                 case Mediator::ACT_SCALE_NONE:
                     setImage(ch,"scaletofit");
+                    ch->tooltip("Full Size");
                     break;
                 case Mediator::ACT_SCALE_AUTO:
                     setImage(ch,"autozoom");
+                    ch->tooltip("Auto-Zoom");
                     break;
                 case Mediator::ACT_SCALE_FIT:
                     setImage(ch,"zoomtofit");
+                    ch->tooltip("Best Fit");
                     break;
                 case Mediator::ACT_SCALE_WIDE:
                     setImage(ch,"scaletowidth");
