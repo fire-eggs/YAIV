@@ -16,6 +16,7 @@ filelist::filelist() {
     current_index = -1;
     file_list = nullptr;
     file_count = -1;
+    file_name[0] = '\0';
 }
 
 //TODO a file-filter callback is not in "vanilla" FLTK
@@ -64,7 +65,7 @@ void filelist::load_file(const char *n) {
 }
 
 char *filelist::currentFilename() {
-    return file_name;
+    return file_count > 0 ? file_name : nullptr;
 }
 
 int filelist::find_file(const char *n) {
@@ -247,10 +248,10 @@ void filelist::addToFavs()
 
 bool filelist::isFav()
 {
-    return file_list && std::find(_favs.begin(), _favs.end(), fullpath) != _favs.end();
+    return _filelist && !_favs.empty() && std::find(_favs.begin(), _favs.end(), fullpath) != _favs.end();
 }
 
 bool filelist::isHide()
 {
-    return file_list && std::find(_hidden.begin(), _hidden.end(), fullpath) != _hidden.end();
+    return _filelist && !_hidden.empty() && std::find(_hidden.begin(), _hidden.end(), fullpath) != _hidden.end();
 }
