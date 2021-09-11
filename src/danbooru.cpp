@@ -19,7 +19,7 @@
 
 sqlite3 *db = nullptr;
 Fl_Window *dbwin = nullptr;
-Fl_Text_Editor *txtout;
+Fl_Text_Display *txtout;
 Fl_Text_Buffer *textbuf;
 Fl_Text_Buffer *stylebuf;
 
@@ -58,11 +58,12 @@ void view_danbooru(Prefs *prefs, Fl_Group *container) {
     textbuf = new Fl_Text_Buffer;
     stylebuf = new Fl_Text_Buffer;
 
-    txtout = new Fl_Text_Editor(container->x() + 1,container->y() + 1,
+    txtout = new Fl_Text_Display(container->x() + 1,container->y() + 1,
                                 container->w()-1,container->h()-1);
     txtout->textfont(FL_TIMES); // TODO options
     txtout->textsize(TS);       // TODO options
     txtout->buffer(textbuf);
+    txtout->hide_cursor();
 
     if (OS::is_dark_theme(OS::current_theme())) { // TODO use isDark
         styletable[0].color = FL_WHITE;
