@@ -137,7 +137,8 @@ Fl_Widget_Tracker *db_track = nullptr;
             db_track = new Fl_Widget_Tracker(_danbooru);
         }
         view_danbooru(prefs, _danbooru->in_group());
-        update_danbooru(box_filelist->currentFilename());
+        if (box_filelist)
+            update_danbooru(box_filelist->currentFilename());
     }
 #endif
 
