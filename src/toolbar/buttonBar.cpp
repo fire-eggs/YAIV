@@ -12,6 +12,7 @@
 #include <FL/Fl_Toggle_Button.H>
 #include <FL/Fl_Menu_Item.H>
 #include <FL/Fl_SVG_Image.H>
+#include <whereami.h>
 #include "themes.h"
 
 #define BTNSIZE 40 // TODO from options
@@ -22,10 +23,10 @@
 
 #define TB_HEIGHT (BTNSIZE + BTNDOWN + 2)
 
-static void setImage(Fl_Widget *btn, char *imgn, int sz=25)
+static void setImage(char *exepath, Fl_Widget *btn, char *imgn, int sz=25)
 {
     char buff[500];
-    sprintf(buff, "icons/%s.svg", imgn); // TODO find sub-folder? hard-coded in code?
+    sprintf(buff, "%s/icons/%s.svg", exepath, imgn); // TODO find sub-folder? hard-coded in code?
 
     btn->align(FL_ALIGN_CENTER);
     btn->visible_focus(0);
@@ -121,7 +122,7 @@ static void btnCb(Fl_Widget *w, void *data)
     }
 }
 
-static void makeBtn(bool draggable, toolgrp* tg, int i, char *name, bool vert, bool toggle)
+static void makeBtn(char *exepath, bool draggable, toolgrp* tg, int i, char *name, bool vert, bool toggle)
 {
     int x = (draggable ? HANDWID : NOHANDWID) + (BTNSTEP * i);
     int y = BTNDOWN;
@@ -135,12 +136,12 @@ static void makeBtn(bool draggable, toolgrp* tg, int i, char *name, bool vert, b
     btn1->callback(btnCb, (void *)(fl_intptr_t)i);
     //btn1->box(FL_THIN_UP_BOX);
     btn1->box(FL_UP_BOX);
-    setImage(btn1, name);
+    setImage(exepath, btn1, name);
     btn1->tooltip(name);
     tg->add(btn1);
 }
 
-void btn_bar_common(toolgrp* tgroup, bool vert, bool draggable)
+void btn_bar_common(char *exepath, toolgrp* tgroup, bool vert, bool draggable)
 {
     tgroup->box(FL_BORDER_BOX);
     tgroup->in_group()->box(FL_NO_BOX);
@@ -156,7 +157,7 @@ void btn_bar_common(toolgrp* tgroup, bool vert, bool draggable)
                        false,false,false};
     int count = sizeof(btns) / sizeof(char*);
     for (int i=0; i < count; i++)
-        makeBtn(draggable, tgroup, i, btns[i], vert, btntype[i]);
+        makeBtn(exepath, draggable, tgroup, i, btns[i], vert, btntype[i]);
 
     tgroup->end();
 }
@@ -173,15 +174,16 @@ void ButtonBar::setState(Mediator::ACTIONS act, int val) {
     }
 }
 
-ButtonBar* ButtonBar::add_btn_bar(dockgroup *dock, bool vert, bool floating) {
+ButtonBar* ButtonBar::add_btn_bar(char *exePath, dockgroup *dock, bool vert, bool floating) {
     ButtonBar *bbar = new ButtonBar();
+    bbar->exepath = exePath;
     bbar->setActions(acts);
     int btncount = sizeof(acts) / sizeof(Mediator::ACTIONS);
     bool draggable = false;
     int tbwide = (draggable ? HANDWID : NOHANDWID) + (btncount * BTNSTEP) + 3;
     bbar->_tgroup = vert ? new vtoolgrp(dock, floating, false, TB_HEIGHT, tbwide) :
                            new  toolgrp(dock, floating, false, tbwide, TB_HEIGHT);
-    btn_bar_common(bbar->_tgroup, vert, draggable);
+    btn_bar_common(exePath, bbar->_tgroup, vert, draggable);
     bbar->_vert = vert;
     return bbar;
 }
@@ -199,22 +201,22 @@ void ButtonBar::setScaleImage(Mediator::ACTIONS who) {
             {
                 // TODO copy-pasta
                 case Mediator::ACT_SCALE_NONE:
-                    setImage(ch,"scaletofit");
+                    setImage(exepath, ch,"scaletofit");
                     ch->tooltip("Full Size");
                     break;
                 case Mediator::ACT_SCALE_AUTO:
-                    setImage(ch,"autozoom");
+                    setImage(exepath, ch,"autozoom");
                     ch->tooltip("Auto-Zoom");
                     break;
                 case Mediator::ACT_SCALE_FIT:
-                    setImage(ch,"zoomtofit");
+                    setImage(exepath, ch,"zoomtofit");
                     ch->tooltip("Best Fit");
                     break;
                 case Mediator::ACT_SCALE_WIDE:
-                    setImage(ch,"scaletowidth");
+                    setImage(exepath, ch,"scaletowidth");
                     break;
                 case Mediator::ACT_SCALE_HIGH:
-                    setImage(ch,"scaletoheight");
+                    setImage(exepath, ch,"scaletoheight");
                     break;
             }
             ch2->redraw();
@@ -242,7 +244,16 @@ ButtonBar* makeToolbar(dropwin* win) {
     dock->end();
     dock->set_window(win);
 
-    tb = ButtonBar::add_btn_bar(dock, vertbar, false);
+    // find the executable path
+    int dirnamelen;
+    int len = wai_getExecutablePath(NULL,0,&dirnamelen);
+    char *exePath = (char *)malloc(len+1);
+    wai_getExecutablePath(exePath, len, &dirnamelen);
+    exePath[dirnamelen] = '\0';
+
+    tb = ButtonBar::add_btn_bar(exePath, dock, vertbar, false);
+
+    //free(exePath); // buttons can change, don't free this
 
     dock->redraw();
     win->set_dock(dock);

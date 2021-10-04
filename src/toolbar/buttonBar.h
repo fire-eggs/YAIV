@@ -14,6 +14,7 @@ class ButtonBar
 {
 private:
     ButtonBar();
+    char *exepath;
     toolgrp* _tgroup;
     Mediator::ACTIONS* _acts;
     bool _vert;
@@ -24,10 +25,11 @@ public:
     void setState(Mediator::ACTIONS, int val);
     void setScaleImage(Mediator::ACTIONS who);
 
-    static ButtonBar* add_btn_bar(dockgroup *dock, bool vertical, bool floating);
+    static ButtonBar* add_btn_bar(char *exePath, dockgroup *dock, bool vertical, bool floating);
 
     int getXoffset() {return _vert ? _tgroup->w() : 1 ;}
     int getYoffset() {return _vert ? 1 : _tgroup->h() ;}
+
 
     void activate(Mediator::ACTIONS who);
     void deactivate(Mediator::ACTIONS who);
