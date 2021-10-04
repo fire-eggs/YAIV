@@ -600,15 +600,18 @@ void XBox::updateImage() {
         return;
     }
 
+    Fl_RGB_Image *vImg;
     Fl_SVG_Image *svgImg = dynamic_cast<Fl_SVG_Image *>(_img);
     if (svgImg) {
-        _showImg = (Fl_RGB_Image *) svgImg->copy(); // fl_imgTk cannot rotate/scale SVG
-        // TODO no rotation of SVG
+
+        Fl_SVG_Image *tImg = (Fl_SVG_Image *)svgImg->copy();
+        // force rasturization
+        tImg->resize(_img->w(), _img->h());
+        vImg = tImg;
     }
     else
     {
         // Covert any Fl_Pixmap into a Fl_RGB_Image so imgTk can rotate/scale
-        Fl_RGB_Image *vImg;
         Fl_Pixmap *pimg = dynamic_cast<Fl_Pixmap *>(_img);
         if (!pimg) {
             vImg = (Fl_RGB_Image *) _img->copy();
@@ -622,28 +625,31 @@ void XBox::updateImage() {
             Fl_Surface_Device::pop_current();
             delete imgSurf;
         }
-
-        // 2. rotate the original
-        // TODO rotation of _anim : problematic as frames change via draw(), not here
-        Fl_RGB_Image *rimg = vImg;
-        if (rotation && !_anim) {
-            switch (rotation) {
-                case 1:
-                    rimg = fl_imgtk::rotate90(vImg);
-                    break;
-                case 2:
-                    rimg = fl_imgtk::rotate180(vImg);
-                    break;
-                case 3:
-                    rimg = fl_imgtk::rotate270(vImg);
-                    break;
-                default:
-                    rotation = 0;
-                    break;
-            }
-        }
-        _showImg = rimg;
     }
+
+    // Rotation
+    Fl_RGB_Image *rimg = vImg;
+    // TODO rotation of _anim : problematic as frames change via draw(), not here
+    if (rotation && !_anim) {
+        switch (rotation) {
+            case 1:
+                rimg = fl_imgtk::rotate90(vImg);
+                break;
+            case 2:
+                rimg = fl_imgtk::rotate180(vImg);
+                break;
+            case 3:
+                rimg = fl_imgtk::rotate270(vImg);
+                break;
+            default:
+                rotation = 0;
+                break;
+        }
+    }
+    // ?? vImg->release();
+    _showImg = rimg;
+
+
 
     // 3. scale showimage
 
