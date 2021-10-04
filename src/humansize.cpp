@@ -23,7 +23,7 @@ static char *humanSize(size_t bytes, char *buf, int bufsize)
     return buf;
 }
 
-char *humanSize(char *fname, char *buf, int bufsize)
+char *humanSize(const char *fname, char *buf, int bufsize)
 {
     buf[0] = '\0'; // make sure empty string on fl_stat failure
     struct stat s;

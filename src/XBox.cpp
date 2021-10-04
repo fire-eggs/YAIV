@@ -498,7 +498,7 @@ const char * XBox::getLabel(bool include_filename, char *buff, int buffsize)
     else
     {
         char nicesize[10];
-        humanSize((char *)fullpath.c_str(), nicesize, sizeof(nicesize)-1);
+        humanSize(box_filelist->getCurrentFilePath(), nicesize, sizeof(nicesize)-1);
 
         char Zscaletxt[10];
         humanZScale(imgtkScale, Zscaletxt, sizeof(Zscaletxt)-1);
