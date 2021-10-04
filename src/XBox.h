@@ -46,16 +46,14 @@ private:
 
     bool draw_check{true};
     ScaleMode draw_scale{Noscale};
-    bool draw_center{true};
-    bool panned{false};
     OverlayMode draw_overlay{OverlayNone};
     double _zoom{1.0};
     int _zoom_step = 0;
     int _scroll_speed = 20;
 
-    // scrolling deltas from origin
-    int deltax{0};
-    int deltay{0};
+    // Location of center of image
+    int centerX{0};
+    int centerY{0};
 
     int rotation; // cycle through clockwise rotations of 90 degrees
     ZScaleMode imgtkScale{ZScaleMode::None}; // cycle through fl_imgtk scale values
@@ -139,6 +137,7 @@ private:
     void wipeShowImage();
     void drawMinimap();
     void drawOverlay();
+    void drawCenter();
 
     void toggleSlideshow();
     void toggleMinimap();
@@ -146,9 +145,9 @@ private:
 
 private:
     bool _pan_with_mouse;
-    int dragStartX;
-    int dragStartY;
-    bool dragging;
+    int dragStartX; // mouse panning state
+    int dragStartY; // mouse panning state
+    bool dragging;  // while mouse dragging
     int mousePan(int);
 
     bool _inSlideshow;

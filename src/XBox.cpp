@@ -151,13 +151,9 @@ void XBox::action(int act)
     switch (act)
     {
         case Mediator::ACT_NEXT:
-            deltax = deltay = 0;
-            panned = false;
             next_image();
             break;
         case Mediator::ACT_PREV:
-            deltax = deltay = 0;
-            panned = false;
             prev_image();
             break;
         case Mediator::ACT_CHK:
@@ -244,7 +240,7 @@ int XBox::key(int fullkey)
         case FL_Right:
             if (ctrl)
             {
-                deltax -= _scroll_speed; // direction matches FEH
+                centerX -= _scroll_speed;
                 redraw();
             }
             else
@@ -256,7 +252,7 @@ int XBox::key(int fullkey)
         case FL_Left: // TODO consider for pan
             if (ctrl)
             {
-                deltax += _scroll_speed; // direction matches FEH
+                centerX += _scroll_speed;
                 redraw();
             }
             else
@@ -268,7 +264,7 @@ int XBox::key(int fullkey)
         case FL_Up:
             if (ctrl)
             {
-                deltay += _scroll_speed; // direction matches FEH
+                centerY += _scroll_speed;
                 redraw();
             }
             else
@@ -280,7 +276,7 @@ int XBox::key(int fullkey)
         case FL_Down:
             if (ctrl)
             {
-                deltay -= _scroll_speed; // direction matches FEH
+                centerY -= _scroll_speed;
                 redraw();
             }
             else
@@ -444,8 +440,9 @@ int XBox::mousePan(int msg)
 
     switch (msg) {
         case FL_PUSH:
-            dragStartX = mouseX - deltax;
-            dragStartY = mouseY - deltay;
+            dragStartX = mouseX - centerX;
+            dragStartY = mouseY - centerY;
+
             dragging = true;
             break;
         case FL_DRAG: {
@@ -455,15 +452,14 @@ int XBox::mousePan(int msg)
             int movY = dragStartY - mouseY;
             fl_cursor(FL_CURSOR_MOVE);
 
-            deltax = -movX;
-            deltay = -movY;
+            centerX = -movX;
+            centerY = -movY;
             redraw();
             }
             break;
         case FL_RELEASE:
             fl_cursor(FL_CURSOR_ARROW);
             dragging = false;
-            panned = true;
             break;
     }
     return 1;
@@ -583,9 +579,7 @@ void XBox::image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg)
     rotation = 0;
     _zoom = 1.0;
     _zoom_step = 0;
-    deltax = 0;
-    deltay = 0;
-
+    centerX = centerY = INT_MAX; // On next draw, center to window
     updateImage();
 }
 
@@ -830,11 +824,6 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : SmoothResizeGroup(x,y,w,h
     _prefs->getS(OVERLAY, defaultScale, overlayModeToName(OverlayNone));
     draw_overlay = nameToOverlayMode(defaultScale);
 
-    draw_center = true;
-    panned = false;
-
-    deltax = 0;
-    deltay = 0;
     rotation = 0;
 
     _mru = new MostRecentPaths(_prefs); // TODO consider singleton
@@ -898,6 +887,17 @@ Fl_Color XBox::_mmoc;
 Fl_Color XBox::_mmic;
 int XBox::_miniMapSize;
 
+void XBox::drawCenter()
+{
+    int ww = w();
+    int wh = h();
+    int cx = x() + ww / 2;
+    int cy = y() + wh / 2;
+
+    fl_xyline(cx-10, cy, cx+10);
+    fl_yxline(cx, cy-10, cy+10);
+}
+
 void XBox::drawMinimap() {
     if (!_minimap || (!_showImg && !_anim)) return; // minimap off, no image
 
@@ -925,8 +925,14 @@ void XBox::drawMinimap() {
 
     // draw the 'window' rect. NOTE may be positioned outside the 'image' rect
     // depending on scrolling, zooming, center, etc.
-    int mmix = (int)((double)-deltax / (double)iw * (double)mmw) + 1;
-    int mmiy = (int)((double)-deltay / (double)ih * (double)mmh) + 1;
+    int mmix;
+    int mmiy;
+    {
+        int dx = centerX - iw / 2;
+        int dy = centerY - ih / 2;
+        mmix = (int) ((double) -dx / (double) iw * (double) mmw) + 1;
+        mmiy = (int) ((double) -dy / (double) ih * (double) mmh) + 1;
+    }
     int mmiw = (int)((double)w() / (double)iw * (double)mmw);
     int mmih = (int)((double)h() / (double)ih * (double)mmh);
 
@@ -944,27 +950,29 @@ void XBox::draw() {
 
     fl_push_clip( x(), y(), w(), h() );
 
-    // Note: offset to not overwrite the box outline
-    int drawx = x()+1;
-    int drawy = y()+1;
+    // Determine imagewidth / imageheight for future use
+    int iw;
+    int ih;
+    if (_anim) {iw = _anim->w(); ih = _anim->h();}
+    else {iw = _showImg->w(); ih = _showImg->h();}
 
-    // TODO remove panned and merely clear draw_center?
-    if (draw_center && !panned && !dragging) {
-        int iw;
-        int ih;
-        if (_anim) {iw = _anim->w(); ih = _anim->h();}
-        else {iw = _showImg->w(); ih = _showImg->h();}
-
-        deltax = (w() - iw) / 2;
-        deltay = (h() - ih) / 2;
+    // New image, force to center of window
+    if (centerX == INT_MAX)
+    {
+        centerX = w() / 2;
+        centerY = h() / 2;
     }
+
+    // The upper left X,Y; includes small offset to not draw over box outline
+    int drawx = x() + 1 + centerX - iw / 2;
+    int drawy = y() + 1 + centerY - ih / 2;
 
     if (_anim && draw_check)
     {
         // animation frames currently update here, not in updateImage()
         int outw = std::min(w(), _anim->w());
         int outh = std::min(h(), _anim->h());
-        drawChecker(drawx + deltax, drawy + deltay, outw-2, outh-2);
+        drawChecker(drawx, drawy, outw-2, outh-2);
     }
 
     if (_anim) {
@@ -974,13 +982,14 @@ void XBox::draw() {
         // TODO for some reason the frame scale() isn't "sticking"???
         // TODO 4009.webp gets this far then crashes because image() returns null
         if (tmp)
-            tmp->scale(_anim->w(), _anim->h(), 1, 1);
-        _anim->draw(drawx, drawy, w() - 2, h() - 2, -deltax, -deltay);
+            tmp->scale(iw, ih, 1, 1);
+        _anim->draw(drawx, drawy, iw, ih);
     }
     else {
-        _showImg->draw(drawx, drawy, w() - 2, h() - 2, -deltax, -deltay);
+        _showImg->draw(drawx, drawy, iw-2, ih-2);
     }
 
+    drawCenter();
     drawMinimap();
     drawOverlay();
 
