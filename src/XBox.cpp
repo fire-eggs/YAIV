@@ -745,7 +745,10 @@ void XBox::updateImage() {
     if (_zoom_step)
     {
         // TODO change to be a lookup into a list of zoom levels
-        _zoom =  basezoom + .1 * _zoom_step;
+        double new_zoom =  basezoom + .1 * _zoom_step;
+
+        // prevent crash when attempting to zoom below zero
+        if (new_zoom > 0)  { _zoom = new_zoom; } else {_zoom_step++;}
         if (_anim)
             _anim->scale(_anim->data_w()*_zoom, _anim->data_h()*_zoom,1, 1);
         else {
