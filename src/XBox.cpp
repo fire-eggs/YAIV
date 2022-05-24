@@ -855,19 +855,22 @@ void XBox::forceSlideshow() {
 }
 
 void XBox::toggleSlideshow() {
-    _inSlideshow = !_inSlideshow;
-    if (_inSlideshow) {
-        _slideShow = new Slideshow();
-        _slideShow->setPrefs(_prefs);
-        _slideShow->setWindow(this);
-        _slideShow->start(box_filelist->currentIndex()); // TODO slideshow uses filelist
-    }
-    else {
-        _slideShow->stop();
-        delete _slideShow;
-        _slideShow = nullptr;
-    }
-
+	// Nothing to show...
+	if (box_filelist && box_filelist->any())
+	{
+		_inSlideshow = !_inSlideshow;
+		if (_inSlideshow) {
+			_slideShow = new Slideshow();
+			_slideShow->setPrefs(_prefs);
+			_slideShow->setWindow(this);
+			_slideShow->start(box_filelist->currentIndex()); // TODO slideshow uses filelist
+		}
+		else {
+			_slideShow->stop();
+			delete _slideShow;
+			_slideShow = nullptr;
+		}
+	}
 }
 
 void XBox::toggleMinimap() {
