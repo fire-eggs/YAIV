@@ -899,6 +899,8 @@ int XBox::_miniMapSize;
 
 void XBox::drawCenter()
 {
+    return; // TODO center marker as option?
+    
     int ww = w();
     int wh = h();
     int cx = x() + ww / 2;
