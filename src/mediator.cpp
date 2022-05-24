@@ -45,7 +45,7 @@ namespace Mediator {
                 tb->setState(ACT_CHK, !b2->getCheck());
                 break;
             case ACT_SLID:
-                tb->setState(ACT_SLID, !b2->inSlide());
+                tb->setState(ACT_SLID, !b2->inSlide()); // TODO should not happen if changing slideshow is invalid (e.g. no images)
                 break;
             case ACT_SCALE_HIGH:
             case ACT_SCALE_FIT:
@@ -62,6 +62,8 @@ namespace Mediator {
             case ACT_ISNEXT:
             case ACT_ISPREV:
                 tb->activate(val);
+                break;
+            default:
                 break;
         }
         b2->action(val);

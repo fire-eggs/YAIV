@@ -218,6 +218,8 @@ void ButtonBar::setScaleImage(Mediator::ACTIONS who) {
                 case Mediator::ACT_SCALE_HIGH:
                     setImage(exepath, ch,"scaletoheight");
                     break;
+                default:
+                    break;
             }
             ch2->redraw();
             break;

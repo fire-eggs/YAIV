@@ -29,7 +29,7 @@ static void cb_Exit(Fl_Button *, void *)
 }
 
 YaivWin::YaivWin(int x, int y, int _w, int h, Prefs* prefs) : dropwin(x,y,_w,h),
-                                       _xoff(0), _yoff(0), _border(1), _prefs(prefs)
+                                       _border(1), _prefs(prefs), _xoff(0), _yoff(0)
 {
     // NOTE do _not_ toggle the border in here. Prevents minimize/restore.
 

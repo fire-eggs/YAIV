@@ -160,7 +160,7 @@ static int AllocateFrames(AnimatedImage* const image, uint32_t num_frames)
     WebPFree(image->raw_mem);
     image->num_frames = num_frames;
     image->frames = frames;
-    for (int i = 0; i < num_frames; ++i) {
+    for (uint32_t i = 0; i < num_frames; ++i) {
         frames[i].rgba = (uint8_t*) :: operator new (rgba_size);
         frames[i].duration = 0;
         frames[i].is_key_frame = 0;

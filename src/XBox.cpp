@@ -393,7 +393,7 @@ int XBox::handle(int msg) {
                 return 1; // not a local file, do nothing
 
             size_t len = strlen(urls);
-            int i = 0;
+            size_t i = 0;
             while (urls[i] != '\r' && urls[i] != '\n' && i < len) i++;
             char *fpath = new char[i + 1 - 7];
             strncpy(fpath, urls + 7, i + 1 - 7);
@@ -1033,7 +1033,7 @@ void XBox::drawOverlay() {
 
         Fl_Label *lbl = new Fl_Label();
         lbl->value = l;
-        char imgnm[10];
+        //char imgnm[10];
         Fl_Image *img = nullptr;
         if (box_filelist->isFav())
             img = getImage("heart");

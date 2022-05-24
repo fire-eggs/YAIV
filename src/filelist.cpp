@@ -73,9 +73,11 @@ int filelist::find_file(const char *n) {
     const char *outfn = fl_filename_name(n);
     //logit("file_file:|%s|", (char *)outfn);
     for (int i=0; i < file_count; i++)
+    {
         if (strcmp(file_list[i]->d_name, outfn) == 0)
             return i;
-        return 0;
+    }
+    return 0;
 }
 
 bool filelist::canNext() {

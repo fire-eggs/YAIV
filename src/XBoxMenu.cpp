@@ -155,7 +155,7 @@ void XBox::do_menu(int xloc, int yloc, bool title) {
     std::vector<menucall *> *totoss = new std::vector<menucall*>();
 
     // initialize it with the static menu contents
-    for (size_t j = 0; j <= submenuNdx; j++)
+    for (size_t j = 0; j <= (size_t)submenuNdx; j++)
     {
         dyn_menu[j] = right_click_menu[j];
         size_t menuparam = (size_t)dyn_menu[j].user_data();
@@ -187,7 +187,7 @@ void XBox::do_menu(int xloc, int yloc, bool title) {
         m->do_callback(this, m->user_data());
 
     // Memory cleanup
-    for (int i=0; i<totoss->size();i++)
+    for (long unsigned int i=0; i<totoss->size();i++)
         delete totoss->at(i);
     delete totoss;
     delete [] dyn_menu;
