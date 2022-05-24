@@ -36,6 +36,9 @@ void XBox::load_request() {
 
 void XBox::goto_request() {
 
+    if (!box_filelist || box_filelist->fileCount() == 0)
+        return; // no images
+        
     int dex = box_filelist->currentIndex() + 1;
     char def[256];
     sprintf(def, "%d", dex);
@@ -76,6 +79,8 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
 
         case MI_COPYPATH:
             {
+            if (!box_filelist || box_filelist->fileCount() == 0)
+                break; // no images loaded
             const char *fullpath = box_filelist->getCurrentFilePath();
             if (!fullpath)
                 break;

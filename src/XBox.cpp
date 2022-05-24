@@ -883,6 +883,7 @@ void XBox::toggleOverlay() {
     switch (draw_overlay)
     {
         case OverlayBox:
+            // TODO prevent the overlay box appearing when no images in list
             notifyActivate(true);
             break;
         default:
@@ -1020,7 +1021,7 @@ Fl_Image *getImage(const char *imgn)
 
 void XBox::drawOverlay() {
 
-    if (box_filelist && !box_filelist->fileCount() || !draw_overlay)
+    if ( !box_filelist || !box_filelist->any() || !draw_overlay)
         return;
 
     char hack[501];
