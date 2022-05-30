@@ -56,6 +56,13 @@ void logit(const char *format, char *arg) // TODO varargs
 
 filelist *box_filelist; // TODO member
 
+// image dimensions, pixels
+int iw;
+int ih;
+// image dimensions, zoomed
+int zoomIw;
+int zoomIh;
+
 void XBox::load_file(const char *n) {
     box_filelist = filelist::initFilelist(n);
     load_current();
@@ -416,7 +423,30 @@ int XBox::handle(int msg) {
                 do_menu(Fl::event_x(), Fl::event_y(), true);
                 return 1;
             }
-            return mousePan(FL_PUSH);
+            
+            if (Fl::event_clicks() > 0)
+            {
+                // User has double-clicked in the box. Attempt to zoom in with that location
+                // at the center.
+                int inboxX = Fl::event_x() - x(); // click x,y relative to box
+                int inboxY = Fl::event_y() - y();
+                int boxCntX = w() / 2;            // center of the box
+                int boxCntY = h() / 2;
+
+                // NOTE: _not_ worrying about clicking outside the image! 
+                
+                // Move the image location so the spot the user double-clicked on 
+                // is now in the center of the box.
+                // NOTE: this is very approximate and shifts a bit from the zoom as well.
+                centerX += (boxCntX - inboxX);
+                centerY += (boxCntY - inboxY);
+                
+                change_zoom(+1);
+                redraw();
+                return 1;
+            }
+            else               
+                return mousePan(FL_PUSH);
             break;
         case FL_DRAG:
         case FL_RELEASE:
@@ -908,8 +938,11 @@ void XBox::drawCenter()
     int cx = x() + ww / 2;
     int cy = y() + wh / 2;
 
+    auto oldclr = fl_color();
+    fl_color(FL_RED);
     fl_xyline(cx-10, cy, cx+10);
     fl_yxline(cx, cy-10, cy+10);
+    fl_color(oldclr);
 }
 
 void XBox::drawMinimap() {
@@ -965,8 +998,6 @@ void XBox::draw() {
     fl_push_clip( x(), y(), w(), h() );
 
     // Determine imagewidth / imageheight for future use
-    int iw;
-    int ih;
     if (_anim) {iw = _anim->w(); ih = _anim->h();}
     else {iw = _showImg->w(); ih = _showImg->h();}
 
@@ -977,6 +1008,11 @@ void XBox::draw() {
         centerY = h() / 2;
     }
 
+    zoomIh = ih * _zoom;
+    zoomIw = iw * _zoom;
+    
+    //printf("Draw:Center (%d,%d)\n", centerX, centerY);
+    
     // The upper left X,Y; includes small offset to not draw over box outline
     int drawx = x() + 1 + centerX - iw / 2;
     int drawy = y() + 1 + centerY - ih / 2;
