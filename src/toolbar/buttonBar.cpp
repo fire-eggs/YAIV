@@ -214,9 +214,11 @@ void ButtonBar::setScaleImage(Mediator::ACTIONS who) {
                     break;
                 case Mediator::ACT_SCALE_WIDE:
                     setImage(exepath, ch,"scaletowidth");
+                    ch->tooltip("Fit to width");
                     break;
                 case Mediator::ACT_SCALE_HIGH:
                     setImage(exepath, ch,"scaletoheight");
+                    ch->tooltip("Fit to height");
                     break;
                 default:
                     break;
