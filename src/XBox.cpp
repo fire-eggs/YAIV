@@ -119,7 +119,9 @@ void XBox::load_current() {
         }
         else
         {
-            Fl_Anim_GIF_Image::min_delay = 0.01;
+            //Fl_Anim_GIF_Image::min_delay = 0.01;
+            // KBR 20220528 undocumented 'standard': minimum GIF playback is 0.2 seconds, see Netscape history
+            Fl_Anim_GIF_Image::min_delay = 0.10;
             Fl_Anim_GIF_Image::animate = true;
 
             send_message(Mediator::MSGS::MSG_NEWFILE, 0);
