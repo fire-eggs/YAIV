@@ -31,6 +31,8 @@ private:
     void loadHidden();
     void loadFavs();
 
+    bool addToHidden();
+    
 public:
     filelist();
     void load_filelist(const char *);
@@ -52,13 +54,13 @@ public:
     int fileCount();
 
     void randomize();
-    void hide();
+    bool hide();
     bool ishidden();
     bool isFav();
     bool isHide();
-    void addToHidden();
-    void addToFavs();
 
+    bool addToFavs();
+    
     static filelist* initFilelist(const char *n);
 };
 

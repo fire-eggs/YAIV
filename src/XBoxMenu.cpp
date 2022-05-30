@@ -201,12 +201,16 @@ void XBox::hideCurrent() {
     int res = fl_choice(buff, "No", "Yes", 0L, "continue");
     if (!res) return;
 
-    box_filelist->hide();
+    bool res2 = box_filelist->hide();
+    if (!res2)
+        fl_alert("Failure to open 'hidden' file.");
     load_current();
 }
 
 void XBox::favCurrent() {
-    box_filelist->addToFavs();
+    bool res2 = box_filelist->addToFavs();
+    if (!res2)
+        fl_alert("Failure to open 'favs' file.");
 }
 
 #ifndef _MSC_VER

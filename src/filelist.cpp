@@ -173,24 +173,10 @@ void filelist::setCurrent(int val) {
     next();
 }
 
-void filelist::hide() {
-    addToHidden();
-/*
-    const char *fullpath = getCurrentFilePath();
-
-    // TODO test with utf-8 folder, filename
-
-#ifndef _MSC_VER
-    std::string newpath = std::string(folder_name) + "/." + file_name;
-    if (std::rename(fullpath, newpath.c_str()))
-        return; // failure
-
-    strcpy(file_list[current_index]->d_name, (std::string(".") + file_name).c_str());
-#else
-    // TODO Windows change hidden attribute
-#endif
-*/
+bool filelist::hide() {
+    bool OK = addToHidden();
     next(); // TODO probably a problem if hiding the only image in the list
+    return OK;
 }
 
 bool filelist::ishidden() {
@@ -228,24 +214,30 @@ void filelist::loadFavs()
     }
 }
 
-void filelist::addToHidden()
+bool filelist::addToHidden()
 {
     _hidden.push_back(fullpath);
-    // TODO write out
+    // write out
     FILE *fp = fl_fopen("hidden.yaiv", "a+");
+    if (!fp) // 20220530 fix crash when cannot open file
+        return false;
     fputs(fullpath,fp);
     fputc('\n',fp);
     fclose(fp);
+    return true;
 }
 
-void filelist::addToFavs()
+bool filelist::addToFavs()
 {
     _favs.push_back(fullpath);
-    // TODO write out
+    // write out
     FILE *fp = fl_fopen("favs.yaiv", "a+");
+    if (!fp) // 20220530 fix crash when cannot open file
+        return false;
     fputs(fullpath,fp);
     fputc('\n',fp);
     fclose(fp);
+    return true;
 }
 
 bool filelist::isFav()
