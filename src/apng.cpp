@@ -21,9 +21,12 @@ zlib license
 #include <cstdio>
 #include <cstring>
 #include <vector>
-#include <Fl_Anim_GIF_Image.h>
+#include "Fl_Anim_GIF_Image.h"
+
+//#include </home/kevin/fltk/png/pnglibconf.h>
+
 #include "apng.h"
-#include "png.h" // unpatched libpng is OK
+#include "png/png.h"
 
 #define id_IHDR 0x52444849
 #define id_acTL 0x4C546361
@@ -214,7 +217,7 @@ int load_apng(const char * szIn, std::vector<Image>& img)
 
     if ((f = fopen(szIn, "rb")) == nullptr)
         return -1;
-
+    
     if (fread(sig, 1, 8, f) != 8 || png_sig_cmp(sig, 0, 8) != 0) {
         fclose(f);
         return -1;
