@@ -18,6 +18,10 @@ extern filelist* box_filelist; // TODO member
 
 void XBox::load_request() {
 
+    // 20220530 start with the last path used
+    char** mru = _mru->getAll(); // TODO return a single path
+    auto last = mru[0];
+    
     Fl_File_Chooser::sort = fl_numericsort;
     const char *fname =
             fl_file_chooser("Image file?","*.{bm,bmp,gif,jpg,apng,png,webp"
@@ -27,7 +31,7 @@ void XBox::load_request() {
                                           ",svgz"
                                           #endif // HAVE_LIBZ
                                           #endif // FLTK_USE_SVG
-                                          "}", nullptr);
+                                          "}", last);
 
     if (!fname)
         return;
