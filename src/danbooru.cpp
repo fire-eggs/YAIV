@@ -28,7 +28,7 @@ const char *labels = "Copyright:\nArtist:\nCharacters:\nMeta:\nTags:\n";
 // TODO customization of text size
 // TODO customization of text styles
 
-#define TS 14 // default editor textsize
+#define TS 16 // default editor textsize
 
 Fl_Text_Display::Style_Table_Entry  styletable[] = {	// Style table
         { FL_BLACK,      FL_TIMES,             TS }, // A - Plain
@@ -175,6 +175,13 @@ void update_danbooru(char *filename) // TODO class member?
     size_t totsize = 0;
     for (const std::string& t: *_tags)
         totsize += t.size() + 1;
+    if (totsize == 0)
+    {
+        textbuf->text( "Not found in database!");
+        stylebuf->text("BBBBBBBBBBBBBBBBBBBBBB");
+        //dbwin->redraw();
+        return;
+    }
     totsize += strlen(labels) + 1;
 
     // 2. allocate temp text/style bufs
