@@ -144,15 +144,26 @@ void XBox::load_current() {
 }
 
 void XBox::next_image() {
-    box_filelist->next();
-    if (!box_filelist->canNext() && _quitAtEnd ) // command line option
-        exit(0);
-    load_current();
+    // 20220530 Don't reset the visible image if already at the end
+    if (box_filelist->canNext())
+    {
+        box_filelist->next();
+        load_current();
+    }
+    else
+    {
+        if (_quitAtEnd) // NOTE: command-line option
+            exit(0);
+    }
 }
 
 void XBox::prev_image() {
-    box_filelist->prev();
-    load_current();
+    // 20220530 don't reset the visible image if already at the beginning
+    if (box_filelist->canPrev())
+    {
+        box_filelist->prev();
+        load_current();
+    }
 }
 
 void XBox::action(int act)
