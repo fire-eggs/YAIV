@@ -59,11 +59,123 @@ struct dirent ** list_randomize(struct dirent ** list, int count)
 #endif
 #include <FL/Fl_JPEG_Image.H>
 
+enum ImageFormat
+{
+    FAIL = 0,
+    GIF,
+    BMP,
+    PNM,
+    PNG,
+    JPG,
+    SVG,
+    APNG,
+    WEBP
+};
+
+ImageFormat readImageHeader(uchar *header, int headerlen)
+{
+    if (headerlen < 6) // not a valid image
+        return FAIL;
+
+    if (memcmp(header, "GIF87a", 6) == 0 ||
+        memcmp(header, "GIF89a", 6) == 0) // GIF file
+        return GIF;
+
+    if (memcmp(header, "BM", 2) == 0)     // BMP file
+        return BMP;
+
+    if (header[0] == 'P' && header[1] >= '1' && header[1] <= '7')
+        // Portable anymap
+        return PNM;
+
+#ifdef HAVE_LIBPNG
+    if (memcmp(header, "\211PNG", 4) == 0)// PNG file
+    return PNG;
+#endif // HAVE_LIBPNG
+
+#ifdef HAVE_LIBJPEG
+    if (memcmp(header, "\377\330\377", 3) == 0 && // Start-of-Image
+      header[3] >= 0xc0 && header[3] <= 0xfe)   // APPn .. comment for JPEG file
+    return JPG;
+#endif // HAVE_LIBJPEG
+
+#ifdef FLTK_USE_SVG
+  #  if defined(HAVE_LIBZ)
+    if (header[0] == 0x1f && header[1] == 0x8b) { // denotes gzip'ed data
+        int fd = fl_open_ext(name, 1, 0);
+        if (fd < 0) 
+            return FAIL;
+        gzFile gzf =  gzdopen(fd, "r");
+        if (gzf) {
+        gzread(gzf, header, headerlen);
+        gzclose(gzf);
+        }
+    }
+  #  endif // HAVE_LIBZ
+
+  // KBR handle BOM
+  if (memcmp(header, "<svg", 4) == 0 ||
+      memcmp(&(header[3]), "<svg", 4) == 0 ||
+      memcmp(header, "<?xml", 5) == 0 ||
+      memcmp(&(header[3]), "<?xml", 5) == 0 )
+  {
+    return SVG;
+  }
+#endif // FLTK_USE_SVG
+
+    bool riff = header[0] == 'R' &&
+                header[1] == 'I' &&
+                header[2] == 'F' &&
+                header[3] == 'F';
+    bool webp = header[8] == 'W' &&
+                header[9] == 'E' &&
+                header[10] == 'B' &&
+                header[11] == 'P';
+    if (riff & webp)
+        return WEBP;
+
+    return FAIL;
+}
+
+ImageFormat getImageFormat(const char *filename)
+{
+    FILE *fp;
+    uchar header[64];
+
+    if ((fp = fl_fopen(filename, "rb")) == NULL)
+        return FAIL;
+    
+    int count = fread(header, 1, sizeof(header), fp);
+    fclose(fp);
+
+    return readImageHeader(header, count);
+}
+
 Fl_Image *                                      // O - Image, if found
 fl_check_images(const char *name,               // I - Filename
                 uchar      *header,             // I - Header data from file
                 int headerlen) {                // I - Amount of data
 
+    ImageFormat itype = readImageHeader(header,headerlen);
+    switch (itype)
+    {
+        case GIF:
+            return new Fl_GIF_Image(name);
+        case BMP:
+            return new Fl_BMP_Image(name);
+        case PNM:
+            return new Fl_PNM_Image(name);
+        case PNG:
+            return new Fl_PNG_Image(name);
+        case JPG:
+            return new Fl_JPEG_Image(name);
+        case SVG:
+            return new Fl_SVG_Image(name);
+        case FAIL:
+        default:
+            return nullptr;
+    }
+#if 0                    
     if (headerlen < 6) // not a valid image
         return nullptr;
 
@@ -113,6 +225,7 @@ if (memcmp(header, "<svg", 4) == 0 ||
 #endif // FLTK_USE_SVG
 
     return 0;
+#endif    
 }
 
 // TODO go into "file loader" module
@@ -123,11 +236,12 @@ Fl_Image *loadFile(char *filename, XBox *owner)
     if (img)
         return img;
 
+    // 2. Try to open as animated PNG
     img = LoadAPNG(filename, owner);
     if (img)
         return img;
 
-    // 2. Try to open as (animated) gif
+    // 3. Try to open as animated gif
     Fl_Anim_GIF_Image *animgif = new Fl_Anim_GIF_Image(filename, nullptr, Fl_Anim_GIF_Image::Start);
     if (animgif && animgif->valid() && animgif->is_animated()) // TODO can use fail() ?
     {
