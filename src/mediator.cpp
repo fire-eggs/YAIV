@@ -135,7 +135,7 @@ Fl_Widget_Tracker *db_track = nullptr;
 
         if (!db_track || db_track->deleted()) {
             delete db_track;
-            _danbooru = new toolgrp(nullptr, 1, 0, 0, 200, 500);
+            _danbooru = new toolgrp(nullptr, 1, 0, 0, 200, 500, nullptr, "yaivDanbooru");
             db_track = new Fl_Widget_Tracker(_danbooru);
         }
         view_danbooru(prefs, _danbooru->in_group());

@@ -7,7 +7,7 @@
 vtoolgrp::vtoolgrp(dockgroup *d, bool floating, bool draggable, int w, int h, const char *l)
     : toolgrp(w, h, l) {
 
-    initialize(d, floating, draggable, w, h, l);
+    initialize(d, floating, draggable, w, h, l, nullptr);
 }
 
 void vtoolgrp::create_dockable_group()

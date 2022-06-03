@@ -47,6 +47,8 @@ YaivWin::YaivWin(int x, int y, int _w, int h, Prefs* prefs) : dropwin(x,y,_w,h),
 
     callback((Fl_Callback*)cb_Exit);
     win_main = this;
+    
+    xclass("yaivmain"); // useful on KDE Plasma
 }
 
 void YaivWin::resize(int x, int y, int w, int h) {

@@ -20,10 +20,10 @@ protected:
 	virtual void create_fixed_group();
 
 	void create_docked(dockgroup *d);
-	void create_floating(dockgroup *d, int state, int x, int y, int w, int h, const char *l);
+	void create_floating(dockgroup *d, int state, int x, int y, int w, int h, const char *l, const char *xclass);
     void create_fixed_docked(dockgroup *d);
 
-    void initialize(dockgroup *dk, bool floater, bool draggable, int w, int h, const char *lbl);
+    void initialize(dockgroup *dk, bool floater, bool draggable, int w, int h, const char *lbl, const char *xclass);
 
 protected:
 	// Widgets used by the toolbar
@@ -44,7 +44,7 @@ public:
 	// Constructors for docked/floating window
 	toolgrp(int w, int h, const char *l = nullptr);
 	toolgrp(dockgroup *d, bool floating, bool draggable, int w, int h, const char *l = nullptr);
-	toolgrp(dockgroup *d, int f, int x, int y, int w, int h, const char *l = nullptr);
+	toolgrp(dockgroup *d, int f, int x, int y, int w, int h, const char *l = nullptr, const char *xclass=nullptr);
 
 	// methods for hiding/showing *all* the floating windows
 	static void show_all();
