@@ -7,12 +7,13 @@
 
 #include <FL/filename.H>
 #include <vector>
+#include <string>
 
 class filelist {
 
 private:
     int current_index;
-    char folder_name[FL_PATH_MAX] {'\0'};
+    //char folder_name[FL_PATH_MAX] {'\0'};
     char file_name[FL_PATH_MAX] {'\0'};
 
     char fullpath[FL_PATH_MAX<<2] {'\0'};
@@ -62,6 +63,15 @@ public:
     bool addToFavs();
     
     static filelist* initFilelist(const char *n);
+    
+    dirent *get_entry(int i) { return file_list[i]; }
+    const char *getFolderName();
+    void addToReal(const char *filename);
+    void resetReal();
+    int realCount();
+    
+    std::vector<std::string> RealFileList;
+    int oldFileCount();
 };
 
 

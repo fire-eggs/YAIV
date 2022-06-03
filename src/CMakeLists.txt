@@ -22,14 +22,14 @@ add_executable(yaiv main.cpp yaiv_win.cpp Fl_Anim_GIF_Image.cpp humansize.cpp li
                Webp.cpp checker.cpp XBox.cpp MostRecentPaths.cpp Slideshow.cpp apng.cpp
                Fl_TransBox.cpp modes.cpp XBoxMenu.cpp SmoothResizeGroup.cpp SmoothResizeGroup.h
                ${srcs} mediator.cpp mediator.h themes.cpp themes.h filelist.cpp filelist.h
-        whereami.c whereami.h)
+        whereami.c whereami.h fileScanThread.cpp)
 
 add_executable(yaiv_db main.cpp Fl_Anim_GIF_Image.cpp humansize.cpp list_rand.cpp
                Webp.cpp checker.cpp XBox.cpp MostRecentPaths.cpp Slideshow.cpp apng.cpp
                Fl_TransBox.cpp danbooru.cpp yaiv_win.cpp ${srcs}
                ${PROJECT_SOURCE_DIR}/sqlite-amalgamation-3350500/sqlite3.c modes.cpp XBoxMenu.cpp SmoothResizeGroup.cpp
-        SmoothResizeGroup.h mediator.cpp mediator.h themes.cpp themes.h filelist.cpp filelist.h
-        whereami.c whereami.h)
+               SmoothResizeGroup.h mediator.cpp mediator.h themes.cpp themes.h filelist.cpp filelist.h
+               whereami.c whereami.h fileScanThread.cpp)
 
 target_compile_definitions(yaiv_db PUBLIC "-DDANBOORU")
 

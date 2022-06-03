@@ -65,23 +65,29 @@ int zoomIh;
 
 void XBox::load_file(const char *n) {
     box_filelist = filelist::initFilelist(n);
-    load_current();
 
     // TODO don't add to MRU if unsuccessful load
     // Update the MRU list
     _mru->Add(n);
     _mru->Save();
+    
+    Fl::wait(0.5); // Give the filescanner thread a chance to load file(s)
+    load_current();
 }
 
 void XBox::load_current() {
 
-    const char *fullpath = box_filelist->getCurrentFilePath();
+    //printf("LC: rc=%d\n", box_filelist->realCount());
+    
+    // TODO redo using "realCount"
     Mediator::send_message(Mediator::MSGS::MSG_TB,
                            box_filelist->canPrev() ? Mediator::ACT_ISPREV
                                                    : Mediator::ACT_NOPREV);
     Mediator::send_message(Mediator::MSGS::MSG_TB,
                            box_filelist->canNext() ? Mediator::ACT_ISNEXT
                                                    : Mediator::ACT_NONEXT);
+    
+    const char *fullpath = box_filelist->getCurrentFilePath();   
     if (!fullpath) return;
 
     logit("Load %s", (char *)fullpath);
