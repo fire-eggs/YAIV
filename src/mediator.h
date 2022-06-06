@@ -46,6 +46,8 @@ namespace Mediator {
 
     void danbooru(Prefs *);
 
+    void metadata(Prefs *);
+    
     void setTheme(int);
 
 }

@@ -385,6 +385,11 @@ int XBox::key(int fullkey)
                 }
                 break;
 #endif
+            case 'e':
+                Mediator::metadata(_prefs);
+                //metadata(box_filelist->getCurrentFilePath());
+                //return 1;
+                break;
     }
     return 0;
 
