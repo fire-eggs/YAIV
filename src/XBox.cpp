@@ -71,15 +71,14 @@ void XBox::load_file(const char *n) {
     _mru->Add(n);
     _mru->Save();
     
+    // TODO not always working: GUI is updated too fast for the file scanner to get files: need a "have files" callback
     Fl::wait(0.5); // Give the filescanner thread a chance to load file(s)
     load_current();
 }
 
 void XBox::load_current() {
 
-    //printf("LC: rc=%d\n", box_filelist->realCount());
-    
-    // TODO redo using "realCount"
+    // Update anything which needs to know if the user can go forward/back
     Mediator::send_message(Mediator::MSGS::MSG_TB,
                            box_filelist->canPrev() ? Mediator::ACT_ISPREV
                                                    : Mediator::ACT_NOPREV);
@@ -88,13 +87,14 @@ void XBox::load_current() {
                                                    : Mediator::ACT_NONEXT);
     
     const char *fullpath = box_filelist->getCurrentFilePath();   
-    if (!fullpath) return;
+    if (!fullpath) 
+        return; // Nothing to do
 
     logit("Load %s", (char *)fullpath);
 
     rotation = 0; // TODO anything else need resetting?
 
-    if (fl_filename_isdir(fullpath))
+    if (fl_filename_isdir(fullpath)) // TODO shouldn't be happening any more?
     {
         align(FL_ALIGN_CENTER);
         label("@fileopen"); // show a generic folder
@@ -417,7 +417,7 @@ int XBox::handle(int msg) {
         case FL_PASTE: {
             // input will be a URL of form "file://<path>\n" OR "file://<path>\r\n"
             // THERE MAY BE MORE THAN ONE URL! taking only the first
-            // TODO confirm that windows DND includes the "file://" prefix!
+            // TODO confirm if windows drag-and-drop includes the "file://" prefix!
             const char *urls = Fl::event_text();
 #ifndef _WINDOWS
             if (strncmp(urls, "file://", 7) != 0)
