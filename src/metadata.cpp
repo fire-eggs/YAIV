@@ -139,6 +139,9 @@ void update_metadata(const char *filepath) {
     Exiv2::IptcData &iptcData = image->iptcData();
     Exiv2::XmpData &xmpData = image->xmpData();
     
+    // Some images found to have improperly formatted XML in their XMP
+    bool badXmp = !xmpData.count() && xmpData.xmpPacket().length();
+    
     size_t totsize = 0;
     
     for (Exiv2::ExifData::const_iterator i = exifData.begin(); i != exifData.end(); ++i) 
@@ -148,6 +151,8 @@ void update_metadata(const char *filepath) {
     for (Exiv2::XmpData::const_iterator i = xmpData.begin(); i != xmpData.end(); ++i) 
         totsize += i->tagLabel().length() + i->toString().length() + 5;
     totsize += strlen(labels);
+    if (badXmp)
+        totsize += 15;
     
     char *tmptxt = new char[totsize + 1];
     char *tmpsty = new char[totsize + 1];
@@ -177,10 +182,17 @@ void update_metadata(const char *filepath) {
         strcat(tmpsty, "F");
     strcat(tmptxt, "\n");
     strcat(tmpsty, "A");
-    
-    for (Exiv2::XmpData::const_iterator i = xmpData.begin(); i != xmpData.end(); ++i) 
-        addTag(tmptxt, tmpsty, i->tagLabel(), i->toString());
 
+    if (badXmp)
+    {
+        strcat(tmptxt, "Error in XMP!\n");
+        strcat(tmpsty, "BBBBBBBBBBBBBA");
+    }
+    else
+    {
+        for (Exiv2::XmpData::const_iterator i = xmpData.begin(); i != xmpData.end(); ++i) 
+            addTag(tmptxt, tmpsty, i->tagLabel(), i->toString());
+    }
     textbuf->text(tmptxt);
     stylebuf->text(tmpsty);
 
