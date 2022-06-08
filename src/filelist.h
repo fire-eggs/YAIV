@@ -13,7 +13,7 @@ class filelist {
 
 private:
     int current_index;
-    //char folder_name[FL_PATH_MAX] {'\0'};
+    char folder_name[FL_PATH_MAX] {'\0'};
     char file_name[FL_PATH_MAX] {'\0'};
 
     char fullpath[FL_PATH_MAX<<2] {'\0'};
@@ -42,7 +42,7 @@ public:
     const char *getCurrentFilePath();
     char *currentFilename();
 
-    bool any() { return file_list && file_count > 0; }
+    bool any() { return realCount() > 0; }
     bool canNext();
     bool canPrev();
     void next();
@@ -64,7 +64,7 @@ public:
     
     static filelist* initFilelist(const char *n);
     
-    dirent *get_entry(int i) { return file_list[i]; }
+    dirent *get_entry(int i);
     const char *getFolderName();
     void addToReal(const char *filename);
     void resetReal();
