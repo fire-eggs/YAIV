@@ -24,7 +24,7 @@ void XBox::load_request() {
     
     Fl_File_Chooser::sort = fl_numericsort;
     const char *fname =
-            fl_file_chooser("Image file?","*.{bm,bmp,gif,jpg,apng,png,webp"
+            fl_file_chooser("Image file?","*.{bm,bmp,gif,jpg,jpeg,apng,png,webp"
                                           #ifdef FLTK_USE_SVG
                                           ",svg"
                                           #ifdef HAVE_LIBZ
