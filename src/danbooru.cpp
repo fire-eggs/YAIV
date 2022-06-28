@@ -151,9 +151,13 @@ void update_danbooru(char *filename) // TODO class member?
         image_id = std::stoll(name, &posEnd, 10);
     } catch (const std::invalid_argument& e) {
         inError = true;
+    } catch (const std::out_of_range& e) {
+        inError = true; // thrown for some file names
     }
 
-    if (inError || posEnd < strlen(name)) {
+    // files with a leading zero won't be a danbooru file
+    // arbitrary max limit beyond current end of danbooru files (as of 2021, 4.5 million)
+    if (inError || posEnd < strlen(name) || name[0] == '0' || image_id > 10000000) {
         textbuf->text("Not a danbooru file!");
         stylebuf->text("BBBBBBBBBBBBBBBBBBBB");
         //dbwin->redraw();
