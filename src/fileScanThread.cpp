@@ -8,6 +8,7 @@
 
 #include "threads.h"
 #include "filelist.h"
+#include "mediator.h" // TODO define messages elsewhere?
 
 extern int getImageFormat(const char *);
 
@@ -22,6 +23,8 @@ void *fileScanner(void *p)
 {
     const char *fn = _filelist->getFolderName();
 
+    int updCount = 0;
+    
 //    bool first = true;
     for (int i=0; i < _filelist->oldFileCount(); i++)
     {
@@ -39,6 +42,9 @@ void *fileScanner(void *p)
 //        if (first) printf("add to real\n");
 //        first = false;
         _filelist->addToReal(ent->d_name);
+        updCount ++;
+        if ((updCount % 5) == 1)
+            send_message(Mediator::MSG_REALUPDATE, 0);
     }   
     
     return NULL;

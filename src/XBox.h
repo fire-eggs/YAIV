@@ -120,6 +120,8 @@ public:
     void hideCurrent();
     void favCurrent();
 
+    void updateLabel();
+    
 private:
 
     bool _quitAtEnd {false};
@@ -131,7 +133,6 @@ private:
     void next_scale();
     void nextTkScale();
     void nextRotation();
-    void updateLabel();
     void updateImage();
 
     void wipeShowImage();

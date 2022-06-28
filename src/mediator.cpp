@@ -104,6 +104,14 @@ namespace Mediator {
             case MSG_KEY:
                 b2->key(msg2->data); // TODO do key handling in mediator: lookup & send
                 break;
+            case MSG_REALUPDATE:
+                // update toolbar
+                // update titlebar
+                if (box_filelist->realCount() < 2)
+                    b2->load_current();
+                else
+                    b2->updateLabel();
+                break;
         }
         delete msg2;
     }
