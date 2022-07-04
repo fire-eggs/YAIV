@@ -17,6 +17,9 @@ extern ButtonBar* tb;
 toolgrp* _danbooru;
 #endif
 
+#include "metadata.h"
+toolgrp* _metadata;
+
 #include "menuids.h"
 #include "themes.h"
 
@@ -93,10 +96,21 @@ namespace Mediator {
                 // TODO if data is negative, no file
                 // TODO update b2 image
                 // TODO update toolbar state
+                
+                if (_metadata)
+                    update_metadata(box_filelist->getCurrentFilePath());
 
                 break;
             case MSG_KEY:
                 b2->key(msg2->data); // TODO do key handling in mediator: lookup & send
+                break;
+            case MSG_REALUPDATE:
+                // update toolbar
+                // update titlebar
+                if (box_filelist->realCount() < 2)
+                    b2->load_current();
+                else
+                    b2->updateLabel();
                 break;
         }
         delete msg2;
@@ -143,6 +157,20 @@ Fl_Widget_Tracker *db_track = nullptr;
             update_danbooru(box_filelist->currentFilename());
     }
 #endif
+
+    Fl_Widget_Tracker *md_track = nullptr;
+
+    void metadata(Prefs *prefs) {
+        if (!md_track || md_track->deleted()) {
+            delete md_track;
+            _metadata = new toolgrp(nullptr, 1, 0, 0, 200, 500, nullptr, "yaivMetadata");
+            md_track = new Fl_Widget_Tracker(_metadata);
+        }
+        init_metadata();
+        create_metadata(prefs, _metadata->in_group());
+        if (box_filelist)
+            update_metadata(box_filelist->getCurrentFilePath());
+    }
 
 void setTheme(int menuval) {
     bool isdark = false;

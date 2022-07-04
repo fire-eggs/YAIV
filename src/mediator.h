@@ -13,6 +13,7 @@ namespace Mediator {
         MSG_KEY = 0,
         MSG_TB = 1,
         MSG_NEWFILE=2,
+        MSG_REALUPDATE,
     };
 
     enum ACTIONS {
@@ -46,6 +47,8 @@ namespace Mediator {
 
     void danbooru(Prefs *);
 
+    void metadata(Prefs *);
+    
     void setTheme(int);
 
 }

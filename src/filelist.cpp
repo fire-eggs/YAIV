@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <random>
 
 #include "filelist.h"
 #include "list_rand.h"
@@ -19,16 +20,13 @@ filelist::filelist() {
     file_name[0] = '\0';
 }
 
-//TODO a file-filter callback is not in "vanilla" FLTK
-#if 0
-int removeFolders(struct dirent *entry) {
-    // TODO this is a hack, we're not provided the base path
-    const char * out = fl_filename_ext(entry->d_name);
-    bool val = out != nullptr && *out != 0 && (out[1] != 0);
-    return val;
-}
-#endif
+const char *filelist::getFolderName() { return folder_name; }
 
+extern int getImageFormat(const char *);
+extern void fire_scan_thread();
+
+// Determine the directory portion of a full filename
+// E.g. given <path>/filename.ext, return <path>
 int filelist::filename_path(const char* buf, char *to) { // TODO hack pending adding to FLTK
     const char *p = buf + strlen(buf) - 1;
     for (; *p != '/' && p != buf; --p) // TODO slash is possible '\' under windows
@@ -40,9 +38,12 @@ int filelist::filename_path(const char* buf, char *to) { // TODO hack pending ad
 }
 
 void filelist::load_filelist(const char *n) {
+    
     if (file_list)
         fl_filename_free_list(&file_list, file_count);
 
+    // Get a clean folder path from a folder or filename
+    folder_name[0] = '\0';
     if (!fl_filename_isdir(n))
         filename_path(n, folder_name);
     else
@@ -51,41 +52,47 @@ void filelist::load_filelist(const char *n) {
     if (folder_name[strlen(folder_name) - 1] == '/')
         folder_name[strlen(folder_name) - 1] = 0x0;
 
-    // TODO how best to filter for images?
-    //TODO a file-filter callback is not in "vanilla" FLTK
-    //file_count = fl_filename_list(folder_name, &file_list, fl_numericsort, removeFolders);
-    file_count = fl_filename_list(folder_name, &file_list, fl_numericsort);
+    // Get the list of all filenames in the specified folder
+    file_count = fl_filename_list((const char *)folder_name, &file_list, fl_numericsort);
+    
+    // Let the file scanner iterate over the file list and filter out non-image files
+    resetReal();
+    fire_scan_thread();
 }
 
 void filelist::load_file(const char *n) {
-    load_filelist(n); // TODO background process
+    load_filelist(n);
     current_index = 0;
     if (!fl_filename_isdir(n))
         current_index = find_file(n);
 }
 
 char *filelist::currentFilename() {
-    return file_count > 0 ? file_name : nullptr;
+    return realCount() > 0 ? file_name : nullptr;
 }
 
 int filelist::find_file(const char *n) {
-    // determine the index in the file_list of the given filename
+    
+    // determine the index in the file list of the given filename
     const char *outfn = fl_filename_name(n);
+    int rc = realCount();
     //logit("file_file:|%s|", (char *)outfn);
-    for (int i=0; i < file_count; i++)
+    for (int i=0; i < rc; i++)
     {
-        if (strcmp(file_list[i]->d_name, outfn) == 0)
+        if (strcmp(RealFileList[i].c_str(), outfn) == 0)
             return i;
     }
     return 0;
 }
 
 bool filelist::canNext() {
-    return file_list && current_index < (file_count-1);
+    // Is it possible to move to the "next" image?
+    return realCount() > 0 && current_index < (realCount()-1);
 }
 
 bool filelist::canPrev() {
-    return file_list && current_index > 0;
+    // Is it possible to move to the "previous" image?
+    return realCount() > 0 && current_index > 0;
 }
 
 bool filelist::skip() {
@@ -93,7 +100,7 @@ bool filelist::skip() {
 
     bool isdir = fl_filename_isdir(fullpath);
 #ifndef _MSC_VER
-    bool ishide = file_name[0] == '.';
+    bool ishide = file_name[0] == '.'; // Linux files are hidden with leading period
 #else
     bool ishide = false; // TODO windows hidden attribute
 #endif
@@ -102,32 +109,37 @@ bool filelist::skip() {
 
 const char *filelist::getCurrentFilePath() {
 
+    int rc = realCount();
     // NOTE: initialize first for canPrev/canNext
-    current_index = std::min(std::max(current_index,0), file_count-1);
+    current_index = std::min(std::max(current_index,0), rc-1);
 
-    if (!file_list || file_count < 1) return nullptr;
+    if (!rc) 
+        return nullptr;
 
-    strncpy(file_name, file_list[current_index]->d_name, FL_PATH_MAX);
+    strncpy(file_name, RealFileList[current_index].c_str(), FL_PATH_MAX);
 
-    sprintf(fullpath, "%s/%s", folder_name, file_list[current_index]->d_name);
+    sprintf(fullpath, "%s/%s", folder_name, file_name);
 
     return fullpath;
 }
 
 void filelist::step(int delta) {
-    if (!file_list || file_count < 1)
+    int rc = realCount();
+    if (!rc)
         return;
 
     int curr = current_index; // in case there are nothing but hidden files in this direction
     while (true) {
         current_index += delta;
-        if (current_index < 0 || current_index >= file_count) {
+        if (current_index < 0 || current_index >= rc) {
             current_index = curr; // reached the end, don't change image
             return;
         }
-        getCurrentFilePath(); // required for skip()
-        if (!skip())
-            return; // non-skippable, proceed
+                
+        //getCurrentFilePath(); // required for skip()
+        //if (!skip())
+        //    return; // non-skippable, proceed
+        return; // TODO skip
     }
 }
 
@@ -136,18 +148,10 @@ void filelist::next() { step(+1); }
 void filelist::prev() { step(-1); }
 
 void filelist::randomize() {
-    if (!file_list || file_count<=1)
-        return;
-
-    struct dirent **newlist = list_randomize(file_list, file_count);
-
-    for (int i=0; i<file_count; i++)
-        file_list[i] = newlist[i];
-
-    free(newlist);
-
-    current_index -= 1;
-    next();
+    
+    auto rng = std::default_random_engine{};
+    std::shuffle(std::begin(RealFileList), std::end(RealFileList), rng);
+    return;
 }
 
 void filelist::home() {
@@ -165,7 +169,7 @@ int filelist::currentIndex() const {
 }
 
 int filelist::fileCount() {
-    return file_count;
+    return realCount();
 }
 
 void filelist::setCurrent(int val) {
@@ -183,14 +187,15 @@ bool filelist::ishidden() {
     return file_list && (file_name[0] == '.' || isHide()); // TODO windows hidden attribute
 }
 
-static filelist *_filelist;
+//static 
+filelist *_filelist; // Hack for scanner: TODO pass as parameter
 
 filelist* filelist::initFilelist(const char *n) {
     delete _filelist;
     _filelist = new filelist();
     _filelist->load_file(n);
-    _filelist->loadFavs();
-    _filelist->loadHidden();
+    _filelist->loadFavs(); // TODO don't reload each time?
+    _filelist->loadHidden(); // TODO don't reload each time?
     return _filelist;
 }
 
@@ -249,3 +254,26 @@ bool filelist::isHide()
 {
     return _filelist && !_hidden.empty() && std::find(_hidden.begin(), _hidden.end(), fullpath) != _hidden.end();
 }
+
+void filelist::addToReal(const char* filename)
+{
+    RealFileList.push_back(std::string(filename));
+}
+
+void filelist::resetReal()
+{
+    RealFileList.clear();
+}
+
+int filelist::realCount()
+{
+    return RealFileList.size();
+}
+
+int filelist::oldFileCount()
+{
+    return file_count;
+}
+
+dirent *filelist::get_entry(int i)
+{ return file_list[i]; }    

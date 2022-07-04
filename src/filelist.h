@@ -7,6 +7,7 @@
 
 #include <FL/filename.H>
 #include <vector>
+#include <string>
 
 class filelist {
 
@@ -41,7 +42,7 @@ public:
     const char *getCurrentFilePath();
     char *currentFilename();
 
-    bool any() { return file_list && file_count > 0; }
+    bool any() { return realCount() > 0; }
     bool canNext();
     bool canPrev();
     void next();
@@ -62,6 +63,15 @@ public:
     bool addToFavs();
     
     static filelist* initFilelist(const char *n);
+    
+    dirent *get_entry(int i);
+    const char *getFolderName();
+    void addToReal(const char *filename);
+    void resetReal();
+    int realCount();
+    
+    std::vector<std::string> RealFileList;
+    int oldFileCount();
 };
 
 
