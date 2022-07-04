@@ -71,7 +71,6 @@ void XBox::load_file(const char *n) {
     _mru->Add(n);
     _mru->Save();
     
-    // TODO not always working: GUI is updated too fast for the file scanner to get files: need a "have files" callback
     Fl::wait(0.5); // Give the filescanner thread a chance to load file(s)
     load_current();
 }
@@ -134,7 +133,7 @@ void XBox::load_current() {
         {
             //Fl_Anim_GIF_Image::min_delay = 0.01;
             // KBR 20220528 undocumented 'standard': minimum GIF playback is 0.2 seconds, see Netscape history
-            Fl_Anim_GIF_Image::min_delay = 0.10;
+            Fl_Anim_GIF_Image::min_delay = 0.02;
             Fl_Anim_GIF_Image::animate = true;
 
             send_message(Mediator::MSGS::MSG_NEWFILE, 0);
@@ -220,6 +219,41 @@ void XBox::action(int act)
             redraw();
             break;
 
+        case Mediator::ACT_SCROLLUP:
+            centerY += _scroll_speed;
+            redraw();
+            break;
+        case Mediator::ACT_SCROLLDOWN:
+            centerY -= _scroll_speed;
+            redraw();
+            break;
+        case Mediator::ACT_SCROLLLEFT:
+            centerX += _scroll_speed;
+            redraw();
+            break;
+        case Mediator::ACT_SCROLLRIGHT:
+            centerX -= _scroll_speed;
+            redraw();
+            break;
+
+        case Mediator::ACT_SCALE:
+            next_scale();
+            break;
+        case Mediator::ACT_OVERLAY:
+            toggleOverlay();
+            break;
+        case Mediator::ACT_RANDOM:
+            box_filelist->randomize();
+            load_current();
+            break;
+        case Mediator::ACT_DITHER:
+            nextTkScale();
+            break;
+        case Mediator::ACT_MINIMAP:
+            toggleMinimap();
+            break;
+            
+
         default:
             return;
     }
@@ -227,6 +261,11 @@ void XBox::action(int act)
 
 int XBox::key(int fullkey)
 {
+    printf("XBox key\n");
+    //(Mediator::MSG_KEY, 0);
+    //return 0;
+    
+    
     // TODO this moves to mediator to lookup key customization
 
     int key = fullkey & FL_KEY_MASK;
