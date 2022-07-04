@@ -43,9 +43,12 @@ void *fileScanner(void *p)
 //        first = false;
         _filelist->addToReal(ent->d_name);
         updCount ++;
-        if ((updCount % 5) == 1)
+        if ((updCount % 10) == 1) // update only periodically
             send_message(Mediator::MSG_REALUPDATE, 0);
     }   
+    
+    // final update
+    send_message(Mediator::MSG_REALUPDATE, 0);
     
     return NULL;
 }
