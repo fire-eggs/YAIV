@@ -81,6 +81,9 @@ namespace Mediator {
             return;
         }
 
+        if (msg2->msg != MSG_REALUPDATE)
+            printf("med: %d, %d\n", msg2->msg, msg2->data);
+        
         switch (msg2->msg)
         {
             case MSG_TB:
@@ -112,6 +115,9 @@ namespace Mediator {
                 else
                     b2->updateLabel();
                 break;
+            case MSG_VIEW:
+                b2->action(static_cast<ACTIONS>(msg2->data));
+                break;
         }
         delete msg2;
     }
@@ -128,6 +134,7 @@ namespace Mediator {
 
     void handle_key() {
 
+        //printf("med:handle_key\n");
         // TODO why does this use send_message()? when would keys happen on the non-GUI thread?
 
         int key = Fl::event_key();
@@ -138,7 +145,17 @@ namespace Mediator {
 #ifdef __APPLE__
         int keyStateCmd = Fl::event_state(FL_COMMAND);
 #endif
-        send_message(MSGS::MSG_KEY, key | keyStateShift | keyStateAlt | keyStateCtrl | keyStateCmd);
+    
+        int msg;
+        int act;
+        bool res = lookupKey(key, keyStateCtrl, msg, act);
+        if (res)
+            send_message(msg, act); // TODO invoke directly
+        else
+            b2->key(key | keyStateShift | keyStateAlt | keyStateCtrl | keyStateCmd); // TODO do key handling in mediator: lookup & send
+
+        
+        //send_message(MSGS::MSG_KEY, key | keyStateShift | keyStateAlt | keyStateCtrl | keyStateCmd);
     }
 
 #ifdef DANBOORU
@@ -227,5 +244,61 @@ void setTheme(int menuval) {
      */
 
 
+    
+    struct KeyAction
+    {
+        int key;
+        bool shift;
+        bool ctrl;
+        bool alt;
+        enum MSGS    msg;             // TODO eliminate the 'msg' part? e.g. ask each consumer, if returns false, ask next
+        enum ACTIONS act;
+    };
+
+    struct KeyAction keymap[] = 
+    {
+        {'c',false,false,false, MSG_TB, ACT_CHK},
+        {'m',false,false,false, MSG_VIEW, ACT_MINIMAP},
+        {'o',false,false,false, MSG_VIEW, ACT_OVERLAY},
+        {'o',false,true, false, MSG_TB, ACT_OPEN},
+        {'q',false,false,false, MSG_TB, ACT_EXIT},
+        {'r',false,false,false, MSG_VIEW, ACT_RANDOM}, // TODO should be toolbar msg?
+        {'s',false,false,false, MSG_TB, ACT_SCALE},
+        {'t',false,false,false, MSG_VIEW, ACT_ROTR},
+        {'w',false,false,false, MSG_TB, ACT_SLID},
+        {'z',false,false,false, MSG_VIEW, ACT_DITHER},
+        {' ',false,false,false, MSG_VIEW, ACT_NEXT},
+        
+        {FL_Up,false,false,false, MSG_VIEW, ACT_ZMI},
+        {FL_Up,false,true,false,  MSG_VIEW, ACT_SCROLLUP},
+        {FL_Down,false,false,false, MSG_VIEW, ACT_ZMO},
+        {FL_Down,false,true,false,  MSG_VIEW, ACT_SCROLLDOWN},
+        {FL_Right,false,false,false, MSG_VIEW, ACT_NEXT},
+        {FL_Right,false,true,false,  MSG_VIEW, ACT_SCROLLRIGHT},
+        {FL_Left,false,false,false, MSG_VIEW, ACT_PREV},
+        {FL_Left,false,true,false,  MSG_VIEW, ACT_SCROLLLEFT},
+
+        {FL_Page_Down,false,false,false, MSG_VIEW, ACT_NEXT},
+        {FL_Page_Up,false,false,false, MSG_VIEW, ACT_PREV},
+
+        {FL_BackSpace,false,false,false, MSG_VIEW, ACT_PREV},
+    };
+    
+    bool lookupKey(int key, int ctrl, int& msg, int& act)
+    {
+        int len = sizeof(keymap) / sizeof(struct KeyAction);
+        for (int i = 0; i < len; i++)
+        {
+            if (key != keymap[i].key)
+                continue;
+            if ((bool)ctrl != keymap[i].ctrl)
+                continue;
+            
+            msg = keymap[i].msg;
+            act = keymap[i].act;
+            return true;
+        }
+        return false;
+    }
 }
 

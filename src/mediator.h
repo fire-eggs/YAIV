@@ -14,18 +14,19 @@ namespace Mediator {
         MSG_TB = 1,
         MSG_NEWFILE=2,
         MSG_REALUPDATE,
+        MSG_VIEW,
     };
 
     enum ACTIONS {
         ACT_INVALID = -1,
         ACT_PREV = 0,
         ACT_NEXT = 1,
-        ACT_ROTR = 2,
-        ACT_CHK  = 3,
+        ACT_ROTR = 2,  // rotate right
+        ACT_CHK  = 3,  // checkerboard
         ACT_GOTO = 4,
-        ACT_SLID = 5,
-        ACT_ZMI  = 6,
-        ACT_ZMO  = 7,
+        ACT_SLID = 5,  // slideshow
+        ACT_ZMI  = 6,  // zoom in
+        ACT_ZMO  = 7,  // zoom out
         ACT_OPEN = 8,
         ACT_EXIT = 9,
         ACT_MENU = 10,
@@ -40,7 +41,19 @@ namespace Mediator {
         ACT_NONEXT,
         ACT_ISPREV,
         ACT_ISNEXT,
+        
+        ACT_RANDOM,
+        ACT_OVERLAY,
+        ACT_MINIMAP,
+        ACT_BORDER,
+        ACT_DITHER,
+        
+        ACT_SCROLLUP,
+        ACT_SCROLLDOWN,
+        ACT_SCROLLLEFT,
+        ACT_SCROLLRIGHT,
     };
+        
     void send_message(int msg, int data);
 
     void handle_key();
@@ -50,6 +63,8 @@ namespace Mediator {
     void metadata(Prefs *);
     
     void setTheme(int);
+
+    bool lookupKey(int key, int ctrl, int& msg, int& act);
 
 }
 
