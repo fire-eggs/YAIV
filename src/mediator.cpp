@@ -3,13 +3,13 @@
 //
 #include <FL/Fl.H>
 #include "mediator.h"
-#include "XBox.h"
-#include "toolbar/toolgrp.h"
+//#include "XBox.h"
+//#include "toolbar/toolgrp.h"
 #include "toolbar/buttonBar.h"
 #include "filelist.h"
 
 extern XBox *b2;
-extern dockgroup* dock;
+//extern dockgroup* dock;
 extern ButtonBar* tb;
 
 #ifdef DANBOORU
@@ -22,11 +22,23 @@ toolgrp* _metadata;
 
 #include "menuids.h"
 #include "themes.h"
+#include <assert.h>
 
 extern filelist* box_filelist; // TODO hack
+static Prefs *_prefs;          // TODO hack
+static XBox *_viewer;
+static ButtonBar *_toolbar;
 
 namespace Mediator {
 
+    void initialize(XBox *viewer, Prefs *prefs, ButtonBar *toolbar)
+    {
+        _prefs = prefs;
+        _viewer = viewer;
+        _toolbar = toolbar;
+    }
+
+    
     class message {
     public:
         int msg;
@@ -66,13 +78,39 @@ namespace Mediator {
             case ACT_ISPREV:
                 tb->activate(val);
                 break;
+
+#ifdef DANBOORU                
+            case ACT_DANBOORU:
+                if (!box_filelist || !box_filelist->any())
+                    break;
+
+                // TODO was this supposed to be tied to a modifier?
+                //if (Fl::event_state() & CTRL_P_KEY)
+                {
+                    Mediator::danbooru(_prefs);
+                }
+                break;
+#endif
+                
+            case ACT_METADATA:
+                Mediator::metadata(_prefs);
+                break;
+            case ACT_HIDE:
+                _viewer->hideCurrent(); // TODO better approach?
+                break;
+            case ACT_FAV:
+                _viewer->favCurrent(); // TODO better approach?
+                break;
+                
             default:
                 break;
         }
-        b2->action(val);
+        
+        b2->action(val); // TODO with this, MSG_VIEW, MSG_TB distinction not necessary?
     }
 
-    void mediator(void *msg) {
+    void mediator(void *msg) 
+    {
         if (!msg) return;
 
         message *msg2 = static_cast<message *>(msg); // TODO how to use dynamic_cast?
@@ -81,8 +119,8 @@ namespace Mediator {
             return;
         }
 
-        if (msg2->msg != MSG_REALUPDATE)
-            printf("med: %d, %d\n", msg2->msg, msg2->data);
+//         if (msg2->msg != MSG_REALUPDATE)
+//             printf("med: %d, %d\n", msg2->msg, msg2->data);
         
         switch (msg2->msg)
         {
@@ -105,6 +143,7 @@ namespace Mediator {
 
                 break;
             case MSG_KEY:
+                assert(false);
                 b2->key(msg2->data); // TODO do key handling in mediator: lookup & send
                 break;
             case MSG_REALUPDATE:
@@ -122,7 +161,8 @@ namespace Mediator {
         delete msg2;
     }
 
-    void send_message(int msg, int data) {
+    void send_message(int msg, int data) 
+    {
 
         // TODO primarily intended for thread activity like "load image" -> sends "image loaded" message
 
@@ -151,9 +191,13 @@ namespace Mediator {
         bool res = lookupKey(key, keyStateCtrl, msg, act);
         if (res)
             send_message(msg, act); // TODO invoke directly
-        else
-            b2->key(key | keyStateShift | keyStateAlt | keyStateCtrl | keyStateCmd); // TODO do key handling in mediator: lookup & send
-
+            
+        // Unknown key, ignore            
+//         else
+//         {
+//             printf("Invalid xbox key invoke\n");
+//             b2->key(key | keyStateShift | keyStateAlt | keyStateCtrl | keyStateCmd); // TODO do key handling in mediator: lookup & send
+//         }
         
         //send_message(MSGS::MSG_KEY, key | keyStateShift | keyStateAlt | keyStateCtrl | keyStateCmd);
     }
@@ -257,14 +301,21 @@ void setTheme(int menuval) {
 
     struct KeyAction keymap[] = 
     {
+        {'b',false,false,false, MSG_VIEW, ACT_BORDER},
         {'c',false,false,false, MSG_TB, ACT_CHK},
+        {'d',false,false,false, MSG_TB, ACT_DANBOORU},
+        {'e',false,false,false, MSG_TB, ACT_METADATA},
+        {'g',false,true, false, MSG_TB, ACT_GOTO},
+        {'h',false,false,false, MSG_VIEW, ACT_HIDE},
         {'m',false,false,false, MSG_VIEW, ACT_MINIMAP},
         {'o',false,false,false, MSG_VIEW, ACT_OVERLAY},
         {'o',false,true, false, MSG_TB, ACT_OPEN},
+        {'p',false,false,false, MSG_VIEW, ACT_MOUSEPAN},
         {'q',false,false,false, MSG_TB, ACT_EXIT},
         {'r',false,false,false, MSG_VIEW, ACT_RANDOM}, // TODO should be toolbar msg?
         {'s',false,false,false, MSG_TB, ACT_SCALE},
         {'t',false,false,false, MSG_VIEW, ACT_ROTR},
+        {'v',false,false,false, MSG_TB, ACT_FAV},
         {'w',false,false,false, MSG_TB, ACT_SLID},
         {'z',false,false,false, MSG_VIEW, ACT_DITHER},
         {' ',false,false,false, MSG_VIEW, ACT_NEXT},
@@ -280,7 +331,9 @@ void setTheme(int menuval) {
 
         {FL_Page_Down,false,false,false, MSG_VIEW, ACT_NEXT},
         {FL_Page_Up,false,false,false, MSG_VIEW, ACT_PREV},
-
+        {FL_Home,false,false,false, MSG_VIEW, ACT_HOME},
+        {FL_End,false,false,false, MSG_VIEW, ACT_END},
+ 
         {FL_BackSpace,false,false,false, MSG_VIEW, ACT_PREV},
     };
     

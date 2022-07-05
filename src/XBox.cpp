@@ -19,6 +19,7 @@
 #include "XBoxDisplayInfoEvent.h"
 #include "mediator.h" // TODO define messages elsewhere?
 #include "filelist.h"
+#include <assert.h>
 
 #ifdef DANBOORU
 #include "danbooru.h"
@@ -149,6 +150,8 @@ void XBox::load_current() {
 }
 
 void XBox::next_image() {
+    if (!box_filelist) // TODO initialize at start
+        return;
     // 20220530 Don't reset the visible image if already at the end
     if (box_filelist->canNext())
     {
@@ -163,6 +166,8 @@ void XBox::next_image() {
 }
 
 void XBox::prev_image() {
+    if (!box_filelist) // TODO initialize at start
+        return;
     // 20220530 don't reset the visible image if already at the beginning
     if (box_filelist->canPrev())
     {
@@ -173,6 +178,8 @@ void XBox::prev_image() {
 
 void XBox::action(int act)
 {
+    // TODO turn this into a map of act -> method where each method is void()
+    
     switch (act)
     {
         case Mediator::ACT_NEXT:
@@ -252,8 +259,29 @@ void XBox::action(int act)
         case Mediator::ACT_MINIMAP:
             toggleMinimap();
             break;
-            
+        case Mediator::ACT_BORDER:
+            notifyBorder();
+            break;
+        case Mediator::ACT_MOUSEPAN:
+            _pan_with_mouse = !_pan_with_mouse;
+            _prefs->set2(MOUSE_PAN, _pan_with_mouse);
+            break;
 
+        case Mediator::ACT_HOME:
+            if (box_filelist) // TODO initialize 
+            {
+                box_filelist->home();
+                load_current();
+            }
+            break;
+        case Mediator::ACT_END:
+            if (box_filelist) // TODO initialize
+            {
+                box_filelist->end();
+                load_current();
+            }
+            break;
+            
         default:
             return;
     }
@@ -261,6 +289,8 @@ void XBox::action(int act)
 
 int XBox::key(int fullkey)
 {
+    assert(false);
+    
     printf("XBox key\n");
     //(Mediator::MSG_KEY, 0);
     //return 0;
@@ -518,6 +548,7 @@ int XBox::handle(int msg) {
     }
 
     if (msg == FL_KEYDOWN) {
+        printf("Invalid key\n");
         return key(Fl::event_key());
     }
 

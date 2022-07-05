@@ -6,6 +6,8 @@
 #define YAIV_MEDIATOR_H
 
 #include "prefs.h"
+#include "XBox.h"
+class ButtonBar;
 
 namespace Mediator {
 
@@ -42,16 +44,26 @@ namespace Mediator {
         ACT_ISPREV,
         ACT_ISNEXT,
         
+        ACT_HIDE,
+        ACT_FAV,
+        
         ACT_RANDOM,
         ACT_OVERLAY,
         ACT_MINIMAP,
         ACT_BORDER,
         ACT_DITHER,
+        ACT_MOUSEPAN,
         
         ACT_SCROLLUP,
         ACT_SCROLLDOWN,
         ACT_SCROLLLEFT,
         ACT_SCROLLRIGHT,
+        
+        ACT_HOME,
+        ACT_END, 
+        
+        ACT_METADATA,
+        ACT_DANBOORU,
     };
         
     void send_message(int msg, int data);
@@ -66,6 +78,7 @@ namespace Mediator {
 
     bool lookupKey(int key, int ctrl, int& msg, int& act);
 
+    void initialize(XBox *, Prefs *, ButtonBar *);
 }
 
 #endif //YAIV_MEDIATOR_H
