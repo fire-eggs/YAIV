@@ -53,6 +53,7 @@ void view_danbooru(Prefs *prefs, Fl_Group *container) {
     {
         fl_alert("Could not open danbooru database:\n%s", sqlite3_errmsg(db));
         //return; // 20220704 crashes later unless textbuf etc initialized
+        db = nullptr;
     }
 
     textbuf = new Fl_Text_Buffer;
