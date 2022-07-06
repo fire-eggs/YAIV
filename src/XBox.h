@@ -114,7 +114,6 @@ public:
 
     void load_file(const char *n); // exposed for argv processing
 
-    int key(int val); // keydown from someplace
     void action(int val); // action from someplace (e.g. toolbar button)
 
     void hideCurrent();

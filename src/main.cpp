@@ -31,10 +31,6 @@ void cmdline(int argc, char **argv, XBox *box)
     }
 }
 
-// TODO nasty globals for mediator
-XBox *b2;
-ButtonBar* tb;
-
 int main(int argc, char **argv) {
 
 #if (FLTK_EXT_VERSION>0)
@@ -54,7 +50,7 @@ int main(int argc, char **argv) {
 
     // TODO tb : mediator needs to know about main, XBox, prefs
     YaivWin* _w = makeMainWindow();
-    tb = makeToolbar(_w);
+    ButtonBar *tb = makeToolbar(_w);
 
     _w->begin();
 
@@ -63,7 +59,7 @@ int main(int argc, char **argv) {
     _w->workspace = new Fl_Group(ws_x,ws_y,_w->w()-1-ws_x, _w->h()-1-ws_y);
     _w->workspace->box(FL_NO_BOX);
 
-    b2 = new XBox(ws_x, ws_y,_w->workspace->w(),_w->workspace->h(), _w->prefs());
+    XBox *b2 = new XBox(ws_x, ws_y,_w->workspace->w(),_w->workspace->h(), _w->prefs());
 
     _w->workspace->resizable(static_cast<Fl_Widget *>(b2));
 
@@ -95,6 +91,7 @@ int main(int argc, char **argv) {
     // TODO this the wrong place / way to initialize these buttons?
     Mediator::send_message(Mediator::MSG_TB, Mediator::ACT_NOPREV);
     Mediator::send_message(Mediator::MSG_TB, Mediator::ACT_NONEXT);
+    // TODO missing initializer for checkerboard
     
     cmdline(argc, argv, b2); // do this _after_ show() for label etc to be correct
 

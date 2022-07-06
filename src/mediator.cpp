@@ -3,14 +3,8 @@
 //
 #include <FL/Fl.H>
 #include "mediator.h"
-//#include "XBox.h"
-//#include "toolbar/toolgrp.h"
 #include "toolbar/buttonBar.h"
 #include "filelist.h"
-
-extern XBox *b2;
-//extern dockgroup* dock;
-extern ButtonBar* tb;
 
 #ifdef DANBOORU
 #include "danbooru.h"
@@ -24,6 +18,7 @@ toolgrp* _metadata;
 #include "themes.h"
 #include <assert.h>
 
+// TODO make a class, these as members
 extern filelist* box_filelist; // TODO hack
 static Prefs *_prefs;          // TODO hack
 static XBox *_viewer;
@@ -53,14 +48,14 @@ namespace Mediator {
                 exit(0);
             case ACT_MENU:
                 // TODO show the full menu, not the popup menu
-                b2->do_menu(Fl::event_x(),Fl::event_y(), false);
+                _viewer->do_menu(Fl::event_x(),Fl::event_y(), false);
                 break;
-// TODO refactor state management: 1. mediator holds state; 2. mediator inits state; 3. mediator sends state update to targets; 4. keyboard handling not in xbox
+// TODO refactor state management: 1. mediator holds state; 2. mediator inits state; 3. mediator sends state update to targets
             case ACT_CHK:
-                tb->setState(ACT_CHK, !b2->getCheck());
+                _toolbar->setState(ACT_CHK, !_viewer->getCheck());
                 break;
             case ACT_SLID:
-                tb->setState(ACT_SLID, !b2->inSlide()); // TODO should not happen if changing slideshow is invalid (e.g. no images)
+                _toolbar->setState(ACT_SLID, !_viewer->inSlide()); // TODO should not happen if changing slideshow is invalid (e.g. no images)
                 break;
             case ACT_SCALE_HIGH:
             case ACT_SCALE_FIT:
@@ -68,15 +63,15 @@ namespace Mediator {
             case ACT_SCALE_NONE:
             case ACT_SCALE_WIDE:
                 // TODO tell the toolbar to set the scale image
-                tb->setScaleImage(val);
+                _toolbar->setScaleImage(val);
                 break;
             case ACT_NONEXT:
             case ACT_NOPREV:
-                tb->deactivate(val);
+                _toolbar->deactivate(val);
                 break;
             case ACT_ISNEXT:
             case ACT_ISPREV:
-                tb->activate(val);
+                _toolbar->activate(val);
                 break;
 
 #ifdef DANBOORU                
@@ -106,7 +101,7 @@ namespace Mediator {
                 break;
         }
         
-        b2->action(val); // TODO with this, MSG_VIEW, MSG_TB distinction not necessary?
+        _viewer->action(val); // TODO with this, MSG_VIEW, MSG_TB distinction not necessary?
     }
 
     void mediator(void *msg) 
@@ -118,13 +113,11 @@ namespace Mediator {
             printf("Invalid msg\n");
             return;
         }
-
-//         if (msg2->msg != MSG_REALUPDATE)
-//             printf("med: %d, %d\n", msg2->msg, msg2->data);
         
         switch (msg2->msg)
         {
             case MSG_TB:
+            case MSG_VIEW: // TODO distinction no longer necessary?
                 toolbarMsg(static_cast<ACTIONS>(msg2->data));
                 break;
 
@@ -135,27 +128,20 @@ namespace Mediator {
                     update_danbooru(box_filelist->currentFilename());
 #endif
                 // TODO if data is negative, no file
-                // TODO update b2 image
+                // TODO update _viewer image
                 // TODO update toolbar state
                 
                 if (_metadata)
                     update_metadata(box_filelist->getCurrentFilePath());
 
                 break;
-            case MSG_KEY:
-                assert(false);
-                b2->key(msg2->data); // TODO do key handling in mediator: lookup & send
-                break;
             case MSG_REALUPDATE:
                 // update toolbar
                 // update titlebar
                 if (box_filelist->realCount() < 2)
-                    b2->load_current();
+                    _viewer->load_current();
                 else
-                    b2->updateLabel();
-                break;
-            case MSG_VIEW:
-                b2->action(static_cast<ACTIONS>(msg2->data));
+                    _viewer->updateLabel();
                 break;
         }
         delete msg2;
@@ -172,10 +158,8 @@ namespace Mediator {
         Fl::awake(mediator, msg2);
     }
 
-    void handle_key() {
-
-        //printf("med:handle_key\n");
-        // TODO why does this use send_message()? when would keys happen on the non-GUI thread?
+    void handle_key() 
+    {
 
         int key = Fl::event_key();
         int keyStateShift = Fl::event_state(FL_SHIFT);
@@ -191,15 +175,6 @@ namespace Mediator {
         bool res = lookupKey(key, keyStateCtrl, msg, act);
         if (res)
             send_message(msg, act); // TODO invoke directly
-            
-        // Unknown key, ignore            
-//         else
-//         {
-//             printf("Invalid xbox key invoke\n");
-//             b2->key(key | keyStateShift | keyStateAlt | keyStateCtrl | keyStateCmd); // TODO do key handling in mediator: lookup & send
-//         }
-        
-        //send_message(MSGS::MSG_KEY, key | keyStateShift | keyStateAlt | keyStateCtrl | keyStateCmd);
     }
 
 #ifdef DANBOORU
@@ -271,7 +246,7 @@ void setTheme(int menuval) {
             break;
     }
 
-    tb->updateColor(isdark);
+    _toolbar->updateColor(isdark);
 }
     /*
         static void use_classic_theme(void);
@@ -295,11 +270,11 @@ void setTheme(int menuval) {
         bool shift;
         bool ctrl;
         bool alt;
-        enum MSGS    msg;             // TODO eliminate the 'msg' part? e.g. ask each consumer, if returns false, ask next
+        enum MSGS    msg;             // TODO eliminate the 'msg' part. e.g. ask each consumer, if returns false, ask next
         enum ACTIONS act;
     };
 
-    struct KeyAction keymap[] = 
+    static struct KeyAction keymap[] = 
     {
         {'b',false,false,false, MSG_VIEW, ACT_BORDER},
         {'c',false,false,false, MSG_TB, ACT_CHK},
@@ -354,4 +329,3 @@ void setTheme(int menuval) {
         return false;
     }
 }
-
