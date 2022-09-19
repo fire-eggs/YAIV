@@ -86,10 +86,11 @@ namespace Mediator {
                 }
                 break;
 #endif
-                
+#ifdef METADATA                
             case ACT_METADATA:
                 Mediator::metadata(_prefs);
                 break;
+#endif                
             case ACT_HIDE:
                 _viewer->hideCurrent(); // TODO better approach?
                 break;
@@ -130,10 +131,10 @@ namespace Mediator {
                 // TODO if data is negative, no file
                 // TODO update _viewer image
                 // TODO update toolbar state
-                
+#ifdef METADATA                
                 if (_metadata)
                     update_metadata(box_filelist->getCurrentFilePath());
-
+#endif
                 break;
             case MSG_REALUPDATE:
                 // update toolbar
@@ -194,6 +195,7 @@ Fl_Widget_Tracker *db_track = nullptr;
     }
 #endif
 
+#ifdef METADATA
     Fl_Widget_Tracker *md_track = nullptr;
 
     void metadata(Prefs *prefs) {
@@ -207,6 +209,7 @@ Fl_Widget_Tracker *db_track = nullptr;
         if (box_filelist)
             update_metadata(box_filelist->getCurrentFilePath());
     }
+#endif
 
 void setTheme(int menuval) {
     bool isdark = false;
