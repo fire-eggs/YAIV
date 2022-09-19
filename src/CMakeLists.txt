@@ -1,7 +1,7 @@
 
 include(toolbar/CMakeLists.txt)
 
-add_compile_options( "-fexceptions" "-fopenmp" "-DFLTK_USE_SVG" )
+add_compile_options( "-fexceptions" "-fopenmp" "-DFLTK_USE_SVG" "-DMETADATA" )
 
 # optimize and strip appropriately
 add_link_options( "$<$<CONFIG:MINSIZEREL>:-O2;-s>" "$<$<CONFIG:RELEASE>:-O2;>" )
