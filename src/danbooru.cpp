@@ -18,7 +18,6 @@
 #include "themes.h"
 
 sqlite3 *db = nullptr;
-Fl_Window *dbwin = nullptr;
 Fl_Text_Display *txtout;
 Fl_Text_Buffer *textbuf;
 Fl_Text_Buffer *stylebuf;
@@ -82,8 +81,6 @@ void view_danbooru(Prefs *prefs, Fl_Group *container) {
 void shutdown_danbooru()
 {
     sqlite3_close(db);
-    if (dbwin)
-        dbwin->hide();
 }
 
 // TODO member vars?
@@ -161,7 +158,6 @@ void update_danbooru(char *filename) // TODO class member?
     if (inError || posEnd < strlen(name) || name[0] == '0' || image_id > 10000000) {
         textbuf->text("Not a danbooru file!");
         stylebuf->text("BBBBBBBBBBBBBBBBBBBB");
-        //dbwin->redraw();
         return;
     }
 
@@ -184,7 +180,6 @@ void update_danbooru(char *filename) // TODO class member?
     {
         textbuf->text( "Not found in database!");
         stylebuf->text("BBBBBBBBBBBBBBBBBBBBBB");
-        //dbwin->redraw();
         return;
     }
     totsize += strlen(labels) + 1;
@@ -211,8 +206,6 @@ void update_danbooru(char *filename) // TODO class member?
     // 5. deallocate temp bufs
     delete[] tmptxt;
     delete[] tmpsty;
-
-    //dbwin->redraw();
 }
 
 #endif
