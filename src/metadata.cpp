@@ -1,3 +1,4 @@
+#ifdef METADATA
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 #include "metadata.h"
@@ -204,3 +205,4 @@ void update_metadata(const char *filepath) {
     }
 }
 
+#endif // METADATA
