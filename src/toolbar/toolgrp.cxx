@@ -55,6 +55,12 @@ void toolgrp::undock_grp(void* v)
 	}
 }
 
+bool toolgrp::shown()
+{
+    toolwin *cur_parent = (toolwin *)parent();
+    return cur_parent ? cur_parent->visible() : false;
+}
+
 // static CB to handle the dismiss action
 void toolgrp::cb_dismiss(Fl_Button*, void* v) 
 {

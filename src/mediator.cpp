@@ -184,6 +184,13 @@ Fl_Widget_Tracker *db_track = nullptr;
     // TODO should this be a message? action?
     void danbooru(Prefs *prefs) {
 
+        if (_danbooru && !_danbooru->docked() && _danbooru->shown())
+        {
+            _danbooru->cb_dismiss(nullptr, _danbooru);
+            _danbooru = nullptr;
+            return;
+        }
+                
         if (!db_track || db_track->deleted()) {
             delete db_track;
             _danbooru = new toolgrp(nullptr, 1, 0, 0, 200, 500, nullptr, "yaivDanbooru");

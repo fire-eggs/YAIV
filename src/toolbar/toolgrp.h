@@ -37,9 +37,6 @@ protected:
 	// Defines which dock the group can dock into
 	void set_dock(dockgroup *w) {dock = w;}
 
-    // generic callback function for the dismiss button
-	static void cb_dismiss(Fl_Button*, void* v);
-
 public:
 	// Constructors for docked/floating window
 	toolgrp(int w, int h, const char *l = nullptr);
@@ -58,6 +55,7 @@ public:
 	void undock_grp(void* v);
 
   Fl_Group *in_group() {return inner_group;} // KBR hack
+  bool shown();
 
 	// wrap some basic Fl_Group functions to access the enclosed inner_group
 	inline void begin() {inner_group->begin(); }
@@ -76,6 +74,10 @@ public:
   //int handle(int evt) override;
 // get the dock group ID
 dockgroup *get_dock() {return dock;}
+
+    // generic callback function for the dismiss button
+	static void cb_dismiss(Fl_Button*, void* v);
+
 };
 
 #endif // _HAVE_TOOL_GROUP_HDR_
