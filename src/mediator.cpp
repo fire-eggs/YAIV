@@ -184,6 +184,7 @@ Fl_Widget_Tracker *db_track = nullptr;
     // TODO should this be a message? action?
     void danbooru(Prefs *prefs) {
 
+        // shortcut hides window if it's displayed
         if (_danbooru && !_danbooru->docked() && _danbooru->shown())
         {
             _danbooru->cb_dismiss(nullptr, _danbooru);
@@ -206,6 +207,15 @@ Fl_Widget_Tracker *db_track = nullptr;
     Fl_Widget_Tracker *md_track = nullptr;
 
     void metadata(Prefs *prefs) {
+        
+        // shortcut hides window if it's displayed
+        if (_metadata && !_metadata->docked() && _metadata->shown())
+        {
+            _metadata->cb_dismiss(nullptr, _metadata);
+            _metadata = nullptr;
+            return;
+        }
+        
         if (!md_track || md_track->deleted()) {
             delete md_track;
             _metadata = new toolgrp(nullptr, 1, 0, 0, 200, 500, nullptr, "yaivMetadata");
