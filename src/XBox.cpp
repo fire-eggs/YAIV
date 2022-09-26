@@ -71,6 +71,15 @@ int zoomIh;
 void XBox::load_file(const char *n) {
     box_filelist = filelist::initFilelist(n);
 
+    /* this is always "failure" because the file scanner hasn't run yet
+    const char *fullpath = box_filelist->getCurrentFilePath();   
+    if (!fullpath) // load fail. don't update MRU. 
+    {
+        timeoutCallback(this, "Failure");
+        return; 
+    }
+    */
+    
     // TODO don't add to MRU if unsuccessful load
     // Update the MRU list
     _mru->Add(n);
@@ -80,14 +89,14 @@ void XBox::load_file(const char *n) {
     load_current();
 }
 
-void XBox::timeoutCallback(void *d)
+void XBox::timeoutCallback(void *d, const char *text)
 {
     XBox *xb = static_cast<XBox *>(d);
 
     Fl_Label *lbl = new Fl_Label();
     
-    lbl->value = "Loading...";
-    lbl->size = 20;
+    lbl->value = text; //"Loading...";
+    lbl->size = 22;
     lbl->color = FL_DARK_GREEN;
     lbl->align_ = FL_ALIGN_CENTER;   
 
@@ -155,13 +164,12 @@ void XBox::load_current() {
     }
     else
     {        
-        // Load image async. If it takes longer than a second, show a message
+        // Load image async. If it takes longer than 0.75 seconds, show a message
         std::future<Fl_Image *> future = std::async(std::launch::async, loadFile, (char*)fullpath, this);
         std::future_status status = future.wait_for(std::chrono::milliseconds(750));
         if (status != std::future_status::ready)
-            timeoutCallback(this);
+            timeoutCallback(this, "Loading...");
         Fl_Image *img = future.get();
-
         
         // 590B-01.jpg failed to load and resulted in crash further on
         if (!img || img->fail() || img->w() == 0 || img->h() == 0)

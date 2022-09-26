@@ -185,7 +185,7 @@ public:
 private:
     void activate_working(const char *);
     void deactivate_working();
-    static void timeoutCallback(void *);
+    static void timeoutCallback(void *, const char *);
 };
 
 #endif //CLION_TEST2_XBOX_H
