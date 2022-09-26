@@ -20,6 +20,10 @@
 #include "mediator.h" // TODO define messages elsewhere?
 #include "filelist.h"
 #include <assert.h>
+#include <unistd.h> // sleep
+#include <future> // std::future
+#include <chrono> // chrono literal
+using namespace std::chrono_literals;
 
 #ifdef DANBOORU
 #include "danbooru.h"
@@ -76,6 +80,41 @@ void XBox::load_file(const char *n) {
     load_current();
 }
 
+void XBox::timeoutCallback(void *d)
+{
+    XBox *xb = static_cast<XBox *>(d);
+
+    Fl_Label *lbl = new Fl_Label();
+    
+    lbl->value = "Loading...";
+    lbl->size = 20;
+    lbl->color = FL_DARK_GREEN;
+    lbl->align_ = FL_ALIGN_CENTER;   
+
+    int mx = xb->x();
+    int mw = xb->w();
+    int my = xb->y();
+    int mh = xb->h();
+    
+    {
+        int lw=0;
+        int lh=0;
+        lbl->measure(lw, lh);
+        fl_draw_box(FL_FLAT_BOX, 
+                    mx + mw/2 - lw/2 - 2,
+                    my + mh/2 - lh / 2 - 2,
+                    lw + 4, lh + 4,
+                    FL_BLACK
+                   );
+        lbl->draw(mx + mw/2 - lw / 2,
+                    my + mh/2 - lh / 2,
+                    lw, lh, FL_ALIGN_CENTER);
+    }
+    delete lbl;
+    
+    Fl::wait();
+}
+
 void XBox::load_current() {
 
     // Update anything which needs to know if the user can go forward/back
@@ -115,9 +154,15 @@ void XBox::load_current() {
         send_message(Mediator::MSGS::MSG_NEWFILE, 0);
     }
     else
-    {
-        Fl_Image *img = loadFile((char *)fullpath, this);
+    {        
+        // Load image async. If it takes longer than a second, show a message
+        std::future<Fl_Image *> future = std::async(std::launch::async, loadFile, (char*)fullpath, this);
+        std::future_status status = future.wait_for(std::chrono::milliseconds(750));
+        if (status != std::future_status::ready)
+            timeoutCallback(this);
+        Fl_Image *img = future.get();
 
+        
         // 590B-01.jpg failed to load and resulted in crash further on
         if (!img || img->fail() || img->w() == 0 || img->h() == 0)
         {

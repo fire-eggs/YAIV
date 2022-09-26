@@ -161,7 +161,7 @@ private:
     MostRecentPaths* _mru;
     Prefs* _prefs;
 
-    void safe_resize();
+    void safe_resize() override;
 
 private:
     std::vector<XBoxDisplayInfoEvent *> *_dispevents {nullptr};
@@ -181,6 +181,11 @@ public:
             _dispevents = new std::vector<XBoxDisplayInfoEvent *>();
         _dispevents->push_back(hand);
     }
+    
+private:
+    void activate_working(const char *);
+    void deactivate_working();
+    static void timeoutCallback(void *);
 };
 
 #endif //CLION_TEST2_XBOX_H
