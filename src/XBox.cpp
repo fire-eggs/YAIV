@@ -97,7 +97,7 @@ void XBox::timeoutCallback(void *d, const char *text)
     
     lbl->value = text; //"Loading...";
     lbl->size = 22;
-    lbl->color = FL_DARK_GREEN;
+    lbl->color = FL_GREEN;
     lbl->align_ = FL_ALIGN_CENTER;   
 
     int mx = xb->x();
