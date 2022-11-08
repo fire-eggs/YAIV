@@ -45,6 +45,16 @@ public:
         Fl_Preferences::get((n + "_w").c_str(), w, 400);
         Fl_Preferences::get((n + "_h").c_str(), h, 400);
     }
+    
+    void getWinRect(const char* prefix, int& x, int& y, int& w, int& h, 
+                    int prefx, int prefy, int prefw, int prefh )
+    {
+        std::string n = prefix;
+        Fl_Preferences::get((n + "_x").c_str(), x, prefx);
+        Fl_Preferences::get((n + "_y").c_str(), y, prefy);
+        Fl_Preferences::get((n + "_w").c_str(), w, prefw);
+        Fl_Preferences::get((n + "_h").c_str(), h, prefh);
+    }
 
     void setWinRect(const char* prefix, int x, int y, int w, int h)
     {

@@ -79,6 +79,8 @@ void toolgrp::cb_dismiss(Fl_Button*, void* v)
 		// and remove the floating window
 		toolwin *cur_parent = (toolwin *)gp->parent();
 		cur_parent->remove(gp);
+        cur_parent->saveWindowPos();
+        
 		//delete cur_parent; // we no longer need the tool window.
 		Fl::delete_widget(cur_parent);
 		Fl::delete_widget(gp);
@@ -91,7 +93,7 @@ toolgrp::toolgrp(int w, int h, const char *lbl) : Fl_Group(1,1,w,h,lbl) {}
 // WITH x, y co-ordinates
 toolgrp::toolgrp(dockgroup *dk, int floater, int x, int y, int w, int h, const char *lbl, const char *xclass)
   : Fl_Group(1, 1, w, h, lbl) {
-    initialize(dk, floater, true, w, h, lbl, xclass);
+    initialize(dk, floater, true, x, y, w, h, lbl, xclass);
 }
 
 // WITHOUT x, y co-ordinates
@@ -100,11 +102,21 @@ toolgrp::toolgrp(dockgroup *dk, bool floater, bool draggable, int w, int h, cons
     initialize(dk, floater, draggable, w, h, lbl, nullptr);
 }
 
+void toolgrp::initialize(dockgroup *dk, bool floater, bool draggable, int x, int y, int w, int h, const char *lbl, const char *xclass) {
+    if (!draggable)
+        create_fixed_docked(dk);
+    else if (floater) // set dk to nullptr for floating and not dockable
+        create_floating(dk, true, x, y, w, h, lbl, xclass);
+    else if(dk) // create docked
+        create_docked(dk);
+    //	else //do nothing...
+}
+
 void toolgrp::initialize(dockgroup *dk, bool floater, bool draggable, int w, int h, const char *lbl, const char *xclass) {
     if (!draggable)
         create_fixed_docked(dk);
     else if (floater) // set dk to nullptr for floating and not dockable
-        create_floating(dk, 0, 0, 0, w, h, lbl, xclass);
+        create_floating(dk, true, 0, 0, w, h, lbl, xclass);
     else if(dk) // create docked
         create_docked(dk);
     //	else //do nothing...
@@ -153,7 +165,7 @@ void toolgrp::create_floating(dockgroup *dk, int full, int x, int y, int w, int 
 	// create a floating toolbar window
 	// Ensure the window is not created as a child of its own inner group!
 	Fl_Group::current(0);
-	if(full)
+	if(full && x != 0 && y != 0)
 		tw = new toolwin(x, y, w + 3, h + 3, lbl);
 	else
 		tw = new toolwin(w + 3, h + 3, lbl);
@@ -199,6 +211,13 @@ void toolgrp::show_all()
 void toolgrp::hide_all()
 {
 	toolwin::hide_all();
+}
+
+void toolgrp::setPrefs(void *p)
+{
+    toolwin *cur_parent = (toolwin *)parent();
+    if (cur_parent)
+        cur_parent->setPrefs(p);
 }
 
 #ifndef _MSC_VER

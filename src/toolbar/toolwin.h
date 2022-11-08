@@ -15,6 +15,7 @@ protected:
 	static toolwin* active_list[TW_MAX_FLOATERS];
 	static short active;
 	void *tool_group;
+    void *_prefs; // type-less pointer to prefs to save window position
 
 public:
 	// Normal FLTK constructors
@@ -30,8 +31,11 @@ public:
 
 	// set the inner group
 	void set_inner(void *v) {tool_group = v;}
+	
+	void setPrefs(void *);
+	void saveWindowPos();
   
-  int handle(int evt) override;
+    int handle(int evt) override;
 };
 
 #endif // _HAVE_TOOLWIN_HDR_

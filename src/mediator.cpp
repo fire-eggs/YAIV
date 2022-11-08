@@ -194,7 +194,14 @@ Fl_Widget_Tracker *db_track = nullptr;
                 
         if (!db_track || db_track->deleted()) {
             delete db_track;
-            _danbooru = new toolgrp(nullptr, 1, 0, 0, 200, 500, nullptr, "yaivDanbooru");
+            
+            int dx,dy,dw,dh;
+            prefs->getWinRect("danbooru", dx, dy, dw, dh, 0, 0, 200, 500);
+            
+            //_danbooru = new toolgrp(nullptr, 1, 0, 0, 200, 500, nullptr, "yaivDanbooru");
+            _danbooru = new toolgrp(nullptr, 1, dx, dy, dw, dh, nullptr, "yaivDanbooru");
+            _danbooru->setPrefs(prefs);
+            
             db_track = new Fl_Widget_Tracker(_danbooru);
         }
         view_danbooru(prefs, _danbooru->in_group());

@@ -24,6 +24,7 @@ protected:
     void create_fixed_docked(dockgroup *d);
 
     void initialize(dockgroup *dk, bool floater, bool draggable, int w, int h, const char *lbl, const char *xclass);
+    void initialize(dockgroup *dk, bool floater, bool draggable, int x, int y, int w, int h, const char *lbl, const char *xclass);
 
 protected:
 	// Widgets used by the toolbar
@@ -78,6 +79,8 @@ dockgroup *get_dock() {return dock;}
     // generic callback function for the dismiss button
 	static void cb_dismiss(Fl_Button*, void* v);
 
+	void setPrefs(void *);
+    
 };
 
 #endif // _HAVE_TOOL_GROUP_HDR_

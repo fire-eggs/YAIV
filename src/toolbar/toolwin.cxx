@@ -2,6 +2,7 @@
 #include <FL/Fl_Button.H>
 #include "toolwin.h"
 #include "mediator.h"
+#include "prefs.h"
 
 #  define FX_DROP_EVENT	(FL_DND_RELEASE + 100)  // TODO tb hack
 #  define DROP_REGION_HEIGHT 42 //39
@@ -117,6 +118,17 @@ int toolwin::handle(int event)
   }
 
   return res;
+}
+
+void toolwin::setPrefs(void *p)
+{
+    _prefs = p;
+}
+
+void toolwin::saveWindowPos()
+{
+    Prefs *p = static_cast<Prefs *>(_prefs);
+    p->setWinRect("danbooru", x(), y(), w(), h());
 }
 
 // end of file
