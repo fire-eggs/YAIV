@@ -84,6 +84,8 @@ void toolgrp::cb_dismiss(Fl_Button*, void* v)
 		//delete cur_parent; // we no longer need the tool window.
 		Fl::delete_widget(cur_parent);
 		Fl::delete_widget(gp);
+        cur_parent = nullptr;
+        gp->parent(nullptr);
 	}
 }
 
