@@ -236,9 +236,17 @@ void XBox::action(int act)
     switch (act)
     {
         case Mediator::ACT_NEXT:
+            // User has manually changed image. Make sure the slideshow
+            // shows said image for the specified time.
+            if (_inSlideshow)
+                _slideShow->resetTimer();
             next_image();
             break;
         case Mediator::ACT_PREV:
+            // User has manually changed image. Make sure the slideshow
+            // shows said image for the specified time.
+            if (_inSlideshow)
+                _slideShow->resetTimer();
             prev_image();
             break;
         case Mediator::ACT_CHK:

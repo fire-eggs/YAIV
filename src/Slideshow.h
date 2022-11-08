@@ -23,6 +23,7 @@ public:
     void setTimer();
     void countdown();
     void slideNext();
+    void resetTimer(); // On manual image change, force timer to start over
 
 private:
     Prefs *_prefs = nullptr;

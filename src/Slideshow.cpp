@@ -66,3 +66,9 @@ void Slideshow::slideNext() {
     _window->next_image();
     setTimer();
 }
+
+void Slideshow::resetTimer()
+{
+    clearTimer(); // TODO just use Fl::repeat_timeout ?
+    setTimer();
+}
