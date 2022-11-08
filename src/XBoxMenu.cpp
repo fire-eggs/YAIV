@@ -199,6 +199,9 @@ void XBox::do_menu(int xloc, int yloc, bool title) {
 
 void XBox::hideCurrent() {
 
+    if (!box_filelist || box_filelist->fileCount() == 0) // TODO initialize box_filelist
+        return; // no images
+    
     char buff[FL_PATH_MAX<<2];
     char *currfilename = box_filelist->currentFilename();
     sprintf(buff, "Are you sure you want to hide '%s'?", currfilename);
@@ -212,6 +215,10 @@ void XBox::hideCurrent() {
 }
 
 void XBox::favCurrent() {
+
+    if (!box_filelist || box_filelist->fileCount() == 0)
+        return; // no images
+
     bool res2 = box_filelist->addToFavs();
     if (!res2)
         fl_alert("Failure to open 'favs' file.");
