@@ -79,7 +79,7 @@ dockgroup *get_dock() {return dock;}
     // generic callback function for the dismiss button
 	static void cb_dismiss(Fl_Button*, void* v);
 
-	void setPrefs(void *);
+	void setPrefs(void *, const char *magic);
     
 };
 

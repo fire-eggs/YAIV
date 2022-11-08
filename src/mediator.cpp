@@ -200,7 +200,7 @@ Fl_Widget_Tracker *db_track = nullptr;
             
             //_danbooru = new toolgrp(nullptr, 1, 0, 0, 200, 500, nullptr, "yaivDanbooru");
             _danbooru = new toolgrp(nullptr, 1, dx, dy, dw, dh, nullptr, "yaivDanbooru");
-            _danbooru->setPrefs(prefs);
+            _danbooru->setPrefs(prefs, "danbooru");
             
             db_track = new Fl_Widget_Tracker(_danbooru);
         }
@@ -225,7 +225,14 @@ Fl_Widget_Tracker *db_track = nullptr;
         
         if (!md_track || md_track->deleted()) {
             delete md_track;
-            _metadata = new toolgrp(nullptr, 1, 0, 0, 200, 500, nullptr, "yaivMetadata");
+            
+            int dx,dy,dw,dh;
+            prefs->getWinRect("metaview", dx, dy, dw, dh, 0, 0, 200, 500);
+            
+            //_metadata = new toolgrp(nullptr, 1, 0, 0, 200, 500, nullptr, "yaivMetadata");
+            _metadata = new toolgrp(nullptr, 1, dx, dy, dw, dh, nullptr, "yaivDanbooru");
+            _metadata->setPrefs(prefs, "metaview");
+            
             md_track = new Fl_Widget_Tracker(_metadata);
         }
         init_metadata();

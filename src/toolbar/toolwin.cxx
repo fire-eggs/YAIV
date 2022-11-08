@@ -120,15 +120,16 @@ int toolwin::handle(int event)
   return res;
 }
 
-void toolwin::setPrefs(void *p)
+void toolwin::setPrefs(void *p, const char *pval)
 {
     _prefs = p;
+    _prefsVal = pval;
 }
 
 void toolwin::saveWindowPos()
 {
     Prefs *p = static_cast<Prefs *>(_prefs);
-    p->setWinRect("danbooru", x(), y(), w(), h());
+    p->setWinRect(_prefsVal, x(), y(), w(), h());
 }
 
 // end of file

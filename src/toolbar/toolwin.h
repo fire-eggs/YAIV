@@ -16,6 +16,7 @@ protected:
 	static short active;
 	void *tool_group;
     void *_prefs; // type-less pointer to prefs to save window position
+    const char *_prefsVal; // string required to use with prefs
 
 public:
 	// Normal FLTK constructors
@@ -32,7 +33,7 @@ public:
 	// set the inner group
 	void set_inner(void *v) {tool_group = v;}
 	
-	void setPrefs(void *);
+	void setPrefs(void *, const char *);
 	void saveWindowPos();
   
     int handle(int evt) override;

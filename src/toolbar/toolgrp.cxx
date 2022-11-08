@@ -215,11 +215,11 @@ void toolgrp::hide_all()
 	toolwin::hide_all();
 }
 
-void toolgrp::setPrefs(void *p)
+void toolgrp::setPrefs(void *p, const char *magic)
 {
     toolwin *cur_parent = (toolwin *)parent();
     if (cur_parent)
-        cur_parent->setPrefs(p);
+        cur_parent->setPrefs(p, magic);
 }
 
 #ifndef _MSC_VER
