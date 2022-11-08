@@ -13,6 +13,9 @@ enum
 #ifdef DANBOORU
     MI_DANBOORU,
 #endif
+#ifdef METADATA
+    MI_METADATA,
+#endif    
     MI_OPTIONS,
 
     MI_THEME_BLUE,

@@ -61,10 +61,19 @@ private:
 
 // TODO consider building the menu in code
 #ifdef DANBOORU
-#define MNU_COUNT 19
+  #ifdef METADATA
+    #define MNU_COUNT 20
+  #else
+    #define MNU_COUNT 19
+  #endif
 #else
-#define MNU_COUNT 18
+  #ifdef METADATA
+    #define MNU_COUNT 19
+  #else
+    #define MNU_COUNT 18
+  #endif
 #endif
+
     Fl_Menu_Item right_click_menu[MNU_COUNT] =
     {
         {"Load",            0, nullptr, (void *)(fl_intptr_t) MI_LOAD},
@@ -73,6 +82,10 @@ private:
 #ifdef DANBOORU
         {"Show Danbooru",    0, nullptr, (void *)MI_DANBOORU, FL_MENU_DIVIDER},
 #endif
+#ifdef METADATA
+        {"Show Metadata",    0, nullptr, (void *)MI_METADATA, FL_MENU_DIVIDER},
+#endif
+
         {"Theme", 0, nullptr, nullptr, FL_SUBMENU},
             {"Blue", 0, nullptr, (void *)(fl_intptr_t)MI_THEME_BLUE},
             {"Classic", 0, nullptr, (void *)(fl_intptr_t)MI_THEME_CLASSIC},

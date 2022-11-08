@@ -104,6 +104,12 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
             Mediator::danbooru(_prefs);
             break;
 #endif
+            
+#ifdef METADATA
+        case MI_METADATA:
+            Mediator::metadata(_prefs);
+            break;
+#endif
 
         case MI_FAV0: case MI_FAV1: case MI_FAV2:
         case MI_FAV3: case MI_FAV4: case MI_FAV5:
