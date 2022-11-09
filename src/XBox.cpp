@@ -874,6 +874,8 @@ void XBox::toggleSlideshow() {
 			_slideShow = nullptr;
 		}
 	}
+	else
+        _inSlideshow = false;
 }
 
 void XBox::toggleMinimap() {

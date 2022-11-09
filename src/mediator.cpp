@@ -42,6 +42,11 @@ namespace Mediator {
 
     void toolbarMsg(Mediator::ACTIONS val)
     {
+// TODO refactor state management?: 1. mediator holds state; 2. mediator inits state; 3. mediator sends state update to targets
+
+        // 20221109 perform action first, update toolbar state from result of action [e.g. slideshow status]
+        _viewer->action(val); // TODO with this, MSG_VIEW, MSG_TB distinction not necessary?
+              
         switch (val)
         {
             case ACT_EXIT:
@@ -50,12 +55,14 @@ namespace Mediator {
                 // TODO show the full menu, not the popup menu
                 _viewer->do_menu(Fl::event_x(),Fl::event_y(), false);
                 break;
-// TODO refactor state management: 1. mediator holds state; 2. mediator inits state; 3. mediator sends state update to targets
             case ACT_CHK:
                 _toolbar->setState(ACT_CHK, !_viewer->getCheck());
                 break;
             case ACT_SLID:
-                _toolbar->setState(ACT_SLID, !_viewer->inSlide()); // TODO should not happen if changing slideshow is invalid (e.g. no images)
+                {
+                bool inslide = _viewer->inSlide();
+                _toolbar->setState(ACT_SLID, inslide);
+                }
                 break;
             case ACT_SCALE_HIGH:
             case ACT_SCALE_FIT:
@@ -101,8 +108,7 @@ namespace Mediator {
             default:
                 break;
         }
-        
-        _viewer->action(val); // TODO with this, MSG_VIEW, MSG_TB distinction not necessary?
+       
     }
 
     void mediator(void *msg) 
