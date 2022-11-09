@@ -271,6 +271,8 @@ void XBox::action(int act)
             break;
         case Mediator::ACT_GOTO:
             goto_request();
+            if (_inSlideshow)
+                _slideShow->resetTimer();
             break;
         case Mediator::ACT_SLID:
             toggleSlideshow();
@@ -313,6 +315,8 @@ void XBox::action(int act)
         case Mediator::ACT_RANDOM:
             box_filelist->randomize();
             load_current();
+            if (_inSlideshow)
+                _slideShow->resetTimer();
             break;
         case Mediator::ACT_DITHER:
             nextTkScale();
@@ -333,6 +337,8 @@ void XBox::action(int act)
             {
                 box_filelist->home();
                 load_current();
+                if (_inSlideshow)
+                    _slideShow->resetTimer();
             }
             break;
         case Mediator::ACT_END:
@@ -340,6 +346,8 @@ void XBox::action(int act)
             {
                 box_filelist->end();
                 load_current();
+                if (_inSlideshow)
+                    _slideShow->resetTimer();
             }
             break;
             
