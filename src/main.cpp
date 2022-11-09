@@ -40,6 +40,8 @@ int main(int argc, char **argv) {
     //Fl::scheme("plastic"); // TODO ability to change - see unittests
 #endif
 
+    FL_NORMAL_SIZE = 18;
+    
     TanColormap_FLTKSUBS(); // TODO from settings
 
     // set to system local to "C" default for mostly work.
