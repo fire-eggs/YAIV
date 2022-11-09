@@ -200,6 +200,16 @@ void XBox::load_current() {
 
     redraw();
     updateLabel();
+    
+    // TODO do this again - action was run before toolbar status update
+    // Update anything which needs to know if the user can go forward/back
+    Mediator::send_message(Mediator::MSGS::MSG_TB,
+                           box_filelist->canPrev() ? Mediator::ACT_ISPREV
+                                                   : Mediator::ACT_NOPREV);
+    Mediator::send_message(Mediator::MSGS::MSG_TB,
+                           box_filelist->canNext() ? Mediator::ACT_ISNEXT
+                                                   : Mediator::ACT_NONEXT);
+    
 }
 
 void XBox::next_image() {
