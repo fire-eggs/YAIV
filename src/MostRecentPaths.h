@@ -15,6 +15,7 @@ private:
     std::vector<char*> _pathList;
     Fl_Preferences* _prefs;
     void ShuffleDown(int);
+    void ShuffleUp(int);
     MostRecentPaths(const MostRecentPaths&) = delete; // no copying!
     MostRecentPaths& operator=(const MostRecentPaths&) = delete;
 
@@ -22,6 +23,7 @@ public:
     explicit MostRecentPaths(Prefs* prefs);
     ~MostRecentPaths();
     void Add(const char* newPath);
+    void Remove(const char *newPath);
     char** getAll();
     void Save();
     int getCount();

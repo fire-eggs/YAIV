@@ -80,7 +80,13 @@ void XBox::load_file(const char *n) {
     }
     */
     
-    // TODO don't add to MRU if unsuccessful load
+    // don't add to MRU if unsuccessful load
+    if (!box_filelist || box_filelist->oldFileCount() < 1)
+    {
+        _mru->Remove(n);
+        return; 
+    }
+    
     // Update the MRU list
     _mru->Add(n);
     _mru->Save();
