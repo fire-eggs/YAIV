@@ -128,14 +128,14 @@ void toolgrp::initialize(dockgroup *dk, bool floater, bool draggable, int w, int
 void toolgrp::create_dockable_group()
 {
 //	begin();
-	dismiss = new Fl_Button(3, 3, 11, 11, "@-31+");
+	dismiss = new Fl_Button(3, 3, 13, 13, "@-31+");
 //	dismiss->box(FL_THIN_UP_BOX);
 	dismiss->box(FL_BORDER_BOX);
 	dismiss->tooltip("Dismiss");
 	dismiss->clear_visible_focus();
 	dismiss->callback((Fl_Callback*)cb_dismiss, (void *)this);
 
-	dragger = new drag_btn(3, 16, 11, h() - 15);
+	dragger = new drag_btn(3, 16, 13, h() - 15);
 	dragger->type(FL_TOGGLE_BUTTON);
 	dragger->box(FL_ENGRAVED_BOX);
 //	dragger->box(FL_BORDER_BOX);
@@ -143,7 +143,7 @@ void toolgrp::create_dockable_group()
 	dragger->clear_visible_focus();
 	dragger->when(FL_WHEN_CHANGED);
 	
-	inner_group = new Fl_Group(17, 3, w() - 17, h() - 3);
+	inner_group = new Fl_Group(19, 3, w() - 19, h() - 3);
 	inner_group->box(FL_NO_BOX);
 	//inner_group->box(FL_ENGRAVED_FRAME);
 }
