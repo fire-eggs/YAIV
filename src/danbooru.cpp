@@ -75,7 +75,10 @@ void view_danbooru(Prefs *prefs, Fl_Group *container) {
                            'A', style_unfinished_cb, 0);
 
     container->add(txtout);
-    container->resizable(txtout);
+    
+    //container->resizable(txtout);
+    // HACK Prevents the dismiss/dragbar widgets from resizing
+    container->parent()->resizable(txtout); // TODO shouldn't have to know about this?
 }
 
 void shutdown_danbooru()

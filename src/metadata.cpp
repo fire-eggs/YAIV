@@ -112,7 +112,9 @@ void create_metadata(Prefs *prefs, Fl_Group *container) {
                            'A', nullptr, 0);
 
     container->add(txtout);
-    container->resizable(txtout);
+    //container->resizable(txtout);
+    // HACK Prevents the dismiss/dragbar widgets from resizing
+    container->parent()->resizable(txtout); // TODO shouldn't have to know about this?
 }
 
 void addTag(char *tmptxt, char *tmpsty, std::string label, std::string data)
