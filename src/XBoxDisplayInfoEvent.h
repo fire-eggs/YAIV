@@ -32,9 +32,8 @@ public:
 
     void OnDisplayLabel(const char *info) override
     {
-        if (!_win || !info)
-            return;
-        _win->label(info);
+        if (_win && info && *info)
+            _win->label(info);
     }
 
     void OnBorder() override
