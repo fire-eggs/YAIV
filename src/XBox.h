@@ -133,6 +133,7 @@ public:
     void favCurrent();
 
     void updateLabel();
+    void updateDisplay();
     
 private:
 

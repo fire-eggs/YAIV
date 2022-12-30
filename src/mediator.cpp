@@ -148,7 +148,10 @@ namespace Mediator {
                 if (box_filelist->realCount() < 2)
                     _viewer->load_current();
                 else
+                {
                     _viewer->updateLabel();
+                    _viewer->updateDisplay();
+                }
                 break;
         }
         delete msg2;

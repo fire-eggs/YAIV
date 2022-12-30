@@ -568,11 +568,17 @@ void XBox::nextRotation() {
 }
 
 void XBox::updateLabel() {
-    char lbl[FL_PATH_MAX+250];
+    char lbl[FL_PATH_MAX+250]; // TODO fix hack
     lbl[0] = 0;
     getLabel(true, lbl, sizeof(lbl));
 
     notifyDisplayLabel(lbl);
+}
+
+void XBox::updateDisplay() {
+    char hack[501];
+    const char *l = getLabel(false, hack, 500);  // TODO fix hack
+    notifyDisplayInfo(l);
 }
 
 void XBox::image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg)
