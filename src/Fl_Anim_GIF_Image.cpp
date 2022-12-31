@@ -606,12 +606,25 @@ Fl_Anim_GIF_Image::Fl_Anim_GIF_Image(const char *name_,
     _fi->_debug = (flags_ & Log) + 2 * (flags_ & Debug);
     _fi->optimize_mem = (flags_ & OptimizeMemory);
     _valid = load(name_);
+    
+    //printf("Load: base(%d,%d);canvas(%d,%d)\n", w(), h(), canvas_w(), canvas_h());
+
+    // Issue #109: the base class w/h values get set to the *frame* size at some
+    // point. However, the defining size of the image is the canvas; a frame may
+    // be smaller than the canvas and drawn offset within it.
+    /*
     if (canvas_w() && canvas_h()) {
         if (!w() && !h()) {
             w(canvas_w());
             h(canvas_h());
         }
     }
+    */
+    
+    // TODO KBR when would this not be valid to do?
+    w(canvas_w());
+    h(canvas_h());
+    
     canvas(canvas_, flags_);
     if ((flags_ & Start))
         start();
