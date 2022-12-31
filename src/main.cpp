@@ -5,6 +5,8 @@
 
 #include <clocale>     // setlocale()..
 
+#include <FL/Fl_File_Icon.H>
+
 #include "yaiv_win.h"
 #include "Fl_TransBox.h"
 #include "XBoxDisplayInfoEvent.h"
@@ -46,6 +48,14 @@ int main(int argc, char **argv) {
 
     // set to system local to "C" default for mostly work.
     setlocale(LC_ALL, "C");
+    
+    // appearance
+    Fl_File_Icon::load_system_icons();
+    // Issue #114: asian characters missing from open dialog, 'last used' menu
+    // TODO if this font isn't installed, falls back to something that won't give the desired result
+    Fl::set_font(FL_HELVETICA, " Noto Sans CJK SC");
+    Fl::set_font(FL_HELVETICA_BOLD, "BNoto Sans CJK SC"); // note this isn't the 'display name'
+    
     makeChecker(); // TODO move to more appropriate location
 
     Fl_Image::RGB_scaling(FL_RGB_SCALING_NEAREST); // TODO use a fl_imgtk scaler by default
