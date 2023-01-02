@@ -144,7 +144,7 @@ ImageFormat getImageFormat(const char *filename)
 
     if ((fp = fl_fopen(filename, "rb")) == NULL)
         return FAIL;
-    
+    setvbuf(fp, (char *)header, _IONBF, 63);
     int count = fread(header, 1, sizeof(header), fp);
     fclose(fp);
 

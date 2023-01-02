@@ -33,8 +33,11 @@ void *fileScanner(void *p)
             continue;
         
         char fullpath[FL_PATH_MAX*2];
-        sprintf(fullpath, "%s/%s", fn, ent->d_name);
-        
+        strcpy(fullpath, fn);
+        strcat(fullpath, "/");
+        strcat(fullpath, ent->d_name);
+        //sprintf(fullpath, "%s/%s", fn, ent->d_name);
+
         int format = getImageFormat(fullpath); 
         if (!format)
             continue;
@@ -43,7 +46,7 @@ void *fileScanner(void *p)
 //        first = false;
         _filelist->addToReal(ent->d_name);
         updCount ++;
-        if ((updCount % 10) == 1) // update only periodically
+        if ((updCount % 50) == 1) // update only periodically
             send_message(Mediator::MSG_REALUPDATE, 0);
     }   
     
