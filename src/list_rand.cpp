@@ -99,7 +99,27 @@ ImageFormat readImageHeader(uchar *header, int headerlen)
     return JPG;
 #endif // HAVE_LIBJPEG
 
+    bool riff = header[0] == 'R' &&
+                header[1] == 'I' &&
+                header[2] == 'F' &&
+                header[3] == 'F';
+    bool webp = header[8] == 'W' &&
+                header[9] == 'E' &&
+                header[10] == 'B' &&
+                header[11] == 'P';
+    if (riff & webp)
+        return WEBP;
+
 #ifdef FLTK_USE_SVG
+  // KBR handle BOM
+  if (memcmp(header, "<svg", 4) == 0 ||
+      memcmp(&(header[3]), "<svg", 4) == 0 ||
+      memcmp(header, "<?xml", 5) == 0 ||
+      memcmp(&(header[3]), "<?xml", 5) == 0 )
+  {
+    return SVG;
+  }
+  
   #  if defined(HAVE_LIBZ)
     if (header[0] == 0x1f && header[1] == 0x8b) { // denotes gzip'ed data
         int fd = fl_open_ext(name, 1, 0);
@@ -113,29 +133,24 @@ ImageFormat readImageHeader(uchar *header, int headerlen)
     }
   #  endif // HAVE_LIBZ
 
-  // KBR handle BOM
-  if (memcmp(header, "<svg", 4) == 0 ||
-      memcmp(&(header[3]), "<svg", 4) == 0 ||
-      memcmp(header, "<?xml", 5) == 0 ||
-      memcmp(&(header[3]), "<?xml", 5) == 0 )
-  {
-    return SVG;
-  }
 #endif // FLTK_USE_SVG
-
-    bool riff = header[0] == 'R' &&
-                header[1] == 'I' &&
-                header[2] == 'F' &&
-                header[3] == 'F';
-    bool webp = header[8] == 'W' &&
-                header[9] == 'E' &&
-                header[10] == 'B' &&
-                header[11] == 'P';
-    if (riff & webp)
-        return WEBP;
-
+    
     return FAIL;
 }
+
+#include <fcntl.h> // O_RDONLY
+#include <unistd.h>  // close()
+
+ImageFormat getImageFormatAt(int dirfd, const char *filename)
+{
+    uchar header[64];
+    int fd = openat(dirfd, filename, O_DIRECT | O_NOATIME | O_NONBLOCK | O_RDONLY);
+    int count = read(fd, header, 63);
+    close(fd);
+
+    return readImageHeader(header, count);
+}
+
 
 ImageFormat getImageFormat(const char *filename)
 {

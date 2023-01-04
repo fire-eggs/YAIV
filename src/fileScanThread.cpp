@@ -6,11 +6,15 @@
 #define HAVE_PTHREAD
 #define HAVE_PTHREAD_H
 
+#include <fcntl.h> // O_RDONLY
+#include <unistd.h> // close()
+
 #include "threads.h"
 #include "filelist.h"
 #include "mediator.h" // TODO define messages elsewhere?
 
 extern int getImageFormat(const char *);
+extern int getImageFormatAt(int, const char *);
 
 Fl_Thread scanThread;
 
@@ -23,6 +27,33 @@ void *fileScanner(void *p)
 {
     const char *fn = _filelist->getFolderName();
 
+    int dirfd = open(fn, O_RDONLY|O_DIRECTORY);
+    if (dirfd != -1)
+    {
+        int updCount = 0;
+        
+        // NOTE: tried to use omp but failed [memory corruption in addToReal]
+        for (int i=0; i < _filelist->oldFileCount(); i++)
+        {           
+            dirent *ent = _filelist->get_entry(i);
+            if (ent->d_type != DT_REG)
+                continue;
+            
+            int format = getImageFormatAt(dirfd, ent->d_name);
+            if (!format)
+                continue;
+            
+            _filelist->addToReal(ent->d_name);
+         
+            updCount ++;
+            if ((updCount % 50) == 1) // update only periodically
+                send_message(Mediator::MSG_REALUPDATE, 0);
+        }
+        close(dirfd);
+        send_message(Mediator::MSG_REALUPDATE, 0);  // final update
+        return NULL;
+    }
+    
     int updCount = 0;
     
 //    bool first = true;
