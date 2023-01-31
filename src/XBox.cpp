@@ -946,9 +946,10 @@ void XBox::drawMinimap() {
     int iw = _anim ? _anim->w() : _showImg->w();
     int ih = _anim ? _anim->h() : _showImg->h();
     int ww = w();
-    int wh = h();
 
-    if (iw <= ww && ih <= wh) return; // image fits inside window, no map necessary
+    // TODO if option "hide minimap if smaller" is created, need to take panning into account.
+    //int wh = h();
+    //if (iw <= ww && ih <= wh) return; // image fits inside window, no map necessary
 
     // Size the 'image' rectangle proportional to the image
     int mmw = _miniMapSize;
