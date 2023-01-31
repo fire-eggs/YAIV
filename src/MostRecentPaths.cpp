@@ -37,7 +37,8 @@ void MostRecentPaths::ShuffleUp(int stopAt)
 {
     for (long i = stopAt; i < 9; i++)
         _pathList[i] = _pathList[i+1];
-    _pathList[9] = (char *)"";
+    _pathList[9] = (char *)malloc(1); // (char *)"";
+    _pathList[9][0] = '\0';
 }
 
 void MostRecentPaths::Add(const char* newPath)
