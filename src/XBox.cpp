@@ -84,10 +84,13 @@ void XBox::load_file(const char *n) {
     if (!box_filelist || box_filelist->oldFileCount() < 1)
     {
         _mru->Remove(n);
+        showUserMessage("Path is missing");
+        clearUserMesssageLater();
         return; 
     }
     
     // Update the MRU list
+    clearUserMessage();
     _mru->Add(n);
     _mru->Save();
     
@@ -95,13 +98,19 @@ void XBox::load_file(const char *n) {
     load_current();
 }
 
-void XBox::timeoutCallback(void *d, const char *text)
+void XBox::drawMessage()
 {
-    XBox *xb = static_cast<XBox *>(d);
+    // Draw a message to present to the user.
+    // TODO consider replacing with 'toast' style messaging
+    
+    if (_message[0] == '\0') // No message
+        return;
+    
+    XBox *xb = this;
 
     Fl_Label *lbl = new Fl_Label();
     
-    lbl->value = text; //"Loading...";
+    lbl->value = _message;
     lbl->size = 22;
     lbl->color = FL_GREEN;
     lbl->align_ = FL_ALIGN_CENTER;   
@@ -127,7 +136,35 @@ void XBox::timeoutCallback(void *d, const char *text)
     }
     delete lbl;
     
+}
+
+void XBox::showUserMessage(const char *msg)
+{
+    // Establish a message to show to the user on next redraw
+    strcpy(_message, msg);
+    redraw();
     Fl::wait();
+}
+
+void XBox::clearUserMessage()
+{
+    // Clear any existing user message, is wiped on next redraw
+    _message[0] = '\0';
+    // NOTE: this is not immediate, waits until next redraw
+}
+
+void XBox::clearUserMesssageLater()
+{
+    // Wipe the user message in two seconds via timeout
+    Fl::add_timeout(2.0, cb_UserMsgTimeout, this);
+}
+
+void XBox::cb_UserMsgTimeout(void *data)
+{
+    // Clear an existing user message after timeout
+    XBox *xb = static_cast<XBox *>(data);
+    xb->showUserMessage("");
+    Fl::remove_timeout(cb_UserMsgTimeout);
 }
 
 void XBox::load_current() {
@@ -174,8 +211,11 @@ void XBox::load_current() {
         std::future<Fl_Image *> future = std::async(std::launch::async, loadFile, (char*)fullpath, this);
         std::future_status status = future.wait_for(std::chrono::milliseconds(750));
         if (status != std::future_status::ready)
-            timeoutCallback(this, "Loading...");
+        {
+            showUserMessage("Loading...");
+        }
         Fl_Image *img = future.get();
+        clearUserMessage();
         
         // 590B-01.jpg failed to load and resulted in crash further on
         if (!img || img->fail() || img->w() == 0 || img->h() == 0)
@@ -205,7 +245,8 @@ void XBox::load_current() {
     }
 
     redraw();
-    updateLabel();
+    // Update the title bar
+    updateLabel(); // TODO issue #98: on error, provide a message. need to expose something in list_rand.cpp ... Nice for overlay also.
     
     // TODO do this again - action was run before toolbar status update
     // Update anything which needs to know if the user can go forward/back
@@ -871,16 +912,17 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : SmoothResizeGroup(x,y,w,h
 
     dragStartX = dragStartY = 0;
     _slideShow = nullptr;
+    clearUserMessage();
 }
 
 void XBox::forceSlideshow() {
+    // user specified '-s' on command line
     _inSlideshow = false;
     toggleSlideshow();
     _slideShow->forceDelay(2);
 }
 
 void XBox::toggleSlideshow() {
-	// Nothing to show...
 	if (box_filelist && box_filelist->any())
 	{
 		_inSlideshow = !_inSlideshow;
@@ -897,7 +939,7 @@ void XBox::toggleSlideshow() {
 		}
 	}
 	else
-        _inSlideshow = false;
+        _inSlideshow = false; // Nothing to show
 }
 
 void XBox::toggleMinimap() {
@@ -987,6 +1029,7 @@ void XBox::draw() {
     Fl_Group::draw();
 
     if ((!_showImg || !_showImg->w() || !_showImg->h()) && !_anim) {
+        drawMessage();
         drawOverlay();
         return;
     }
@@ -1038,6 +1081,7 @@ void XBox::draw() {
     drawCenter();
     drawMinimap();
     drawOverlay();
+    drawMessage();
 
     fl_pop_clip();
 }

@@ -58,6 +58,7 @@ private:
     int rotation; // cycle through clockwise rotations of 90 degrees
     ZScaleMode imgtkScale{ZScaleMode::None}; // cycle through fl_imgtk scale values
 
+    char _message[128];  // HACK hard-coded message length
 
 // TODO consider building the menu in code
 #ifdef DANBOORU
@@ -152,10 +153,16 @@ private:
     void drawMinimap();
     void drawOverlay();
     void drawCenter();
+    void drawMessage();
 
     void toggleSlideshow();
     void toggleMinimap();
     void toggleOverlay();
+    
+    void showUserMessage(const char *);
+    void clearUserMessage();
+    void clearUserMesssageLater();
+    static void cb_UserMsgTimeout(void *);
 
 private:
     bool _pan_with_mouse;

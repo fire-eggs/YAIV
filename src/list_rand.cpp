@@ -246,6 +246,8 @@ if (memcmp(header, "<svg", 4) == 0 ||
 // TODO go into "file loader" module
 Fl_Image *loadFile(char *filename, XBox *owner)
 {
+//    sleep(1); // for debugging delay behavior
+    
     // 1. Try to open as webp [animated or not]
     Fl_Image *img = LoadWebp(filename, owner);
     if (img)
