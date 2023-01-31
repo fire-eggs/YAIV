@@ -1193,6 +1193,7 @@ void XBox::notifyDisplayLabel(const char *val) {
 void XBox::safe_resize() {
     centerX = centerY = INT_MAX;
     updateImage();
+    updateLabel(); // resize may have impacted zoom, etc
     redraw();
 }
 
