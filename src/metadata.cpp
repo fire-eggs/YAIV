@@ -132,6 +132,9 @@ void addTag(char *tmptxt, char *tmpsty, std::string label, std::string data)
 
 void update_metadata(const char *filepath) {
     
+    if (filepath == nullptr)
+        return;
+    
     static const char *labels = "Exif:\nIPTC:\nXMP:\n";
     
     try

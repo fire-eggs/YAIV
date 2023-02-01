@@ -131,7 +131,7 @@ void addTags(const char *category, const char *label, std::vector<std::string> *
 
 void update_danbooru(char *filename) // TODO class member?
 {
-    if (!db) return; // db not open, nothing to do
+    if (!db || filename == nullptr) return; // db not open, nothing to do
 
     char *zErrMsg = nullptr;
 
