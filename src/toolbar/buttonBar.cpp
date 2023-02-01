@@ -122,7 +122,7 @@ static void btnCb(Fl_Widget *w, void *data)
     }
 }
 
-static void makeBtn(char *exepath, bool draggable, toolgrp* tg, int i, char *name, bool vert, bool toggle)
+static void makeBtn(char *exepath, bool draggable, toolgrp* tg, int i, char *name, bool vert, bool toggle, char *ttip)
 {
     int x = (draggable ? HANDWID : NOHANDWID) + (BTNSTEP * i);
     int y = BTNDOWN;
@@ -137,7 +137,7 @@ static void makeBtn(char *exepath, bool draggable, toolgrp* tg, int i, char *nam
     //btn1->box(FL_THIN_UP_BOX);
     btn1->box(FL_UP_BOX);
     setImage(exepath, btn1, name);
-    btn1->tooltip(name);
+    btn1->tooltip(ttip);
     tg->add(btn1);
 }
 
@@ -146,10 +146,18 @@ void btn_bar_common(char *exepath, toolgrp* tgroup, bool vert, bool draggable)
     tgroup->box(FL_BORDER_BOX);
     tgroup->in_group()->box(FL_NO_BOX);
 
+    // NOTE these are the filenames
     char *btns [] = {"ViewPreviousImage", "ViewNextImage", "ZoomIn",
                      "ZoomOut", "Slideshow", "RotateRight",
                      "OpenFile", "GoToImage", "Checkerboard",
                      "scaletofit", "Menu", "exit_white"};
+    // NOTE these are the tooltips
+    char *ttips[] = {"View Previous Image", "View Next Image",
+                     "Zoom In", "Zoom Out", "View as Slideshow",
+                     "Rotate Right", "Open File", "Go To Image",
+                     "Draw Checkerboard Background",
+                     "Choose Scaling Option", "Menu", "Exit"};
+                     
     // whether the button is a toggle
     bool btntype [] = {false,false,false,
                        false,true,false,
@@ -157,7 +165,7 @@ void btn_bar_common(char *exepath, toolgrp* tgroup, bool vert, bool draggable)
                        false,false,false};
     int count = sizeof(btns) / sizeof(char*);
     for (int i=0; i < count; i++)
-        makeBtn(exepath, draggable, tgroup, i, btns[i], vert, btntype[i]);
+        makeBtn(exepath, draggable, tgroup, i, btns[i], vert, btntype[i], ttips[i]);
 
     tgroup->end();
 }
