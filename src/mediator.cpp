@@ -56,7 +56,7 @@ namespace Mediator {
                 _viewer->do_menu(Fl::event_x(),Fl::event_y(), false);
                 break;
             case ACT_CHK:
-                _toolbar->setState(ACT_CHK, !_viewer->getCheck());
+                _toolbar->setState(ACT_CHK, _viewer->getCheck());
                 break;
             case ACT_SLID:
                 {
