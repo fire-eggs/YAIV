@@ -527,7 +527,7 @@ int XBox::mousePan(int msg)
 
 const char * XBox::getLabel(bool include_filename, char *buff, int buffsize)
 {
-    if (!box_filelist)
+    if (!box_filelist || box_filelist->currentFilename() == nullptr)
         return "";
 
     std::string fullpath;
