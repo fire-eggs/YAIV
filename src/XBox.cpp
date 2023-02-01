@@ -884,7 +884,8 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : SmoothResizeGroup(x,y,w,h
     _anim = nullptr;
     _inSlideshow = false;
 
-    draw_check = true;
+    // TODO initialize to false so toolbar init (see main()) will toggle ON
+    draw_check = false;
 
     std::string defaultScale;
     _prefs->getS(SCALE_MODE, defaultScale, scaleModeToName(Noscale));

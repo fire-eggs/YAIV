@@ -103,7 +103,10 @@ int main(int argc, char **argv) {
     // TODO this the wrong place / way to initialize these buttons?
     Mediator::send_message(Mediator::MSG_TB, Mediator::ACT_NOPREV);
     Mediator::send_message(Mediator::MSG_TB, Mediator::ACT_NONEXT);
-    // TODO missing initializer for checkerboard
+    // initializer for checkerboard
+    // TODO checker init relies on state initialized to OFF 
+    Mediator::send_message(Mediator::MSG_TB, Mediator::ACT_CHK);
+    
     
     cmdline(argc, argv, b2); // do this _after_ show() for label etc to be correct
 
