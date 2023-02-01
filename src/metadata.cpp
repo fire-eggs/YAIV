@@ -86,6 +86,7 @@ void metadata(const char *file)
 
 void init_metadata()
 {
+    Exiv2::LogMsg::setLevel(Exiv2::LogMsg::mute);
     Exiv2::XmpParser::initialize();
     ::atexit(Exiv2::XmpParser::terminate);
 }
