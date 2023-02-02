@@ -27,6 +27,11 @@ void *fileScanner(void *p)
 {
     const char *fn = _filelist->getFolderName();
 
+/* TODO This attempted optimization is often failing (Feb 1, 2023). It
+ * attempts to use openat() instead of open(). Unfortunately, getImageFormatAt 
+ * fails to read the image headers when processing some directories. I don't 
+ * have a good idea why this is a problem, so revert to getImageFormat for now...
+    
     int dirfd = open(fn, O_RDONLY|O_DIRECTORY);
     if (dirfd != -1)
     {
@@ -53,9 +58,9 @@ void *fileScanner(void *p)
         send_message(Mediator::MSG_REALUPDATE, 0);  // final update
         return NULL;
     }
-    
+*/    
     int updCount = 0;
-    
+
 //    bool first = true;
     for (int i=0; i < _filelist->oldFileCount(); i++)
     {

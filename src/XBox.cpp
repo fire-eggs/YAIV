@@ -83,6 +83,7 @@ void XBox::load_file(const char *n) {
     // don't add to MRU if unsuccessful load
     if (!box_filelist || box_filelist->oldFileCount() < 1)
     {
+        // TODO we might not have come here via MRU ?
         _mru->Remove(n);
         showUserMessage("Path is missing");
         clearUserMesssageLater();
