@@ -190,11 +190,13 @@ namespace Mediator {
 #ifdef DANBOORU
 Fl_Widget_Tracker *db_track = nullptr;
 
-    // TODO should this be a message? action?
+    // TODO danbooru() and metadata() mostly copy-pasta
     void danbooru(Prefs *prefs) {
 
+        bool dismissed = db_track && db_track->deleted();
+        
         // shortcut hides window if it's displayed
-        if (_danbooru && !_danbooru->docked() && _danbooru->shown())
+        if (!dismissed && _danbooru && !_danbooru->docked() && _danbooru->shown())
         {
             _danbooru->cb_dismiss(nullptr, _danbooru);
             _danbooru = nullptr;
@@ -224,8 +226,10 @@ Fl_Widget_Tracker *db_track = nullptr;
 
     void metadata(Prefs *prefs) {
         
+        bool dismissed = md_track && md_track->deleted();
+        
         // shortcut hides window if it's displayed
-        if (_metadata && !_metadata->docked() && _metadata->shown())
+        if (!dismissed && _metadata && !_metadata->docked() && _metadata->shown())
         {
             _metadata->cb_dismiss(nullptr, _metadata);
             _metadata = nullptr;
