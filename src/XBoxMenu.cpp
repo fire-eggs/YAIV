@@ -16,6 +16,8 @@
 
 extern filelist* box_filelist; // TODO member
 
+extern void showOptionsDlg(); // TODO
+
 void XBox::load_request() {
 
     // 20220530 start with the last path used
@@ -97,6 +99,7 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
             break;
 
         case MI_OPTIONS:		    // TODO nyi
+            showOptionsDlg();
             break;
 
 #ifdef DANBOORU
