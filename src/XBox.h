@@ -135,6 +135,8 @@ public:
 
     void updateLabel();
     void updateDisplay();
+
+    void wipeShowImage(bool force = false);
     
 private:
 
@@ -149,7 +151,6 @@ private:
     void nextRotation();
     void updateImage();
 
-    void wipeShowImage();
     void drawMinimap();
     void drawOverlay();
     void drawCenter();
