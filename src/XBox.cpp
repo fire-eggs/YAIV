@@ -658,6 +658,87 @@ void XBox::wipeShowImage(bool force) {
     _showImg = nullptr;
 }
 
+bool XBox::determineTargetSize(int imgW, int imgH, int winW, int winH, int& targetW, int& targetH)
+{
+    // TODO isn't this a recalc on every update, even when the scale hasn't changed?
+    
+    double basezoom = 1.0;
+    bool noscale = false;
+
+    targetW = imgW;
+    targetH = imgH;
+    
+    switch (draw_scale) {
+        case ScaleMode::Noscale:
+            {
+                noscale = true;
+                basezoom = 1.0;
+            }
+            break;
+
+        case ScaleMode::Wide:
+            {
+                int new_h = (int)lround((double)imgH * winW / (double)imgW);
+                targetW = winW;
+                targetH = new_h;
+                basezoom = (double)winW / imgW;
+            }
+            break;
+
+        case ScaleMode::High:
+            {
+                int new_w = (int)lround((double)imgW * winH / (double)imgH);
+                targetW = new_w;
+                targetH = winH;
+                basezoom = (double)winH / imgH;
+            }
+            break;
+
+        case ScaleMode::Auto:
+            if ( imgW < winW && imgH < winH )
+            {
+                noscale = true;
+                basezoom = 1.0;
+                break;
+            }         
+            // Deliberate fall-through!
+        case ScaleMode::Fit:
+            {
+                // proportional rescale to window [stolen from Fl_Image::scale]
+                double fw = (double)imgW / winW;
+                double fh = (double)imgH / winH;
+                if (fh > fw) fw = fh; else fh = fw;
+                targetW = (int)((imgW / fw) + 0.5);
+                targetH = (int)((imgH / fh) + 0.5);
+
+                basezoom = std::max( (double)targetW / imgW,
+                                     (double)targetH / imgH);
+            }
+            break;
+
+        default:
+        case ScaleMode::ScaleModeMAX:
+            break;
+    }
+
+    if (_zoom_step)
+    {
+        // TODO change to be a lookup into a list of zoom levels
+        double new_zoom =  basezoom + .1 * _zoom_step;
+
+        // prevent crash when attempting to zoom below zero
+        // by not changing the zoom and reset the zoom level
+        if (new_zoom > 0)  { _zoom = new_zoom; } else {_zoom_step++;}
+        targetH = imgH * _zoom;
+        targetW = imgW * _zoom;
+        noscale = false;
+    }
+    else _zoom = basezoom;
+
+    return noscale;
+}
+
+
 void XBox::updateImage() {
 
     // 1. dispose of any existing showImg because we're building a new one
@@ -668,6 +749,7 @@ void XBox::updateImage() {
         return;
     }
 
+    // TODO the conversion of SVG / pixmap could be cached
     Fl_RGB_Image *vImg;
     Fl_SVG_Image *svgImg = dynamic_cast<Fl_SVG_Image *>(_img);
     if (svgImg) {
@@ -718,125 +800,40 @@ void XBox::updateImage() {
     _showImg = rimg;
 
 
-
-    // 3. scale showimage
-
-    double basezoom = 1.0;
-    bool noscale = false;
-
-    switch (draw_scale) {
-        case ScaleMode::Noscale:
-            {
-                // TODO is any of this necessary?
-                if (_anim)
-                    _anim->scale(_anim->data_w(), _anim->data_h());
-                else
-                    _showImg->scale(_showImg->data_w(),_showImg->data_h());
-                noscale = true;
-                basezoom = 1.0;
-            }
-            break;
-
-        case ScaleMode::Wide:
-            {
-                int new_h = (int)lround((double)_showImg->h() * w() / (double)_showImg->w());
-                if (_anim) {
-                    _anim->scale(w(), new_h, 1, 1);
-                    basezoom = (double)_anim->w() / _anim->data_w();
-                }
-                else {
-                    _showImg->scale(w(), new_h, 1, 1);
-                    basezoom = (double)_showImg->w() / _showImg->data_w();
-                }
-            }
-            break;
-
-        case ScaleMode::High:
-            {
-                int new_w = (int)lround((double)_showImg->w() * h() / (double)_showImg->h());
-                if (_anim) {
-                    _anim->scale(new_w, h(), 1, 1);
-                    basezoom = (double)_anim->h() / _anim->data_h();
-                }
-                else {
-                    _showImg->scale(new_w, h(), 1, 1);
-                    basezoom = (double)_showImg->h() / _showImg->data_h();
-                }
-            }
-            break;
-
-        case ScaleMode::Fit:
-            {
-                if (_anim) {
-                    _anim->scale(w(), h(), 1, 1);
-                    basezoom = std::max( (double)_anim->w() / _anim->data_w(),
-                                      (double)_anim->h() / _anim->data_h());
-                }
-                else {
-                    _showImg->scale(w(),h(), 1, 1);
-                    basezoom = std::max( (double)_showImg->w() / _showImg->data_w(),
-                                      (double)_showImg->h() / _showImg->data_h());
-                }
-            }
-            break;
-
-        case ScaleMode::Auto:
-            {
-                if (_anim) {
-                    _anim->scale(w(), h());
-                    if (_anim->w() <= w() && _anim->h() <= h()) {
-                        noscale = true;
-                        basezoom = 1.0;
-                    }
-                    else
-                    basezoom = std::max( (double)_anim->w() / _anim->data_w(),
-                                      (double)_anim->h() / _anim->data_h());
-                }
-                else {
-                    _showImg->scale(w(),h());
-                    if (_showImg->data_w() <= w() && _showImg->data_h() <= h()) {
-                        noscale = true;
-                        basezoom = 1.0;
-                    }
-                    else
-                    basezoom = std::max( (double)_showImg->w() / _showImg->data_w(),
-                                      (double)_showImg->h() / _showImg->data_h());
-                }
-            }
-            break;
-
-        default:
-        case ScaleMode::ScaleModeMAX:
-            break;
-    }
-
-    if (_zoom_step)
+    int imgW, imgH, targetW, targetH;
+    int winW = w();
+    int winH = h();
+    if (_anim)
     {
-        // TODO change to be a lookup into a list of zoom levels
-        double new_zoom =  basezoom + .1 * _zoom_step;
-
-        // prevent crash when attempting to zoom below zero
-        if (new_zoom > 0)  { _zoom = new_zoom; } else {_zoom_step++;}
-        if (_anim)
-            _anim->scale(_anim->data_w()*_zoom, _anim->data_h()*_zoom,1, 1);
-        else {
-            _showImg->scale(_showImg->data_w() * _zoom, _showImg->data_h() * _zoom, 1, 1);
-        }
+        imgW = _anim->data_w();
+        imgH = _anim->data_h();
     }
-    else _zoom = basezoom;
+    else
+    {
+        imgW = _showImg->data_w();
+        imgH = _showImg->data_h();
+    }
+    
+    // 3a. Calculate effect of scaling, zoom
+    // Side-effect: updates _zoom
+    bool noscale = determineTargetSize(imgW, imgH, winW, winH, targetW, targetH);
+    
 
+    // 3b. scale showimage
+    
     // anim is updated in draw so we're done
     if (_anim)
-        return;
-
-    if ((int) imgtkScale && !noscale && !svgImg)
     {
-        // imgTK scaling is going to draw the image, so undo the pseudo-scaling from before
-        int target_w = _showImg->w();
-        int target_h = _showImg->h();
-        _showImg->scale(_showImg->data_w(),_showImg->data_h(),0,1);
-        Fl_RGB_Image *itksimg = fl_imgtk::rescale(_showImg, target_w, target_h,
-                                            static_cast<fl_imgtk::rescaletype>(imgtkScale-1));
+        // Let Fl_Image::draw() handling scaling
+        _anim->scale(targetW, targetH, 1, 1);
+        return;
+    }
+
+    // Let fl_imgtk do the scaling and Fl_Image::draw() no scaling
+    if (!noscale)
+    {
+        Fl_RGB_Image *itksimg = fl_imgtk::rescale(_showImg, targetW, targetH,
+                                            static_cast<fl_imgtk::rescaletype>(imgtkScale));
 
         if (itksimg != nullptr) { // CATMULL was not exposed in released fl_imgtk
             _showImg->release();
@@ -844,6 +841,7 @@ void XBox::updateImage() {
         }
     }
 
+    // 4. Checkerboard for transparency
     size_t pixels = (size_t)_showImg->w() * _showImg->h();
     if (pixels < (INT_MAX >> 2))
     {

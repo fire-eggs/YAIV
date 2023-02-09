@@ -165,6 +165,8 @@ private:
     void clearUserMesssageLater();
     static void cb_UserMsgTimeout(void *);
 
+    bool determineTargetSize(int imgW, int imgH, int winW, int winH, int& targetW, int& targetH);
+    
 private:
     bool _pan_with_mouse;
     int dragStartX; // mouse panning state
