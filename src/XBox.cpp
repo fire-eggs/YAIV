@@ -650,9 +650,10 @@ void XBox::image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg)
     updateImage();
 }
 
-void XBox::wipeShowImage() {
-    if (_showImg && _showImg != _img) {
-            _showImg->release();
+void XBox::wipeShowImage(bool force) {
+    if (_showImg && (_showImg != _img || force)) 
+    {
+        _showImg->release();
     }
     _showImg = nullptr;
 }
