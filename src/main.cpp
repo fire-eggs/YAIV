@@ -110,7 +110,15 @@ int main(int argc, char **argv) {
     
     cmdline(argc, argv, b2); // do this _after_ show() for label etc to be correct
 
-    return Fl::run();
+    auto result = Fl::run();
+    b2->wipeShowImage(true);
+    delete overlay;
+    delete b2;
+    delete tb;
+    overlay = nullptr;
+    b2 = nullptr;
+    tb = nullptr;
+    return result;
 }
 
 #ifndef _MSC_VER
