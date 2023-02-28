@@ -64,6 +64,8 @@ namespace Mediator {
         
         ACT_METADATA,
         ACT_DANBOORU,
+        
+        ACT_ZOOM100,
     };
         
     void send_message(int msg, int data);

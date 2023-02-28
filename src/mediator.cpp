@@ -323,6 +323,8 @@ void setTheme(int menuval) {
 
     static struct KeyAction keymap[] = 
     {
+        //key shift ctrl alt    msg       action
+        {'0',false,false,false, MSG_VIEW, ACT_ZOOM100},
         {'b',false,false,false, MSG_VIEW, ACT_BORDER},
         {'c',false,false,false, MSG_TB, ACT_CHK},
         {'d',false,false,false, MSG_TB, ACT_DANBOORU},

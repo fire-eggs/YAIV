@@ -320,6 +320,12 @@ void XBox::action(int act)
             change_zoom(-1);
             redraw();
             break;
+        case Mediator::ACT_ZOOM100:
+            _forceZoom = 1.0;
+            updateImage(); 
+            updateLabel();            
+            redraw();
+            break;
         case Mediator::ACT_ROTR:
             nextRotation();
             break;
@@ -646,6 +652,7 @@ void XBox::image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg)
     rotation = 0;
     _zoom = 1.0;
     _zoom_step = 0;
+    _forceZoom = -1.0;
     centerX = centerY = INT_MAX; // On next draw, center to window
     updateImage();
 }
@@ -667,6 +674,12 @@ bool XBox::determineTargetSize(int imgW, int imgH, int winW, int winH, int& targ
 
     targetW = imgW;
     targetH = imgH;
+    
+    if (_forceZoom > 0)
+    {
+        basezoom = _forceZoom;
+        goto forced_zoom;
+    }
     
     switch (draw_scale) {
         case ScaleMode::Noscale:
@@ -721,6 +734,8 @@ bool XBox::determineTargetSize(int imgW, int imgH, int winW, int winH, int& targ
             break;
     }
 
+forced_zoom:
+    
     if (_zoom_step)
     {
         // TODO change to be a lookup into a list of zoom levels

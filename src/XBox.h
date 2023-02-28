@@ -47,8 +47,9 @@ private:
     bool draw_check{true};
     ScaleMode draw_scale{Noscale};
     OverlayMode draw_overlay{OverlayNone};
-    double _zoom{1.0};
-    int _zoom_step = 0;
+    double _zoom{1.0};  // current zoom [from scale + zoom step]
+    int _zoom_step = 0; // amount of zoom [relative to scale]
+    double _forceZoom {-1.0};
     int _scroll_speed = 20;
 
     // Location of center of image
