@@ -84,7 +84,7 @@ Mediator::ACTIONS acts[] = {
         Mediator::ACT_EXIT,
 };
 
-Fl_Menu_Item scale_menu[6] =
+static Fl_Menu_Item scale_menu[6] =
         {
                 {"No scale",        0, nullptr, (void *)(fl_intptr_t) Mediator::ACT_SCALE_NONE},
                 {"Auto scale",      0, nullptr, (void *)(fl_intptr_t) Mediator::ACT_SCALE_AUTO},
