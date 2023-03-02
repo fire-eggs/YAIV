@@ -22,6 +22,9 @@
 #define MAIN_LABEL_COLOR "MainLabelColor"
 
 #define SLIDESHOW_DELAY "SlideShow_Delay"
+#define SLIDE_SHUFFLE   "SlideShow_Shuffle"
+#define SLIDE_BORDER    "SlideShow_Border"
+#define SLIDE_ERRORS    "SlideShow_SkipErrorFiles"
 
 #define BORDER_FLAG "BORDER"
 
@@ -29,7 +32,11 @@
 
 #define SCALE_MODE "DefaultScaling"
 #define DITHER_MODE "DefaultDither"
+
 #define OVERLAY "Overlay"
+#define CHECKER "Checkerboard"
+#define MINIMAP "MiniMap"
+#define LOAD_SHUFFLE "ShuffleOnLoad"
 
 class Prefs : public Fl_Preferences
 {
