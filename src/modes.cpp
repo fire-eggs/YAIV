@@ -29,12 +29,14 @@ std::string scaleModeToName(ScaleMode mode)
     return mode < ScaleModeMAX ? ScaleModeNames[mode] : ScaleModeNames[0];
 }
 
+#if 0
 // TODO obsolete - use scaleModeToName directly
 char *humanScale(ScaleMode val, char *buff, int buffsize)
 {
     strncpy(buff, scaleModeToName(val).c_str(), buffsize);
     return buff;
 }
+#endif
 
 #define XX(s) #s
 std::string ZScaleModeNames[] = {MODEStk(XX)};

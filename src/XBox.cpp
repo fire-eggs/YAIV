@@ -552,10 +552,9 @@ const char * XBox::getLabel(bool include_filename, char *buff, int buffsize)
     int h = _img ? _img->h() : 0;
     int depth = _img ? _img->d() : 0;
 
-    char scaletxt[10];
-    char * res = humanScale(draw_scale, scaletxt, sizeof(scaletxt)-1);
+    std::string scaletxt = scaleModeToName(draw_scale);
 
-    if (res == nullptr || _img == nullptr)
+    if (scaletxt.empty() || _img == nullptr)
     {
         // for the image label currently don't have filename, don't display extra dashes
         snprintf( buff, buffsize, "%d/%d%s%s", current_index,
@@ -574,7 +573,7 @@ const char * XBox::getLabel(bool include_filename, char *buff, int buffsize)
         snprintf_nowarn(buff, buffsize, "%d/%d - [%dx%dx%d%s%s] - (%d%%)[%s][%s]%s%s",
                         current_index, file_count, w, h, depth,
                         !include_filename ? "" : " - ",
-                        nicesize, outzoom, scaletxt, Zscaletxt, !include_filename ? "" : " - ",
+                        nicesize, outzoom, scaletxt.c_str(), Zscaletxt, !include_filename ? "" : " - ",
                         include_filename ? fullpath.c_str() : "");
     }
     return buff;
