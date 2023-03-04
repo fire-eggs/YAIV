@@ -7,6 +7,8 @@
 // Created by kevin on 6/21/21.
 //
 
+#include <locale>
+
 #include "XBox.h"
 #include "FL/fl_ask.H"
 #include "FL/Fl_File_Chooser.H"
@@ -18,13 +20,27 @@ extern filelist* box_filelist; // TODO member
 
 extern void showOptionsDlg(); // TODO
 
+
+// Sorting for fl_file_chooser which is UTF-8 aware. I.e. ".." sorts *before* Kanji.
+// NOTE: may not be numeric aware as is fl_numericsort.
+std::locale _loc;
+const std::collate<char>& coll2 = std::use_facet<std::collate<char>>(_loc);
+
+int blah(struct dirent **A, struct dirent **B)
+{
+  const char* a = (*A)->d_name;
+  const char* b = (*B)->d_name;
+  return coll2.compare(a, a + strlen(a), b, b + strlen(b)) > 0;
+}
+
 void XBox::load_request() {
 
     // 20220530 start with the last path used
     char** mru = _mru->getAll(); // TODO return a single path
     auto last = mru[0];
     
-    Fl_File_Chooser::sort = fl_numericsort;
+    //Fl_File_Chooser::sort = fl_numericsort;
+    Fl_File_Chooser::sort = blah;
     const char *fname =
             fl_file_chooser("Image file?","*.{bm,bmp,gif,jpg,jpeg,apng,png,webp"
                                           #ifdef FLTK_USE_SVG
