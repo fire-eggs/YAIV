@@ -96,7 +96,8 @@ void XBox::load_file(const char *n) {
     _mru->Save();
     
     Fl::wait(0.5); // Give the filescanner thread a chance to load file(s)
-    load_current();
+    // *don't* attempt to update yet, we won't have any images yet. wait for the update callback from the scanner
+//    load_current();
 }
 
 void XBox::drawMessage()
@@ -915,6 +916,9 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : SmoothResizeGroup(x,y,w,h
     _prefs->getS(OVERLAY, defaultScale, overlayModeToName(OverlayNone));
     draw_overlay = nameToOverlayMode(defaultScale);
 
+    int mmapVal;
+    _prefs->get(MINIMAP, mmapVal, 1);
+    
     rotation = 0;
 
     _mru = new MostRecentPaths(_prefs); // TODO consider singleton
@@ -922,7 +926,7 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : SmoothResizeGroup(x,y,w,h
     _mmoc = Fl_Color(0xFF555500); // TODO preferences
     _mmic = fl_lighter(_mmoc);    // TODO preferences
     _miniMapSize = 150; // TODO preferences?
-    _minimap = true;
+    _minimap = mmapVal; // TODO
 
     int mp;
     _prefs->get(MOUSE_PAN,mp,false); // TODO define 'bool' getter

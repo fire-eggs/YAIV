@@ -145,6 +145,7 @@ namespace Mediator {
             case MSG_REALUPDATE:
                 // update toolbar
                 // update titlebar
+                _viewer->load_current();
                 if (box_filelist->realCount() < 2)
                     _viewer->load_current();
                 else
