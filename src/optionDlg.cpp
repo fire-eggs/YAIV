@@ -70,6 +70,9 @@ CheckSetting _slideShuffle(SLIDE_SHUFFLE, 0);
 CheckSetting _slideBorder(SLIDE_BORDER, 1);
 CheckSetting _slideSkipError(SLIDE_ERRORS, 1);
 
+Fl_Choice *_scaleChoice;
+Fl_Choice *_zScaleChoice;
+
 void makeGeneralTab(int w, int h)
 {
     Fl_Group *o = new Fl_Group(10, TAB_Y, w-20, h-TAB_Y, "General");
@@ -128,24 +131,24 @@ void makeScaleTab(int w, int h)
 {
     Fl_Group *o = new Fl_Group(10, TAB_Y, w-20, h-TAB_Y, "Scaling");
     
-    std::string defaultScale;
+    std::string scaleName;
     
-    Fl_Choice *scaleC = new Fl_Choice(170, 65, 150, 30, "Default Scale:");
-    scaleC->menu(scale_menu);
-    _prefs->getS(SCALE_MODE, defaultScale, scaleModeToName(ScaleMode::Noscale));
-    ScaleMode sm = nameToScaleMode(defaultScale);
-    scaleC->value(sm);
+    _scaleChoice = new Fl_Choice(170, 65, 150, 30, "Default Scale:");
+    _scaleChoice->menu(scale_menu);
+    _prefs->getS(SCALE_MODE, scaleName, scaleModeToName(ScaleMode::Noscale));
+    ScaleMode sm = nameToScaleMode(scaleName);
+    _scaleChoice->value(sm);
 
-    Fl_Choice *ditherC = new Fl_Choice(170, 100, 150, 30, "Default Dither:");
+    _zScaleChoice = new Fl_Choice(170, 100, 150, 30, "Default Dither:");
     for (int i= ZScaleMode::None; i < ZScaleModeMAX; i++)
     {
         ZScaleMode z = static_cast<ZScaleMode>(i);
         std::string n = zScaleModeToName(z);
-        ditherC->add(n.c_str());
+        _zScaleChoice->add(n.c_str());
     }
-    _prefs->getS(DITHER_MODE, defaultScale, zScaleModeToName(ZScaleMode::None));
-    ZScaleMode zm = nameToZScaleMode(defaultScale);
-    ditherC->value(zm);
+    _prefs->getS(DITHER_MODE, scaleName, zScaleModeToName(ZScaleMode::None));
+    ZScaleMode zm = nameToZScaleMode(scaleName);
+    _zScaleChoice->value(zm);
     
     o->end();
 }
@@ -170,6 +173,18 @@ void On_OK(Fl_Widget *, void *)
     _slideBorder.save();
     _slideSkipError.save();
     
+    // TODO how to encapsulate this using an enum TYPE
+    int scaleValue = _scaleChoice->value();
+    ScaleMode sm = static_cast<ScaleMode>(scaleValue);
+    std::string scaleName = scaleModeToName(sm);
+    _prefs->set(SCALE_MODE, scaleName.c_str());
+
+    scaleValue = _zScaleChoice->value();
+    ZScaleMode zm = static_cast<ZScaleMode>(scaleValue);
+    scaleName = zScaleModeToName(zm);
+    _prefs->set(DITHER_MODE, scaleName.c_str());
+    
+    _prefs->flush();
     _optDlg->hide();
 }
 
