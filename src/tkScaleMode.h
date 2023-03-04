@@ -7,12 +7,13 @@
 
 // NOTE: these must match the value and sequence in fl_imgtk.h
 #define MODEStk(XX) \
-    XX(None),  \
+    XX(None),   \
     XX(Bilinear), \
-    XX(Bicubic), \
-    XX(Lanczos),   \
-    XX(Bspline),   \
-    XX(Catmull)
+    XX(Bicubic),  \
+    XX(Lanczos),  \
+    XX(Bspline),  \
+    XX(Catmull),  \
+    XX(LAST)
 
 #define XX(e) e
 enum ZScaleMode { MODEStk(XX), ZScaleModeMAX };

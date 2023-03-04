@@ -31,6 +31,53 @@ static Fl_Menu_Item scale_menu[6] =
     {nullptr} // end of menu
 };
 
+template <typename T> class EnumSetting
+{
+public:
+    Fl_Choice *combo;
+    std::string setting;
+    T def_value;
+
+    // TODO typedefs
+    std::string (*convertToString)(T);
+    T (*convertFromString)(const std::string& s);
+    
+    EnumSetting(const char *setstr, T val, std::string (*cvtTo)(T), T (*cvtFrom)(const std::string& s))
+    {
+        setting = setstr;
+        def_value = val;
+        
+        convertToString = cvtTo;
+        convertFromString = cvtFrom;
+    }
+
+    void init(Fl_Choice *w)
+    {
+        combo = w;
+        for (int i=0; i < T::LAST; i++) // NOTE enum must define LAST, first value must be 0
+        {   
+            std::string textVal = convertToString(static_cast<T>(i));
+            combo->add(textVal.c_str());
+        }
+    }
+    
+    void load()
+    {
+        std::string textVal;
+        std::string defVal = convertToString(def_value);
+        _prefs->getS(setting.c_str(), textVal, defVal.c_str());
+        T enumVal = convertFromString(textVal);
+        combo->value(enumVal);
+    }
+    
+    void save()
+    {
+        int selValue = combo->value();
+        T enumVal = static_cast<T>(selValue);
+        std::string enumText = convertToString(enumVal);
+        _prefs->set(setting.c_str(), enumText.c_str());
+    };
+};
 
 
 class CheckSetting
@@ -70,8 +117,11 @@ CheckSetting _slideShuffle(SLIDE_SHUFFLE, 0);
 CheckSetting _slideBorder(SLIDE_BORDER, 1);
 CheckSetting _slideSkipError(SLIDE_ERRORS, 1);
 
+CheckSetting _showMinimap(MINIMAP, 1);
+CheckSetting _showOverlay(OVERLAY, 1);
+
 Fl_Choice *_scaleChoice;
-Fl_Choice *_zScaleChoice;
+EnumSetting<ZScaleMode> _zScaleMode(DITHER_MODE, ZScaleMode::Bilinear, zScaleModeToName, nameToZScaleMode);
 
 void makeGeneralTab(int w, int h)
 {
@@ -79,15 +129,15 @@ void makeGeneralTab(int w, int h)
     
     Fl_Check_Button *cb1 = new Fl_Check_Button(15, 65, 250, 30, "Show checker background");
     _checker.init(cb1);
-    
+
+    // TODO choices: Off, On-Variant1, On-Variant2
     int val;
     Fl_Check_Button *cb2 = new Fl_Check_Button(15, 100, 250, 30, "Show overlay");
-    _prefs->get(OVERLAY, val, 1);
-    cb2->value(val);
+    _showOverlay.init(cb2);
     
+    // TODO choices: Off, On, On-when-zoom
     Fl_Check_Button *cb3 = new Fl_Check_Button(15, 135, 250, 30, "Show minimap");
-    _prefs->get(MINIMAP, val, 1);
-    cb3->value(val);
+    _showMinimap.init(cb3);
 
     Fl_Check_Button *cb4 = new Fl_Check_Button(15, 170, 250, 30, "Pan with mouse");
     _panMouse.init(cb4);
@@ -139,17 +189,10 @@ void makeScaleTab(int w, int h)
     ScaleMode sm = nameToScaleMode(scaleName);
     _scaleChoice->value(sm);
 
-    _zScaleChoice = new Fl_Choice(170, 100, 150, 30, "Default Dither:");
-    for (int i= ZScaleMode::None; i < ZScaleModeMAX; i++)
-    {
-        ZScaleMode z = static_cast<ZScaleMode>(i);
-        std::string n = zScaleModeToName(z);
-        _zScaleChoice->add(n.c_str());
-    }
-    _prefs->getS(DITHER_MODE, scaleName, zScaleModeToName(ZScaleMode::None));
-    ZScaleMode zm = nameToZScaleMode(scaleName);
-    _zScaleChoice->value(zm);
-    
+    Fl_Choice *ditherChoice = new Fl_Choice(170, 100, 150, 30, "Default Dither:");
+    _zScaleMode.init(ditherChoice);
+    _zScaleMode.load();
+
     o->end();
 }
 
@@ -158,7 +201,6 @@ void makeThemeTab(int w, int h)
     Fl_Group *o = new Fl_Group(10, TAB_Y, w-20, h-TAB_Y, "Theme");
     o->end();
 }
-
 
 void OnCancel(Fl_Widget *,void *) { _optDlg->hide(); }
 
@@ -172,6 +214,9 @@ void On_OK(Fl_Widget *, void *)
     _slideShuffle.save();
     _slideBorder.save();
     _slideSkipError.save();
+
+    _showMinimap.save();
+    _showOverlay.save();
     
     // TODO how to encapsulate this using an enum TYPE
     int scaleValue = _scaleChoice->value();
@@ -179,11 +224,8 @@ void On_OK(Fl_Widget *, void *)
     std::string scaleName = scaleModeToName(sm);
     _prefs->set(SCALE_MODE, scaleName.c_str());
 
-    scaleValue = _zScaleChoice->value();
-    ZScaleMode zm = static_cast<ZScaleMode>(scaleValue);
-    scaleName = zScaleModeToName(zm);
-    _prefs->set(DITHER_MODE, scaleName.c_str());
-    
+    _zScaleMode.save();
+
     _prefs->flush();
     _optDlg->hide();
 }
