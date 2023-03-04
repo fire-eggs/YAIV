@@ -179,8 +179,12 @@ void XBox::load_current() {
                                                    : Mediator::ACT_NONEXT);
     
     const char *fullpath = box_filelist->getCurrentFilePath();   
-    if (!fullpath) 
+    if (!fullpath)
+    {
+        showUserMessage("No image");
+        clearUserMesssageLater();
         return; // Nothing to do
+    }
 
     logit("Load %s", (char *)fullpath);
 
