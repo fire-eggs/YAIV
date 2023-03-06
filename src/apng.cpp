@@ -26,7 +26,11 @@ zlib license
 //#include </home/kevin/fltk/png/pnglibconf.h>
 
 #include "apng.h"
-#include "png/png.h"
+#ifdef FLTK_PROVIDES_PNG
+#include "png/png.h"   // fire-eggs modified FLTK PNG code
+#else
+#include <png.h>       // system-install PNG library
+#endif
 
 #define id_IHDR 0x52444849
 #define id_acTL 0x4C546361

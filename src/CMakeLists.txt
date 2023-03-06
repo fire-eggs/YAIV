@@ -1,12 +1,12 @@
 
 include(toolbar/CMakeLists.txt)
 
-add_compile_options( "-fexceptions" "-fopenmp" "-DFLTK_USE_SVG" "-DMETADATA" )
+add_compile_options( "-fexceptions" "-fopenmp" "-DFLTK_USE_SVG" "-DMETADATA" "-DFLTK_PROVIDES_PNG" )
 
 # optimize and strip appropriately
 add_link_options( "$<$<CONFIG:MINSIZEREL>:-O2;-s>" "$<$<CONFIG:RELEASE>:-O2;>" )
 
-#set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 
 # Using pango provides Unicode character display support
 #set(LINK_FLAGS -no-pie -fopenmp -lX11 -lXext -lm -ldl -lXinerama -lXcursor -lXi 
