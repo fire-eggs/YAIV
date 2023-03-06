@@ -23,7 +23,6 @@
 #include <unistd.h> // sleep
 #include <future> // std::future
 #include <chrono> // chrono literal
-using namespace std::chrono_literals;
 
 #ifdef DANBOORU
 #include "danbooru.h"
