@@ -184,8 +184,10 @@ fl_check_images(const char *name,               // I - Filename
             return new Fl_PNG_Image(name);
         case JPG:
             return new Fl_JPEG_Image(name);
+#ifdef FLTK_USE_SVG
         case SVG:
             return new Fl_SVG_Image(name);
+#endif /// of FLTK_USE_SVG
         case FAIL:
         default:
             return nullptr;
