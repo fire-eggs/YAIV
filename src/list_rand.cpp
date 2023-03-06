@@ -259,11 +259,11 @@ Fl_Image *loadFile(char *filename, XBox *owner)
         return img;
 
     // 3. Try to open as animated gif
-    Fl_Anim_GIF_Image *animgif = new Fl_Anim_GIF_Image(filename, nullptr, Fl_Anim_GIF_Image::Start);
+    Fl_AGIF_Image *animgif = new Fl_AGIF_Image(filename, nullptr, Fl_AGIF_Image::Start);
     if (animgif && animgif->valid() && animgif->is_animated()) // TODO can use fail() ?
     {
-        animgif->canvas(owner, Fl_Anim_GIF_Image::Flags::DontResizeCanvas |
-                             Fl_Anim_GIF_Image::Flags::DontSetAsImage);
+        animgif->canvas(owner, Fl_AGIF_Image::Flags::DontResizeCanvas |
+                             Fl_AGIF_Image::Flags::DontSetAsImage);
         return animgif;
     }
 

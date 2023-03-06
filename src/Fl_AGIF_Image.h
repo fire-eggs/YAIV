@@ -2,8 +2,10 @@
 // Created by kevin on 5/11/21.
 //
 
-#ifndef CLION_TEST2_FL_ANIM_GIF_IMAGE_H
-#define CLION_TEST2_FL_ANIM_GIF_IMAGE_H
+// * FLTK-1.4.0 warning : 
+//      Fl_AGIF_Image has been embedded into FLTK-1.4.0,
+#ifndef CLION_TEST2_Fl_AGIF_Image_H
+#define CLION_TEST2_Fl_AGIF_Image_H
 
 class Fl_Image;
 class Fl_Widget;
@@ -11,7 +13,7 @@ class Fl_Widget;
 #include <FL/Fl_Pixmap.H>
 
 /**
- The Fl_Anim_GIF_Image class supports loading, caching,
+ The Fl_AGIF_Image class supports loading, caching,
  and drawing of animated Compuserve GIF<SUP>SM</SUP> images.
  The class loads all images contained in the file and animates
  them by cycling through them as defined by the delay times in
@@ -24,14 +26,14 @@ class Fl_Widget;
 //typedef Fl_GIF_Image Inherited;
 typedef Fl_Pixmap Inherited;
 
-class FL_EXPORT Fl_Anim_GIF_Image : public Inherited {
+class FL_EXPORT Fl_AGIF_Image : public Inherited {
 public:
 
     static bool animate;
     class FrameInfo; // internal helper class
 
     /**
-     When opening a Fl_Anim_GIF_Image there are some options
+     When opening a Fl_AGIF_Image there are some options
      that can be passed in a 'flags' value.
      */
     enum Flags {
@@ -81,11 +83,11 @@ public:
      If 'Start' is specified in the 'flags' parameter it calls start()
      after successful load.
      */
-    explicit Fl_Anim_GIF_Image(const char *name_, Fl_Widget *canvas_ = 0, unsigned short flags_ = 0);
-    Fl_Anim_GIF_Image();
-    Fl_Anim_GIF_Image(const char *name, int loopCount, int W, int H); // KBR webp
+    explicit Fl_AGIF_Image(const char *name_, Fl_Widget *canvas_ = 0, unsigned short flags_ = 0);
+    Fl_AGIF_Image();
+    Fl_AGIF_Image(const char *name, int loopCount, int W, int H); // KBR webp
 
-    ~Fl_Anim_GIF_Image() override;
+    ~Fl_AGIF_Image() override;
     /**
      The canvas() method sets or gets the current widget, that
      is used for display of the frame images.
@@ -192,7 +194,7 @@ public:
      The min_delay value can be used to set a minimum value
      for the frame delay for playback. This is to prevent
      cpu hogs caused by images with very low delay rates.
-     This is a global value for all Fl_Anim_GIF_Image objects.
+     This is a global value for all Fl_AGIF_Image objects.
      */
     static double min_delay;
     /**
@@ -211,8 +213,8 @@ public:
      The resize() method resizes the image to the
      specified size, replacing the current image.
      */
-    Fl_Anim_GIF_Image& resize(int W_, int H_);
-    Fl_Anim_GIF_Image& resize(double scale_);
+    Fl_AGIF_Image& resize(int W_, int H_);
+    Fl_AGIF_Image& resize(double scale_);
     /**
      The speed() method changes the playing speed
      to speed_ x original speed. E.g. to play at half
@@ -270,4 +272,4 @@ private:
     FrameInfo *_fi;
 };
 
-#endif //CLION_TEST2_FL_ANIM_GIF_IMAGE_H
+#endif //CLION_TEST2_Fl_AGIF_Image_H

@@ -15,7 +15,7 @@ extern "C" {
 #include <webp/demux.h>
 };
 
-#include "Fl_Anim_GIF_Image.h"
+#include "Fl_AGIF_Image.h"
 #include "Webp.h"
 
 /*
@@ -189,7 +189,7 @@ AnimatedImage* ReadAnimatedImage(const uint8_t* const data, size_t data_size)
         return nullptr;
     }
 
-    // TODO these go into some sort of 'animated image' object - Fl_Anim_GIF_Image ?
+    // TODO these go into some sort of 'animated image' object - Fl_AGIF_Image ?
     AnimatedImage * image = new AnimatedImage();
     memset(image, 0, sizeof(*image));
 
@@ -288,15 +288,15 @@ Fl_Image* LoadWebp(const char* filename, Fl_Widget *canvas=nullptr)
             // convert to FL_Animate_GIF_Image compatible
             unsigned int W = image->canvas_width;
             unsigned int H = image->canvas_height;
-            auto* gif = new Fl_Anim_GIF_Image(filename, (int)image->loop_count, W, H);
+            auto* gif = new Fl_AGIF_Image(filename, (int)image->loop_count, W, H);
             for (unsigned int i = 0; i < image->num_frames; i++)
             {
                 DecodedFrame* frame = &(image->frames[i]);
                 gif->add_frame(frame->rgba, frame->duration, W, H, true);
             }
             gif->start();
-            gif->canvas(canvas, Fl_Anim_GIF_Image::Flags::DontResizeCanvas |
-                                Fl_Anim_GIF_Image::Flags::DontSetAsImage);
+            gif->canvas(canvas, Fl_AGIF_Image::Flags::DontResizeCanvas |
+                                Fl_AGIF_Image::Flags::DontSetAsImage);
 
             WebPFree((void*)data); // valgrind mem leak
             delete image->frames;

@@ -10,7 +10,7 @@
 #include <climits> // INT_MAX, INT_MIN
 
 #include <FL/Fl_Group.H>
-#include <Fl_Anim_GIF_Image.h>
+#include "Fl_AGIF_Image.h"
 #include <FL/Fl_Menu_Item.H>
 #include <FL/fl_draw.H>
 #include <FL/filename.H>
@@ -42,7 +42,7 @@ public:
 private:
     Fl_Image *_img{}; // the original image loaded from disk
     Fl_RGB_Image *_showImg{}; // the "back-buffer" image: rotated, scaled, checkered
-    Fl_Anim_GIF_Image *_anim{}; // an original animation loaded from disk
+    Fl_AGIF_Image *_anim{}; // an original animation loaded from disk
 
     bool draw_check{true};
     ScaleMode draw_scale{Noscale};
@@ -122,7 +122,7 @@ public:
     void draw() override;
 
     void do_menu(int, int, bool);
-    void image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg);
+    void image(Fl_Image *newImg, Fl_AGIF_Image *animimg);
 
     void load_current(); // exposed for slideshow
     void next_image();   // exposed for slideshow

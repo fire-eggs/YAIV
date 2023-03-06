@@ -16,12 +16,12 @@ maxst at users.sourceforge.net
 zlib license
 */
 
-// Adapted to provide a Fl_RGB_Image* or a Fl_Anim_GIF_Image*, as necessary
+// Adapted to provide a Fl_RGB_Image* or a Fl_AGIF_Image*, as necessary
 
 #include <cstdio>
 #include <cstring>
 #include <vector>
-#include "Fl_Anim_GIF_Image.h"
+#include "Fl_AGIF_Image.h"
 
 //#include </home/kevin/fltk/png/pnglibconf.h>
 
@@ -435,7 +435,7 @@ Fl_Image* LoadAPNG(const char *filename, Fl_Widget *canvas= nullptr)
         Image img=imgs[0];
         int w = img.w;
         int h = img.h;
-        auto* gif = new Fl_Anim_GIF_Image(filename, (int)num_frames, w, h);
+        auto* gif = new Fl_AGIF_Image(filename, (int)num_frames, w, h);
         for (int i = 0; i < num_frames; i++) {
 
             int delay_num = imgs[i].delay_num;
@@ -448,14 +448,14 @@ Fl_Image* LoadAPNG(const char *filename, Fl_Widget *canvas= nullptr)
             // TODO how/why are images ceasing playback?
             // TODO where is loopcount stored?
             // TODO the 20 multiplier is arbitrary but approximates the playback speed in Chrome
-            // *10 would be tenths of second as per Fl_Anim_GIF_Image
+            // *10 would be tenths of second as per Fl_AGIF_Image
             gif->add_frame(imgs[i].p, (int)delay * 20, w, h, true); // cleanup on release()
             imgs[i].p = nullptr; // cleanup
             imgs[i].free();
         }
         gif->start();
-        gif->canvas(canvas, Fl_Anim_GIF_Image::Flags::DontResizeCanvas |
-                                  Fl_Anim_GIF_Image::Flags::DontSetAsImage);
+        gif->canvas(canvas, Fl_AGIF_Image::Flags::DontResizeCanvas |
+                                  Fl_AGIF_Image::Flags::DontSetAsImage);
         return gif;
     }
     else {

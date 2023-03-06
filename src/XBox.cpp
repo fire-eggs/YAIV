@@ -236,15 +236,15 @@ void XBox::load_current() {
         }
         else
         {
-            //Fl_Anim_GIF_Image::min_delay = 0.01;
+            //Fl_AGIF_Image::min_delay = 0.01;
             // KBR 20220528 undocumented 'standard': minimum GIF playback is 0.2 seconds, see Netscape history
-            Fl_Anim_GIF_Image::min_delay = 0.02;
-            Fl_Anim_GIF_Image::animate = true;
+            Fl_AGIF_Image::min_delay = 0.02;
+            Fl_AGIF_Image::animate = true;
 
             send_message(Mediator::MSGS::MSG_NEWFILE, 0);
 
             label(nullptr); // wipe any previous folder/error-file
-            Fl_Anim_GIF_Image* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(img);
+            Fl_AGIF_Image* animgif = dynamic_cast<Fl_AGIF_Image*>(img);
             image(img, animgif);
         }
     }
@@ -632,16 +632,16 @@ void XBox::updateDisplay() {
     notifyDisplayInfo(l);
 }
 
-void XBox::image(Fl_Image *newImg, Fl_Anim_GIF_Image *animimg)
+void XBox::image(Fl_Image *newImg, Fl_AGIF_Image *animimg)
 {
     wipeShowImage();
 
     if (_anim)
     {
-        //Fl_Anim_GIF_Image* animgif = dynamic_cast<Fl_Anim_GIF_Image*>(_img);
+        //Fl_AGIF_Image* animgif = dynamic_cast<Fl_AGIF_Image*>(_img);
         _anim->stop();
         _anim->canvas(nullptr);
-//        Fl_Anim_GIF_Image::animate = false;
+//        Fl_AGIF_Image::animate = false;
         delete _anim;
     }
 
