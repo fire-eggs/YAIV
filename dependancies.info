@@ -1,0 +1,15 @@
+Some dependencies for MSYS2 + MinGW-W64
+
+SQLite3
+  $ pacman -S sqlite
+
+WEBp ( https://packages.msys2.org/package/mingw-w64-x86_64-libwebp )
+  $ pacman -S mingw-w64-x86_64-libwebp
+
+Linux ---
+
+SQLite3
+  $ sudo apt-get install libsqlite3-dev
+
+WEBp
+  $ sudo apt-get install libwebp-dev
