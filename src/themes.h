@@ -1,9 +1,8 @@
 #ifndef THEMES_H
 #define THEMES_H
 
-#pragma warning(push, 0)
+#include <string>
 #include <FL/Enumerations.H>
-#pragma warning(pop)
 
 //#include "utils.h"
 
@@ -46,9 +45,28 @@
 
 #define OS_TAB_COLOR FL_FREE_COLOR
 
+#define THEMES(Y) \
+    Y(CLASSIC), \
+    Y(AERO),    \
+    Y(METRO),   \
+    Y(AQUA),    \
+    Y(GREYBIRD),\
+    Y(OCEAN),   \
+    Y(BLUE),    \
+    Y(OLIVE),   \
+    Y(ROSE_GOLD), \
+    Y(DARK),    \
+    Y(HIGH_CONTRAST), \
+    Y(LAST)
+
+#define Y(e) e
+enum class Theme { THEMES(Y) };
+#undef Y
+
 class OS {
 public:
-	enum class Theme { CLASSIC, AERO, METRO, AQUA, GREYBIRD, OCEAN, BLUE, OLIVE, ROSE_GOLD, DARK, HIGH_CONTRAST };
+	
+//	enum class Theme { CLASSIC, AERO, METRO, AQUA, GREYBIRD, OCEAN, BLUE, OLIVE, ROSE_GOLD, DARK, HIGH_CONTRAST };
 private:
 	static Theme _current_theme;
 	static bool _is_consolas;

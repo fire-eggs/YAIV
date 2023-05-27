@@ -12,8 +12,6 @@
 #include <WinUser.h>
 #endif
 
-//#include "utils.h"
-
 #ifndef _countof
 #define _countof(a) (sizeof(a) / sizeof(a[0]))
 #endif
@@ -2923,7 +2921,8 @@ void OS::use_high_contrast_theme() {
 #ifdef _WIN32
 OS::Theme OS::_current_theme = is_classic_windows() ? Theme::CLASSIC : is_modern_windows() ? Theme::METRO : Theme::AERO;
 #else
-OS::Theme OS::_current_theme = Theme::GREYBIRD;
+//OS::Theme OS::_current_theme = Theme::GREYBIRD;
+Theme OS::_current_theme = Theme::GREYBIRD;
 #endif
 
 bool OS::_is_consolas = false;
