@@ -584,26 +584,16 @@ const char * XBox::getLabel(bool include_filename, char *buff, int buffsize)
 }
 
 void XBox::next_scale() {
-    int next_scale = (ScaleMode)((int)draw_scale + 1);
-    if (next_scale >= ScaleModeMAX)
-        next_scale = ScaleMode::Noscale;
+    int next_scale = ((int)draw_scale + 1);
+    if (next_scale >= static_cast<int>(ScaleMode::LAST))
+        next_scale = static_cast<int>(ScaleMode::Noscale);
     Mediator::ACTIONS act = static_cast<Mediator::ACTIONS>((int)next_scale + (int)Mediator::ACTIONS::ACT_SCALE_NONE);
     send_message(Mediator::MSG_TB, act);
-/*
-    draw_scale = (ScaleMode)((int)draw_scale + 1);
-    if (draw_scale >= ScaleModeMAX)
-        draw_scale = ScaleMode::Noscale;
-    _zoom_step = 0;
-
-    updateImage();
-    updateLabel();
-    redraw();
-*/
 }
 
 void XBox::nextTkScale() {
     imgtkScale = (ZScaleMode)((int)imgtkScale + 1);
-    if (imgtkScale >= ZScaleModeMAX)
+    if (imgtkScale >= ZScaleMode::LAST)
         imgtkScale = ZScaleMode::None;
 
     updateImage();
@@ -733,7 +723,7 @@ bool XBox::determineTargetSize(int imgW, int imgH, int winW, int winH, int& targ
             break;
 
         default:
-        case ScaleMode::ScaleModeMAX:
+        case ScaleMode::LAST:
             break;
     }
 
@@ -906,7 +896,7 @@ XBox::XBox(int x, int y, int w, int h, Prefs *prefs) : SmoothResizeGroup(x,y,w,h
     draw_check = false;
 
     std::string defaultScale;
-    _prefs->getS(SCALE_MODE, defaultScale, scaleModeToName(Noscale));
+    _prefs->getS(SCALE_MODE, defaultScale, scaleModeToName(ScaleMode::Noscale));
     draw_scale = nameToScaleMode(defaultScale);
 
     _prefs->getS(DITHER_MODE, defaultScale, zScaleModeToName(ZScaleMode::None));

@@ -16,10 +16,11 @@
     X(Auto), \
     X(Fit),  \
     X(Wide), \
-    X(High)
+    X(High), \
+    X(LAST)
 
 #define X(e) e
-enum ScaleMode { MODES(X), ScaleModeMAX };
+enum class ScaleMode { MODES(X) };
 #undef X
 
 ScaleMode nameToScaleMode( const std::string& s );

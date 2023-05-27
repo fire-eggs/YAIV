@@ -45,7 +45,7 @@ private:
     Fl_AGIF_Image *_anim{}; // an original animation loaded from disk
 
     bool draw_check{true};
-    ScaleMode draw_scale{Noscale};
+    ScaleMode draw_scale{ScaleMode::Noscale};
     OverlayMode draw_overlay{OverlayNone};
     double _zoom{1.0};  // current zoom [from scale + zoom step]
     int _zoom_step = 0; // amount of zoom [relative to scale]

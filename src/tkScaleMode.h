@@ -16,7 +16,7 @@
     XX(LAST)
 
 #define XX(e) e
-enum ZScaleMode { MODEStk(XX), ZScaleModeMAX };
+enum class ZScaleMode { MODEStk(XX) };
 #undef XX
 
 ZScaleMode nameToZScaleMode( const std::string& s );

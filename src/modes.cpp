@@ -19,24 +19,15 @@ std::string ScaleModeNames[] = {MODES(X)};
 
 ScaleMode nameToScaleMode( const std::string& s )
 {
-    auto res = std::find( ScaleModeNames, ScaleModeNames+ScaleModeMAX, s);
+    auto res = std::find( ScaleModeNames, ScaleModeNames+static_cast<int>(ScaleMode::LAST), s);
     ScaleMode val = ScaleMode( res - ScaleModeNames );
-    return val == ScaleModeMAX ? Noscale : val;
+    return val == ScaleMode::LAST ? ScaleMode::Noscale : val;
 }
 
 std::string scaleModeToName(ScaleMode mode)
 {
-    return mode < ScaleModeMAX ? ScaleModeNames[mode] : ScaleModeNames[0];
+    return mode < ScaleMode::LAST ? ScaleModeNames[static_cast<int>(mode)] : ScaleModeNames[0];
 }
-
-#if 0
-// TODO obsolete - use scaleModeToName directly
-char *humanScale(ScaleMode val, char *buff, int buffsize)
-{
-    strncpy(buff, scaleModeToName(val).c_str(), buffsize);
-    return buff;
-}
-#endif
 
 #define XX(s) #s
 std::string ZScaleModeNames[] = {MODEStk(XX)};
@@ -44,14 +35,14 @@ std::string ZScaleModeNames[] = {MODEStk(XX)};
 
 ZScaleMode nameToZScaleMode( const std::string& s )
 {
-    auto res = std::find( ZScaleModeNames, ZScaleModeNames+ZScaleModeMAX, s);
+    auto res = std::find( ZScaleModeNames, ZScaleModeNames+static_cast<int>(ZScaleMode::LAST), s);
     ZScaleMode val = ZScaleMode( res - ZScaleModeNames );
-    return val == ZScaleModeMAX ? ZScaleMode::None : val;
+    return val == ZScaleMode::LAST ? ZScaleMode::None : val;
 }
 
 std::string zScaleModeToName(ZScaleMode mode)
 {
-    return mode < ZScaleModeMAX ? ZScaleModeNames[mode] : ZScaleModeNames[0];
+    return mode < ZScaleMode::LAST ? ZScaleModeNames[static_cast<int>(mode)] : ZScaleModeNames[0];
 }
 
 // TODO obsolete - use zScaleModeToName directly
@@ -82,6 +73,14 @@ OverlayMode nextOverlay(OverlayMode val)
     OverlayMode res = (OverlayMode)((int) val + 1);
     return res >= OverlayModeMAX ? OverlayNone : res;
 }
+
+#include "themes.h"
+
+#define Y(s) #s
+std::string ThemeNames[] = {THEMES(Y)};
+#undef Y
+
+
 #ifndef _MSC_VER
 #pragma clang diagnostic pop
 #endif

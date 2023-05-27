@@ -54,7 +54,7 @@ public:
     void init(Fl_Choice *w)
     {
         combo = w;
-        for (int i=0; i < T::LAST; i++) // NOTE enum must define LAST, first value must be 0
+        for (int i=0; i < static_cast<int>(T::LAST); i++) // NOTE enum must define LAST, first value must be 0
         {   
             std::string textVal = convertToString(static_cast<T>(i));
             combo->add(textVal.c_str());
@@ -67,7 +67,7 @@ public:
         std::string defVal = convertToString(def_value);
         _prefs->getS(setting.c_str(), textVal, defVal.c_str());
         T enumVal = convertFromString(textVal);
-        combo->value(enumVal);
+        combo->value(static_cast<int>(enumVal));
     }
     
     void save()
@@ -130,7 +130,7 @@ void makeGeneralTab(int w, int h)
     Fl_Check_Button *cb1 = new Fl_Check_Button(15, 65, 250, 30, "Show checker background");
     _checker.init(cb1);
 
-    // TODO choices: Off, On-Variant1, On-Variant2
+    // TODO choices: Off, OverlayText, OverlayBox
     int val;
     Fl_Check_Button *cb2 = new Fl_Check_Button(15, 100, 250, 30, "Show overlay");
     _showOverlay.init(cb2);
@@ -187,7 +187,7 @@ void makeScaleTab(int w, int h)
     _scaleChoice->menu(scale_menu);
     _prefs->getS(SCALE_MODE, scaleName, scaleModeToName(ScaleMode::Noscale));
     ScaleMode sm = nameToScaleMode(scaleName);
-    _scaleChoice->value(sm);
+    _scaleChoice->value(static_cast<int>(sm));
 
     Fl_Choice *ditherChoice = new Fl_Choice(170, 100, 150, 30, "Default Dither:");
     _zScaleMode.init(ditherChoice);
