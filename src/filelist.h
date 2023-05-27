@@ -24,7 +24,6 @@ private:
     void step(int delta);
     bool skip();
     int find_file(const char *n);
-    static int filename_path(const char* buf, char *to);
 
     std::vector<std::string> _hidden;
     std::vector<std::string> _favs;
@@ -35,6 +34,8 @@ private:
     bool addToHidden();
     
 public:
+    static int filename_path(const char* buf, char *to);
+
     filelist();
     void load_filelist(const char *);
     void load_file(const char *);

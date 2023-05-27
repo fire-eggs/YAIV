@@ -154,6 +154,10 @@ namespace Mediator {
                     _viewer->updateDisplay();
                 }
                 break;
+            case MSG_SPAWN:
+                int index = static_cast<int>(msg2->data);
+                execSpawn(index);
+                break;
         }
         delete msg2;
     }
@@ -183,7 +187,7 @@ namespace Mediator {
     
         int msg;
         int act;
-        bool res = lookupKey(key, keyStateCtrl, msg, act);
+        bool res = lookupKey(key, keyStateCtrl, keyStateAlt, msg, act);
         if (res)
             send_message(msg, act); // TODO invoke directly
     }
@@ -326,6 +330,7 @@ void setTheme(int menuval) {
     {
         //key shift ctrl alt    msg       action
         {'0',false,false,false, MSG_VIEW, ACT_ZOOM100},
+        {'1',false,false,true,  MSG_SPAWN, static_cast<ACTIONS>(1) },
         {'b',false,false,false, MSG_VIEW, ACT_BORDER},
         {'c',false,false,false, MSG_TB, ACT_CHK},
         {'d',false,false,false, MSG_TB, ACT_DANBOORU},
@@ -362,7 +367,7 @@ void setTheme(int menuval) {
         {FL_BackSpace,false,false,false, MSG_VIEW, ACT_PREV},
     };
     
-    bool lookupKey(int key, int ctrl, int& msg, int& act)
+    bool lookupKey(int key, int ctrl, int alt, int& msg, int& act)
     {
         int len = sizeof(keymap) / sizeof(struct KeyAction);
         for (int i = 0; i < len; i++)
@@ -378,4 +383,53 @@ void setTheme(int menuval) {
         }
         return false;
     }
+    
+    void execSpawn(int index)
+    {
+        // TODO slideshow?
+        if (!box_filelist)
+            return; // No active file
+            
+        const char *p = box_filelist->getCurrentFilePath();
+        printf("Path:|%s| Cmd:%d\n", p, index);
+
+        // 1. load from INI: command, whether to prompt to confirm
+        // 2. replace magic codes in command, e.g. $PATH
+        // 2a. prompt for any input (e.g. "Rename" is |cp "$PATH" "$ROOT\%"New file name:%"|)
+        //     where %% indicates a prompt for string input
+        // 3. send to popen()
+        // 4. any output from popen, show
+        char root[2048];        
+        root[0] = '\0';
+        filelist::filename_path(p, root);
+
+        std::string cmd;
+        cmd = "cp \"";
+        cmd.append(p);
+        cmd.append("\" \"");
+        cmd.append(root);
+        cmd.append("/bad/newname.ext");
+
+        // messages to stderr can't be read from popen unless redirected to stdout
+        cmd.append("\" 2>&1"); 
+        
+        printf("Exec: %s\n", cmd.c_str());
+
+        // Execute the command in a shell, grabbing any output sent to stdout 
+        // (and stderr, see comment above). If the command executes without
+        // output, it was successful. Any output recorded probably means an error.
+        FILE *fp;
+        fp = popen(cmd.c_str(), "r");
+        if (fp != nullptr)
+        {
+            char buff[1024];
+            std::string outstr = "";
+            while (fgets(buff, sizeof(buff), fp))
+                outstr.append(buff);
+            pclose(fp);
+            
+            printf("Result:|%s|\n", outstr.c_str());
+        }
+    }
+    
 }

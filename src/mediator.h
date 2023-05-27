@@ -17,6 +17,7 @@ namespace Mediator {
         MSG_NEWFILE=2,
         MSG_REALUPDATE,
         MSG_VIEW,
+        MSG_SPAWN,
     };
 
     enum ACTIONS {
@@ -78,9 +79,11 @@ namespace Mediator {
     
     void setTheme(int);
 
-    bool lookupKey(int key, int ctrl, int& msg, int& act);
+    bool lookupKey(int key, int ctrl, int alt, int& msg, int& act);
 
     void initialize(XBox *, Prefs *, ButtonBar *);
+    
+    void execSpawn(int);
 }
 
 #endif //YAIV_MEDIATOR_H
