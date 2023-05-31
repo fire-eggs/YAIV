@@ -2,6 +2,7 @@
 // Created by kevin on 7/6/21.
 //
 #include <FL/Fl.H>
+#include <FL/fl_ask.H>
 #include "mediator.h"
 #include "toolbar/buttonBar.h"
 #include "filelist.h"
@@ -399,21 +400,28 @@ void setTheme(int menuval) {
         //     where %% indicates a prompt for string input
         // 3. send to popen()
         // 4. any output from popen, show
+        /*
         char root[2048];        
         root[0] = '\0';
         filelist::filename_path(p, root);
-
+*/
+        // TODO
+        // hard-coded 'remove' with prompt
+        if (fl_choice("Do you want to delete %s?", "Yes", "No", nullptr, p))
+            return;
+        
         std::string cmd;
-        cmd = "cp \"";
+        cmd = "rm \"";
         cmd.append(p);
-        cmd.append("\" \"");
-        cmd.append(root);
-        cmd.append("/bad/newname.ext");
+        //cmd.append("\" \"");
+        cmd.append("\"");
+        //cmd.append(root);
+        //cmd.append("/bad/newname.ext");
 
         // messages to stderr can't be read from popen unless redirected to stdout
-        cmd.append("\" 2>&1"); 
+        cmd.append(" 2>&1"); 
         
-        printf("Exec: %s\n", cmd.c_str());
+        //printf("Exec: %s\n", cmd.c_str());
 
         // Execute the command in a shell, grabbing any output sent to stdout 
         // (and stderr, see comment above). If the command executes without
@@ -427,8 +435,10 @@ void setTheme(int menuval) {
             while (fgets(buff, sizeof(buff), fp))
                 outstr.append(buff);
             pclose(fp);
-            
-            printf("Result:|%s|\n", outstr.c_str());
+          
+            if (outstr.length() > 0)
+                fl_alert("Bad result: %s", outstr.c_str());
+//            printf("Result:|%s|\n", outstr.c_str());
         }
     }
     
