@@ -22,7 +22,7 @@ Fl_Text_Display *txtout;
 Fl_Text_Buffer *textbuf;
 Fl_Text_Buffer *stylebuf;
 
-const char *labels = "Copyright:\nArtist:\nCharacters:\nMeta:\nTags:\n";
+const char *labels = "Notes:\nCopyright:\nArtist:\nCharacters:\nMeta:\nTags:\n";
 
 // TODO customization of text size
 // TODO customization of text styles
@@ -89,6 +89,7 @@ void shutdown_danbooru()
 // TODO member vars?
 std::vector<std::string> *_tags;
 std::vector<std::string> *_tagcat;
+std::string _noteCount;
 
 void addTags(const char *category, const char *label, std::vector<std::string> *tags, std::vector<std::string> *tagcat,
              char *tmptxt, char *tmpsty);
@@ -97,6 +98,12 @@ static int id_callback(void *data, int argc, char **argv, char **azColName)
 {
     _tags->push_back(std::string(*argv));
     _tagcat->push_back(std::string(*(argv+1)));
+    return 0;
+}
+
+static int notecount_callback(void *data, int argc, char **argv, char **azColName)
+{
+    _noteCount.append(std::string(*argv));
     return 0;
 }
 
@@ -175,6 +182,14 @@ void update_danbooru(char *filename) // TODO class member?
         sqlite3_free(zErrMsg);
     }
 
+    _noteCount = "";
+    sprintf(query, "select count(note_id) from notes where image_id='%llu'", image_id);
+    rc = sqlite3_exec(db, query, notecount_callback, nullptr, &zErrMsg);
+    if (rc != SQLITE_OK) {
+        fl_alert("Note Count fetch for %s : %s", nm, zErrMsg);
+        sqlite3_free(zErrMsg);
+    }
+    
     // 1. Determine total size of output text [tags, labels, newlines]
     size_t totsize = 0;
     for (const std::string& t: *_tags)
@@ -186,6 +201,8 @@ void update_danbooru(char *filename) // TODO class member?
         return;
     }
     totsize += strlen(labels) + 1;
+    
+    totsize += 5; // Notes count
 
     // 2. allocate temp text/style bufs
     char *tmptxt = new char[totsize + 1];
@@ -193,6 +210,26 @@ void update_danbooru(char *filename) // TODO class member?
     memset(tmptxt, 0, totsize+1);
     memset(tmpsty, 0, totsize+1);
 
+    // Add the label, with style.
+    strcat(tmptxt,"Notes:");
+    for (int i=0; i < strlen("Notes:"); i++)
+        strcat(tmpsty, "F");
+
+    // default styled newline
+    strcat(tmptxt, "\n");
+    strcat(tmpsty, "A");
+
+    strcat(tmptxt, _noteCount.c_str());
+
+    // style it
+    for (int i=0; i< _noteCount.size(); i++)
+        strcat(tmpsty, "A");
+
+    // default styled newline
+    strcat(tmptxt, "\n");
+    strcat(tmpsty, "A");
+    
+    
     // TODO consider not outputting label if no tags in category
     // 3. add tags of different category with appropriate (styled) label
     addTags("3","Copyright:",_tags,_tagcat,tmptxt,tmpsty);
