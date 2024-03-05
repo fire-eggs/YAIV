@@ -53,9 +53,10 @@ ifeq ($(ARCH_S),Darwin)
     GCC = llvm-gcc
     CPP = llvm-g++
     CXXOPTS  += -std=c++11
-    ifeq ($(shell test $(ARCH_R) -gt 19; echo $$?),0)
-        COPTS += -arch x86_64 -arch arm64
-    endif
+# -- google libwebp don't support universal binary --
+#    ifeq ($(shell test $(ARCH_R) -gt 19; echo $$?),0)
+#        COPTS += -arch x86_64 -arch arm64
+#    endif
     LOPTS += -lwebp -lwebpdemux -lwebpmux
     ifeq ($(DEBUG),0)
 	    LTWKS += -s

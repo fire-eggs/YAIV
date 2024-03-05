@@ -103,7 +103,7 @@ public:
     {
         // FLTK colors are in the format RGBA
         char buf[10];
-        sprintf(buf, "%X", val);
+        snprintf(buf, 10, "%X", val);
         Fl_Preferences::set(n, buf);
     }
 };

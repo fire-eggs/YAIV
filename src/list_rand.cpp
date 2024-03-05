@@ -141,6 +141,14 @@ ImageFormat readImageHeader(uchar *header, int headerlen)
 #include <fcntl.h> // O_RDONLY
 #include <unistd.h>  // close()
 
+#ifndef O_DIRECT
+    #define O_DIRECT 040000
+#endif
+
+#ifndef O_NOATIME
+    #define O_NOATIME 01000000
+#endif
+
 ImageFormat getImageFormatAt(int dirfd, const char *filename)
 {
     uchar header[64];

@@ -183,7 +183,7 @@ namespace Mediator {
         int keyStateCtrl = Fl::event_state(FL_CTRL);
         int keyStateCmd = 0;
 #ifdef __APPLE__
-        int keyStateCmd = Fl::event_state(FL_COMMAND);
+        keyStateCmd = Fl::event_state(FL_COMMAND);
 #endif
     
         int msg;
