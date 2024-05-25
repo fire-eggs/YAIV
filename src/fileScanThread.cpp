@@ -65,8 +65,14 @@ void *fileScanner(void *p)
     for (int i=0; i < _filelist->oldFileCount(); i++)
     {
         dirent *ent = _filelist->get_entry(i);
-        if (ent->d_type != DT_REG)
+
+        // 20240525 files accessed via SAMBA are of type DT_UNKNOWN. Stop limiting to regular files, 
+        // which has the benefit of handling symbolic links too. 
+//        if (ent->d_type != DT_REG)
+//            continue;
+        if (ent->d_type == DT_DIR || ent->d_type == DT_CHR || ent->d_type == DT_BLK)
             continue;
+        
         
         char fullpath[FL_PATH_MAX*2];
         strcpy(fullpath, fn);
