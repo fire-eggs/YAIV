@@ -94,14 +94,14 @@ std::string _noteCount;
 void addTags(const char *category, const char *label, std::vector<std::string> *tags, std::vector<std::string> *tagcat,
              char *tmptxt, char *tmpsty);
 
-static int id_callback(void *data, int argc, char **argv, char **azColName)
+static int id_callback(void *, int, char **argv, char **)
 {
     _tags->push_back(std::string(*argv));
     _tagcat->push_back(std::string(*(argv+1)));
     return 0;
 }
 
-static int notecount_callback(void *data, int argc, char **argv, char **azColName)
+static int notecount_callback(void *, int , char **argv, char **)
 {
     _noteCount.append(std::string(*argv));
     return 0;
@@ -202,7 +202,8 @@ void update_danbooru(char *filename) // TODO class member?
     }
     totsize += strlen(labels) + 1;
     
-    totsize += 5; // Notes count
+    if (_noteCount[0] != '0')
+        totsize += 5; // Notes count
 
     // 2. allocate temp text/style bufs
     char *tmptxt = new char[totsize + 1];
@@ -210,25 +211,27 @@ void update_danbooru(char *filename) // TODO class member?
     memset(tmptxt, 0, totsize+1);
     memset(tmpsty, 0, totsize+1);
 
-    // Add the label, with style.
-    strcat(tmptxt,"Notes:");
-    for (int i=0; i < strlen("Notes:"); i++)
-        strcat(tmpsty, "F");
+    if (_noteCount[0] != '0')
+    {
+        // Add the label, with style.
+        strcat(tmptxt,"Notes:");
+        for (int i=0; i < strlen("Notes:"); i++)
+            strcat(tmpsty, "F");
 
-    // default styled newline
-    strcat(tmptxt, "\n");
-    strcat(tmpsty, "A");
-
-    strcat(tmptxt, _noteCount.c_str());
-
-    // style it
-    for (int i=0; i< _noteCount.size(); i++)
+        // default styled newline
+        strcat(tmptxt, "\n");
         strcat(tmpsty, "A");
 
-    // default styled newline
-    strcat(tmptxt, "\n");
-    strcat(tmpsty, "A");
-    
+        strcat(tmptxt, _noteCount.c_str());
+
+        // style it
+        for (int i=0; i< _noteCount.size(); i++)
+            strcat(tmpsty, "A");
+
+        // default styled newline
+        strcat(tmptxt, "\n");
+        strcat(tmpsty, "A");
+    }
     
     // TODO consider not outputting label if no tags in category
     // 3. add tags of different category with appropriate (styled) label
