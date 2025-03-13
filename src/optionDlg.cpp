@@ -7,6 +7,7 @@
 #include <FL/Fl_Int_Input.H>
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Choice.H>
+#include <FL/Fl_Spinner.H>
 
 #include "prefs.h"
 #include "ScaleMode.h"
@@ -108,6 +109,34 @@ public:
     }
 };
 
+class SpinSetting // TODO refactor this and CheckSetting
+{
+public:
+    Fl_Spinner *chk;
+    std::string setting;
+    int def_value;
+    
+    SpinSetting(const char *setstr, int val)
+    {
+        setting = setstr;
+        def_value = val;
+    }
+
+    void init(Fl_Spinner *w)
+    {
+        chk = w;
+        int val;
+        _prefs->get(setting.c_str(), val, def_value);
+        chk->value(val);
+    }
+    
+    void save()
+    {
+        int val = chk->value();
+        _prefs->set2(setting.c_str(), val);
+    }
+};
+
 CheckSetting _checker(CHECKER, 1);
 CheckSetting _panMouse(MOUSE_PAN, 1);
 CheckSetting _border(BORDER_FLAG, 1);
@@ -120,6 +149,8 @@ CheckSetting _slideSkipError(SLIDE_ERRORS, 1);
 CheckSetting _showMinimap(MINIMAP, 1);
 CheckSetting _showOverlay(OVERLAY, 1);
 
+SpinSetting _slideDelay(SLIDESHOW_DELAY,20);
+
 Fl_Choice *_scaleChoice;
 EnumSetting<ZScaleMode> _zScaleMode(DITHER_MODE, ZScaleMode::Bilinear, zScaleModeToName, nameToZScaleMode);
 
@@ -131,7 +162,6 @@ void makeGeneralTab(int w, int h)
     _checker.init(cb1);
 
     // TODO choices: Off, OverlayText, OverlayBox
-    int val;
     Fl_Check_Button *cb2 = new Fl_Check_Button(15, 100, 250, 30, "Show overlay");
     _showOverlay.init(cb2);
     
@@ -160,10 +190,11 @@ void makeSlideshowTab(int w, int h)
     Fl_Box* b = new Fl_Box(15, 65, 100, 30, "Timing:");
     b->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP_RIGHT);
     
-    // TODO spin button
-    Fl_Int_Input* ii = new Fl_Int_Input(116, 65, 100, 30);
+    Fl_Spinner *ii = new Fl_Spinner(116,65,100,30);
+    ii->type(FL_INT_INPUT);
+    _slideDelay.init(ii);
     
-    Fl_Box* b2 = new Fl_Box(217, 65, 100, 30, "seconds");
+    new Fl_Box(217, 65, 100, 30, "seconds");
 
     Fl_Check_Button *cb1 = new Fl_Check_Button(15, 100, 100, 30, "Shuffle");
     _slideShuffle.init(cb1);
@@ -214,6 +245,7 @@ void On_OK(Fl_Widget *, void *)
     _slideShuffle.save();
     _slideBorder.save();
     _slideSkipError.save();
+    _slideDelay.save();
 
     _showMinimap.save();
     _showOverlay.save();
