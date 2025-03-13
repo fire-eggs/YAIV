@@ -30,6 +30,10 @@ private:
     XBox *_window = nullptr;
     int _timeout = -1;    // current slide countdown
     int _slideDelay = -1; // seconds between slides
+    int _slideShuffle = 0; // shuffle at beginning of slideshow
+    int _slideBorder = 0; // border for slideshow
+    int _slideErrors = 1;
+    int _slideWrap   = 1;
 };
 
 #endif //YAIV_SLIDESHOW_H
