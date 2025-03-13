@@ -114,8 +114,9 @@ void XBox::MenuCB(Fl_Widget *window_p, int menuid) {
             goto_request();
             break;
 
-        case MI_OPTIONS:		    // TODO nyi
+        case MI_OPTIONS:
             showOptionsDlg();
+            _prefs = new Prefs(); // gets new values. TODO memory leak
             break;
 
 #ifdef DANBOORU
